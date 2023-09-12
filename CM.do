@@ -145,6 +145,8 @@ won't drive any overall results anyway, which I check below (Figure~\ref{chk1}),
 and that the uncertainty associated with such low numbers will be reflected in very wide
 confidence intervals for age-specific analyses. 
 
+Because Australian data are unreliable before 2005, I will drop data from 2002-2004. 
+
 \color{Blue4}
 ***/
 
@@ -328,7 +330,8 @@ However, Canadian data restrictions prohibit the use of any cell count between 1
 for people with diabetes and in the total population; thus, 
 there are many blank values (see below). I will fill them in randomly, where the number
 can be any number from 1 to 9 with equal probabilitiy, unless the number of deaths in the
-total population for the age/sex group is <9, in which case the upper bound will be the 
+total population for the age/sex group is <9 (after being randomly generated), 
+in which case the upper bound will be the 
 number of deaths in the total population. 
 Further, because of this, data has been provided in both 10 and 20-year age groups, as well as
 overall (i.e., the actual counts). My intuition is that the small cell counts
@@ -524,8 +527,138 @@ save Canada, replace
 texdoc stlog close
 
 
+/***
+\color{black}
+
+\subsection{Finland}
+
+The Finnish data comes from X and has been described previously (citation). 
+For Finland, we have the following variables (by age, sex, and calendar year): 
+Person-years and deaths in people with and without diabetes. I.e., no further
+variables need to be derived. 
+Nevertheless, Finland restricts counts between 1 and 5 for both people with and without
+diabetes. I will fill them in randomly, where the number
+can be any number from 1 to 5 with equal probability. 
+I will assume the mid-point of the age interval for people aged $<$40 is 35 and for 90$+$ are
+35 and 95, respectively.
+
+\color{Blue4}
+***/
+
+texdoc stlog
+import delimited "Consortium COD database v1.csv", clear
+keep if substr(country,1,7)=="Finland"
+rename sex SEX
+gen sex = 0 if SEX == "F"
+replace sex = 1 if SEX == "M"
+set seed 09843382
+ta age_gp1
+foreach i in cvd chd cbd hfd can dmd inf flu res liv1 liv2 ckd azd {
+di "`i'"
+ta age_gp1 if `i'_d_nondm ==.
+quietly replace `i'_d_nondm = runiformint(1,5) if `i'_d_nondm==.
+ta age_gp1 if `i'_d_dm ==.
+quietly replace `i'_d_dm = runiformint(1,5) if `i'_d_dm ==.
+}
+gen age = substr(age_gp1,1,2)
+replace age = "30" if age == "0-"
+destring age, replace
+replace age = age+5
+keep country calendar sex age pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
+save Finland, replace
+texdoc stlog close
+
+/***
+\color{black}
+
+There's a considerable amount of missing data here,
+although again, it's always for small cell counts, so shouldn't
+have a major impact, as we saw for Australia and Canada (Finland 
+hasn't provided the full data, so there is no way to check counts).
+
+\clearpage
+\subsection{France}
+
+The French data comes from X and has been described previously (citation). 
+For France, we have the following variables (by age, sex, and calendar year): 
+Person-years and deaths in people with and without diabetes. I.e., no further
+variables need to be derived. 
+I will assume the mid-point of the age interval for people aged $<$40 is 35 and for 90$+$ are
+35 and 95, respectively.
+
+France provided data for 2013-2017 and 2020, but because we are analysing trends, 
+we will exclude the data from 2020. 
+
+\color{Blue4}
+***/
+
+texdoc stlog, cmdlog nodo
+import delimited "Consortium COD database v1.csv", clear
+keep if substr(country,1,8)=="France_1"
+drop if cal == 2020
+rename sex SEX
+gen sex = 0 if SEX == "F"
+replace sex = 1 if SEX == "M"
+gen age = substr(age_gp1,1,2)
+replace age = "30" if age == "0-"
+destring age, replace
+replace age = age+5
+replace country = substr(country,1,6)
+keep country calendar sex age pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
+save France, replace
+texdoc stlog close
+
+/***
+\color{black}
+
+\clearpage
+\subsection{Lithuania}
+
+The Lithuanian data comes from X and has been described previously (citation). 
+For Lithuania, we have the following variables (by age, sex, and calendar year): 
+Total population size, prevalence of diabetes, incidence of diabetes, 
+deaths in people with diabetes, and deaths in the total population. 
+We can calculate person-years in the total population by assuming that the person-years
+of follow-up in a given calendar year are equal to the population size in the current year
+plus the population size in the next year, divided by two (this has been performed before
+I got the dataset). We can calculate person-years in people with diabetes, in a given calendar year, 
+by adding the number of people with prevalent diabetes to half the number of people with 
+incident diabetes and subtracting half the number of all-cause deaths (again, performed before I got the dataset). 
+From there, person-years in people
+without diabetes is just person-years in the total population minus person-years in people with diabetes.
+Similarly, for deaths in people without diabetes, we can subtract the deaths in people with diabetes
+from the total deaths. 
+
+
+
+\color{Blue4}
+***/
+
+texdoc stlog, cmdlog nodo
+
+texdoc stlog close
+
+
+/***
+\color{black}
+
+\clearpage
+\subsection{Lithuania}
+
+
+
+
+\subsection{Scotland}
+\subsection{Sweden}
+
+\color{Blue4}
+***/
+
 
 cd /Users/jed/Documents/CM/
+
+
+
 
 
 /***
