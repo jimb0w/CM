@@ -110,7 +110,6 @@ So we need to harmonize and just have a few variables that are the same for each
 
 The variables I'm aiming to have for each:
 \begin{itemize}
-**# Bookmark #1
 \item Calendar year
 \item Sex
 \item Mid-point age for the age-group
@@ -135,18 +134,21 @@ without diabetes is just person-years in the total population minus person-years
 Similarly, for deaths in people without diabetes, we can subtract the deaths in people with diabetes
 from the total deaths. 
 
-I change the diabetes deaths after assigning randomly to the total pop deaths if the diabetes deaths
-are greater. This only really has an effect on HF and alzherimer's deaths at low ages. 
-
-For Australia, three age groups have been provided because of small cell counts with smaller
-age groups. My intuition is to use the most granular age group data and simply fill the missing
-counts randomly, as I suspect this will have very little effect on the overall trends, which will be driven
-by the age groups for which there are lots of deaths. I will check this below.
+However, Australian data restrictions prohibit the use of any cell count <6 for the diabetes population; thus, 
+there are many blank values (see below). I will fill them in randomly, where the number
+can be any number from 0 to 5 with equal probabilitiy, unless the number of deaths in the
+total population for the age/sex group is <5, in which case the upper bound will be the 
+number of deaths in the total population. 
+Further, because of this, data has been provided in both 10 and 20-year age groups, as well as
+overall (i.e., the actual counts). My intuition is that the small cell counts
+won't drive any overall results anyway, which I check below (Figure~\ref{chk1}), 
+and that the uncertainty associated with such low numbers will be reflected in very wide
+confidence intervals for age-specific analyses. 
 
 \color{Blue4}
 ***/
 
-texdoc stlog, cmdlog nodo
+texdoc stlog
 cd /Users/jed/Documents/CM/
 mkdir GPH
 import delimited "Consortium COD database v1.csv", clear
@@ -168,14 +170,30 @@ foreach i in cvd chd cbd hfd can dmd inf flu res liv1 liv2 ckd azd {
 di "`i'"
 count if `i'_d_dm > `i'_d_pop
 }
+gen diff = dmd_d_dm-dmd_d_pop
+ta diff if diff >0
 replace dmd_d_dm = dmd_d_pop if dmd_d_dm > dmd_d_pop
 foreach i in cvd chd cbd  hfd can dmd inf flu res liv1 liv2 ckd azd {
 quietly replace `i'_d_nondm = `i'_d_pop-`i'_d_dm
 }
+texdoc stlog close
 
-**PICKUP -- figure out the ranom replacement so we're getting an even spread
+/***
+\color{black}
 
-*So, the two to investigate are HF and AZD:
+We see that it is predominately younger age groups affected by
+missing data, which makes sense. Also, there were some age groups in which
+the number of deaths due to diabetes among people with diabetes was greater
+than that recorded for the whole population. This likely has to do with 
+differences with how we (Australian researchers) and the Australian
+Institute of Health and Welfare (who supplied the total population numbers)
+define residence in a state, or something similar. The differences were tiny, 
+so I have just corrected the diabetes counts to not be more than the total
+population counts. 
+
+\color{Blue4}
+***/
+
 texdoc stlog cmdlog nodo
 preserve
 gen agegp = 1 if age_gp1!=""
@@ -183,6 +201,45 @@ replace agegp = 2 if age_gp3!=""
 replace agegp = 3 if age_gp4!=""
 collapse (sum) pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm, by(calendar agegp)
 foreach i in cvd chd cbd hfd can dmd inf flu res liv1 liv2 ckd azd {
+if "`i'" == "cvd" {
+local ii = "Cardiovascular disease"
+}
+if "`i'" == "chd" {
+local ii = "Ischaemic heart disease"
+}
+if "`i'" == "cbd" {
+local ii = "Cerebrovascular disease"
+}
+if "`i'" == "hfd" {
+local ii = "Heart failure"
+}
+if "`i'" == "can" {
+local ii = "Cancer"
+}
+if "`i'" == "dmd" {
+local ii = "Diabetes"
+}
+if "`i'" == "inf" {
+local ii = "Infectious diseases"
+}
+if "`i'" == "flu" {
+local ii = "Influenza and pneumonia"
+}
+if "`i'" == "res" {
+local ii = "Chronic lower respiratory disease"
+}
+if "`i'" == "liv1" {
+local ii = "Liver disease"
+}
+if "`i'" == "liv2" {
+local ii = "Liver disease (excluding alcoholic liver disease)"
+}
+if "`i'" == "ckd" {
+local ii = "Renal disease"
+}
+if "`i'" == "azd" {
+local ii = "Alzheimer's disease"
+}
 gen dm_`i' = 1000*`i'_d_dm/pys_dm
 twoway ///
 (connected dm_`i' cal if agegp == 1, col(black)) ///
@@ -197,7 +254,7 @@ legend(order( ///
 3 "Overall" ///
 ) cols(3) position(12) region(lcolor(none) color(none))) ///
 ylabel(,angle(0) format(%9.2f)) ///
-title("Diabetes, Heart failure", placement(west) size(medium) col(black))
+title("`ii'", placement(west) size(medium) col(black))
 graph save GPH/dm_`i'_chk1, replace
 }
 restore
@@ -219,10 +276,256 @@ GPH/dm_ckd_chk1.gph ///
 GPH/dm_azd_chk1.gph ///
 , graphregion(color(white)) cols(3) altshrink xsize(4)
 texdoc graph, label(chk1) ///
-caption(Crude mortality rate by age-grouping method, by cause of death. Australia.)
+caption(Crude mortality rate by age-grouping method, by cause of death. Australia. People with diabetes.)
+texdoc stlog close
+
+/***
+\color{black}
+
+So, from Figure~\ref{chk1} we see that there doesn't appear to be any systematic
+issue introduced using random numbers. I will proceed using the most granular age groupings. 
+I will assume the mid-point of the age interval for people aged $<$40 is 35 and for 90$+$ are
+35 and 95, respectively.
+
+\color{Blue4}
+***/
+
+texdoc stlog, cmdlog nodo
+keep if age_gp1!=""
+replace country = substr(country,1,9)
+gen age = substr(age_gp1,1,2)
+replace age = "30" if age == "<4"
+destring age, replace
+replace age = age+5
+keep country calendar sex age pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
+save Australia, replace
 texdoc stlog close
 
 
+/***
+\color{black}
+
+
+\clearpage
+\subsection{Canada}
+
+The Canadian data comes from X and has been described previously (citation). 
+For Canada, we have the following variables (by age, sex, and calendar year): 
+Total population size, prevalence of diabetes, incidence of diabetes, 
+deaths in people with diabetes, and deaths in the total population. 
+We can calculate person-years in the total population by assuming that the person-years
+of follow-up in a given calendar year are equal to the population size in the current year
+plus the population size in the next year, divided by two (this has been performed before
+I got the dataset). We can calculate person-years in people with diabetes, in a given calendar year, 
+by adding the number of people with prevalent diabetes to half the number of people with 
+incident diabetes and subtracting half the number of all-cause deaths (again, performed before I got the dataset). 
+From there, person-years in people
+without diabetes is just person-years in the total population minus person-years in people with diabetes.
+Similarly, for deaths in people without diabetes, we can subtract the deaths in people with diabetes
+from the total deaths. 
+
+However, Canadian data restrictions prohibit the use of any cell count between 1 and 9
+for people with diabetes and in the total population; thus, 
+there are many blank values (see below). I will fill them in randomly, where the number
+can be any number from 1 to 9 with equal probabilitiy, unless the number of deaths in the
+total population for the age/sex group is <9, in which case the upper bound will be the 
+number of deaths in the total population. 
+Further, because of this, data has been provided in both 10 and 20-year age groups, as well as
+overall (i.e., the actual counts). My intuition is that the small cell counts
+won't drive any overall results anyway, which I check below (Figure~\ref{chk2}), 
+and that the uncertainty associated with such low numbers will be reflected in very wide
+confidence intervals for age-specific analyses. 
+
+\color{Blue4}
+***/
+
+texdoc stlog
+import delimited "Consortium COD database v1.csv", clear
+keep if substr(country,1,6)=="Canada"
+rename sex SEX
+gen sex = 0 if SEX == "F"
+replace sex = 1 if SEX == "M"
+replace pys_nondm = pys_totpop-pys_dm
+set seed 44542517
+ta age_gp1
+foreach i in cvd chd cbd hfd can dmd inf flu res liv1 liv2 ckd azd {
+di "`i'"
+ta age_gp1 if `i'_d_pop ==.
+quietly replace `i'_d_pop = runiformint(1,9) if `i'_d_pop==.
+ta age_gp1 if `i'_d_dm ==.
+gen max_`i' = min(`i'_d_pop,9)
+quietly replace `i'_d_dm = runiformint(1,max_`i') if `i'_d_dm ==.
+}
+foreach i in cvd chd cbd hfd can dmd inf flu res liv1 liv2 ckd azd {
+di "`i'"
+count if `i'_d_dm > `i'_d_pop
+gen diff = `i'_d_dm-`i'_d_pop
+ta diff if diff >0
+replace `i'_d_dm = `i'_d_pop if `i'_d_dm > `i'_d_pop
+drop diff
+}
+foreach i in cvd chd cbd  hfd can dmd inf flu res liv1 liv2 ckd azd {
+quietly replace `i'_d_nondm = `i'_d_pop-`i'_d_dm
+}
+texdoc stlog close
+
+/***
+\color{black}
+
+We see that it is predominately younger age groups affected by
+missing data, which makes sense. Also, there were some age groups in which
+the number of deaths due to heart failure, diabetes, and renal disease 
+among people with diabetes was greater
+than that recorded for the whole population. The differences were tiny, 
+so I have just corrected the diabetes counts to not be more than the total
+population counts. 
+
+\color{Blue4}
+***/
+
+texdoc stlog cmdlog nodo
+preserve
+gen agegp = 1 if age_gp1!=""
+replace agegp = 2 if age_gp3!=""
+replace agegp = 3 if age_gp4!=""
+collapse (sum) pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm, by(calendar agegp)
+foreach i in cvd chd cbd hfd can dmd inf flu res liv1 liv2 ckd azd {
+if "`i'" == "cvd" {
+local ii = "Cardiovascular disease"
+}
+if "`i'" == "chd" {
+local ii = "Ischaemic heart disease"
+}
+if "`i'" == "cbd" {
+local ii = "Cerebrovascular disease"
+}
+if "`i'" == "hfd" {
+local ii = "Heart failure"
+}
+if "`i'" == "can" {
+local ii = "Cancer"
+}
+if "`i'" == "dmd" {
+local ii = "Diabetes"
+}
+if "`i'" == "inf" {
+local ii = "Infectious diseases"
+}
+if "`i'" == "flu" {
+local ii = "Influenza and pneumonia"
+}
+if "`i'" == "res" {
+local ii = "Chronic lower respiratory disease"
+}
+if "`i'" == "liv1" {
+local ii = "Liver disease"
+}
+if "`i'" == "liv2" {
+local ii = "Liver disease (excluding alcoholic liver disease)"
+}
+if "`i'" == "ckd" {
+local ii = "Renal disease"
+}
+if "`i'" == "azd" {
+local ii = "Alzheimer's disease"
+}
+gen dm_`i' = 1000*`i'_d_dm/pys_dm
+twoway ///
+(connected dm_`i' cal if agegp == 1, col(black)) ///
+(connected dm_`i' cal if agegp == 2, col(blue)) ///
+(connected dm_`i' cal if agegp == 3, col(red)) ///
+, graphregion(color(white)) ///
+ytitle(Mortality rate (per 1,000 person-years)) ///
+xtitle(Calendar year) ///
+legend(order( ///
+1 "10-year age-groups" ///
+2 "20-year age-groups" ///
+3 "Overall" ///
+) cols(3) position(12) region(lcolor(none) color(none))) ///
+ylabel(,angle(0) format(%9.2f)) ///
+title("`ii'", placement(west) size(medium) col(black))
+graph save GPH/dm_`i'_chk2, replace
+gen ndm_`i' = 1000*`i'_d_nondm/pys_nondm
+twoway ///
+(connected ndm_`i' cal if agegp == 1, col(black)) ///
+(connected ndm_`i' cal if agegp == 2, col(blue)) ///
+(connected ndm_`i' cal if agegp == 3, col(red)) ///
+, graphregion(color(white)) ///
+ytitle(Mortality rate (per 1,000 person-years)) ///
+xtitle(Calendar year) ///
+legend(order( ///
+1 "10-year age-groups" ///
+2 "20-year age-groups" ///
+3 "Overall" ///
+) cols(3) position(12) region(lcolor(none) color(none))) ///
+ylabel(,angle(0) format(%9.2f)) ///
+title("`ii'", placement(west) size(medium) col(black))
+graph save GPH/ndm_`i'_chk2, replace
+}
+restore
+texdoc stlog close
+texdoc stlog, cmdlog 
+graph combine ///
+GPH/dm_cvd_chk2.gph ///
+GPH/dm_chd_chk2.gph ///
+GPH/dm_cbd_chk2.gph ///
+GPH/dm_hfd_chk2.gph ///
+GPH/dm_can_chk2.gph ///
+GPH/dm_dmd_chk2.gph ///
+GPH/dm_inf_chk2.gph ///
+GPH/dm_flu_chk2.gph ///
+GPH/dm_res_chk2.gph ///
+GPH/dm_liv1_chk2.gph ///
+GPH/dm_liv2_chk2.gph ///
+GPH/dm_ckd_chk2.gph ///
+GPH/dm_azd_chk2.gph ///
+, graphregion(color(white)) cols(3) altshrink xsize(4)
+texdoc graph, label(chk2d) ///
+caption(Crude mortality rate by age-grouping method, by cause of death. Canada. People with diabetes.)
+graph combine ///
+GPH/ndm_cvd_chk2.gph ///
+GPH/ndm_chd_chk2.gph ///
+GPH/ndm_cbd_chk2.gph ///
+GPH/ndm_hfd_chk2.gph ///
+GPH/ndm_can_chk2.gph ///
+GPH/ndm_dmd_chk2.gph ///
+GPH/ndm_inf_chk2.gph ///
+GPH/ndm_flu_chk2.gph ///
+GPH/ndm_res_chk2.gph ///
+GPH/ndm_liv1_chk2.gph ///
+GPH/ndm_liv2_chk2.gph ///
+GPH/ndm_ckd_chk2.gph ///
+GPH/ndm_azd_chk2.gph ///
+, graphregion(color(white)) cols(3) altshrink xsize(4)
+texdoc graph, label(chk2n) ///
+caption(Crude mortality rate by age-grouping method, by cause of death. Canada. People without diabetes.)
+texdoc stlog close
+
+/***
+\color{black}
+
+As with Australia, we see that there doesn't appear to be any systematic
+issue introduced using random numbers (Figures~\ref{chk2d}-~\ref{,chk2n}). I will proceed using the most granular age groupings. 
+I will assume the mid-point of the age interval for people aged $<$40 is 35 and for 90$+$ are
+35 and 95, respectively.
+
+\color{Blue4}
+***/
+
+texdoc stlog, cmdlog nodo
+keep if age_gp1!=""
+replace country = substr(country,1,6)
+gen age = substr(age_gp1,1,2)
+replace age = "30" if age == "0-"
+destring age, replace
+replace age = age+5
+keep country calendar sex age pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
+save Canada, replace
+texdoc stlog close
+
+
+
+cd /Users/jed/Documents/CM/
 
 
 /***
@@ -232,7 +535,9 @@ texdoc stlog close
 \clearpage
 \section{Crude rates}
 
+Talk about CKD in Australia
 
+Proportion of deaths?
 
 \color{Blue4}
 ***/
