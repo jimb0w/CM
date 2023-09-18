@@ -150,7 +150,7 @@ Because Australian data are unreliable before 2005, I will drop data from 2002-2
 \color{Blue4}
 ***/
 
-texdoc stlog
+texdoc stlog, cmdlog nodo
 cd /Users/jed/Documents/CM/
 mkdir GPH
 import delimited "Consortium COD database v1.csv", clear
@@ -161,6 +161,8 @@ gen sex = 0 if SEX == "F"
 replace sex = 1 if SEX == "M"
 replace pys_nondm = pys_totpop-pys_dm
 set seed 3488717
+texdoc stlog close
+texdoc stlog
 ta age_gp1
 foreach i in cvd chd cbd hfd can dmd inf flu res liv1 liv2 ckd azd {
 di "`i'"
@@ -286,8 +288,9 @@ texdoc stlog close
 
 So, from Figure~\ref{chk1} we see that there doesn't appear to be any systematic
 issue introduced using random numbers. I will proceed using the most granular age groupings. 
-I will assume the mid-point of the age interval for people aged $<$40 is 35 and for 90$+$ are
-35 and 95, respectively.
+I will assume the mid-point of the age interval for people with diabetes aged $<$40 is 35, 
+for people without diabetes aged $<$40 is 20, and for both people with and without diabetes
+aged 90$+$ is 95.
 
 \color{Blue4}
 ***/
@@ -295,11 +298,15 @@ I will assume the mid-point of the age interval for people aged $<$40 is 35 and 
 texdoc stlog, cmdlog nodo
 keep if age_gp1!=""
 replace country = substr(country,1,9)
-gen age = substr(age_gp1,1,2)
-replace age = "30" if age == "<4"
-destring age, replace
-replace age = age+5
-keep country calendar sex age pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
+gen age_dm = substr(age_gp1,1,2)
+replace age_dm = "30" if age_dm == "<4"
+destring age_dm, replace
+replace age_dm = age_dm+5
+gen age_nondm = substr(age_gp1,1,2)
+replace age_nondm = "15" if age_nondm == "<4"
+destring age_nondm, replace
+replace age_nondm = age_nondm+5
+keep country calendar sex age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
 save Australia, replace
 texdoc stlog close
 
@@ -342,7 +349,7 @@ confidence intervals for age-specific analyses.
 \color{Blue4}
 ***/
 
-texdoc stlog
+texdoc stlog, cmdlog
 import delimited "Consortium COD database v1.csv", clear
 keep if substr(country,1,6)=="Canada"
 rename sex SEX
@@ -350,6 +357,8 @@ gen sex = 0 if SEX == "F"
 replace sex = 1 if SEX == "M"
 replace pys_nondm = pys_totpop-pys_dm
 set seed 44542517
+texdoc stlog close
+texdoc stlog
 ta age_gp1
 foreach i in cvd chd cbd hfd can dmd inf flu res liv1 liv2 ckd azd {
 di "`i'"
@@ -367,6 +376,8 @@ ta diff if diff >0
 replace `i'_d_dm = `i'_d_pop if `i'_d_dm > `i'_d_pop
 drop diff
 }
+texdoc stlog close
+texdoc stlog, cmdlog nodo
 foreach i in cvd chd cbd  hfd can dmd inf flu res liv1 liv2 ckd azd {
 quietly replace `i'_d_nondm = `i'_d_pop-`i'_d_dm
 }
@@ -509,8 +520,6 @@ texdoc stlog close
 
 As with Australia, we see that there doesn't appear to be any systematic
 issue introduced using random numbers (Figures~\ref{chk2d}-~\ref{,chk2n}). I will proceed using the most granular age groupings. 
-I will assume the mid-point of the age interval for people aged $<$40 is 35 and for 90$+$ are
-35 and 95, respectively.
 
 \color{Blue4}
 ***/
@@ -518,11 +527,15 @@ I will assume the mid-point of the age interval for people aged $<$40 is 35 and 
 texdoc stlog, cmdlog nodo
 keep if age_gp1!=""
 replace country = substr(country,1,6)
-gen age = substr(age_gp1,1,2)
-replace age = "30" if age == "0-"
-destring age, replace
-replace age = age+5
-keep country calendar sex age pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
+gen age_dm = substr(age_gp1,1,2)
+replace age_dm = "30" if age_dm == "0-"
+destring age_dm, replace
+replace age_dm = age_dm+5
+gen age_nondm = substr(age_gp1,1,2)
+replace age_nondm = "15" if age_nondm == "0-"
+destring age_nondm, replace
+replace age_nondm = age_nondm+5
+keep country calendar sex age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
 save Canada, replace
 texdoc stlog close
 
@@ -545,13 +558,15 @@ I will assume the mid-point of the age interval for people aged $<$40 is 35 and 
 \color{Blue4}
 ***/
 
-texdoc stlog
+texdoc stlog, cmdlog
 import delimited "Consortium COD database v1.csv", clear
 keep if substr(country,1,7)=="Finland"
 rename sex SEX
 gen sex = 0 if SEX == "F"
 replace sex = 1 if SEX == "M"
 set seed 09843382
+texdoc stlog close
+texdoc stlog
 ta age_gp1
 foreach i in cvd chd cbd hfd can dmd inf flu res liv1 liv2 ckd azd {
 di "`i'"
@@ -560,11 +575,17 @@ quietly replace `i'_d_nondm = runiformint(1,5) if `i'_d_nondm==.
 ta age_gp1 if `i'_d_dm ==.
 quietly replace `i'_d_dm = runiformint(1,5) if `i'_d_dm ==.
 }
-gen age = substr(age_gp1,1,2)
-replace age = "30" if age == "0-"
-destring age, replace
-replace age = age+5
-keep country calendar sex age pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
+texdoc stlog close
+texdoc stlog, cmdlog nodo
+gen age_dm = substr(age_gp1,1,2)
+replace age_dm = "30" if age_dm == "0-"
+destring age_dm, replace
+replace age_dm = age_dm+5
+gen age_nondm = substr(age_gp1,1,2)
+replace age_nondm = "15" if age_nondm == "0-"
+destring age_nondm, replace
+replace age_nondm = age_nondm+5
+keep country calendar sex age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
 save Finland, replace
 texdoc stlog close
 
@@ -599,12 +620,16 @@ drop if cal == 2020
 rename sex SEX
 gen sex = 0 if SEX == "F"
 replace sex = 1 if SEX == "M"
-gen age = substr(age_gp1,1,2)
-replace age = "30" if age == "0-"
-destring age, replace
-replace age = age+5
 replace country = substr(country,1,6)
-keep country calendar sex age pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
+gen age_dm = substr(age_gp1,1,2)
+replace age_dm = "30" if age_dm == "0-"
+destring age_dm, replace
+replace age_dm = age_dm+5
+gen age_nondm = substr(age_gp1,1,2)
+replace age_nondm = "15" if age_nondm == "0-"
+destring age_nondm, replace
+replace age_nondm = age_nondm+5
+keep country calendar sex age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
 save France, replace
 texdoc stlog close
 
@@ -617,7 +642,7 @@ texdoc stlog close
 The Lithuanian data comes from X and has been described previously (citation). 
 For Lithuania, we have the following variables (by age, sex, and calendar year): 
 Total population size, prevalence of diabetes, incidence of diabetes, 
-deaths in people with diabetes, and deaths in the total population. 
+deaths in people with diabetes, and deaths in people without diabetes. 
 We can calculate person-years in the total population by assuming that the person-years
 of follow-up in a given calendar year are equal to the population size in the current year
 plus the population size in the next year, divided by two (this has been performed before
@@ -626,40 +651,136 @@ by adding the number of people with prevalent diabetes to half the number of peo
 incident diabetes and subtracting half the number of all-cause deaths (again, performed before I got the dataset). 
 From there, person-years in people
 without diabetes is just person-years in the total population minus person-years in people with diabetes.
-Similarly, for deaths in people without diabetes, we can subtract the deaths in people with diabetes
-from the total deaths. 
-
-
 
 \color{Blue4}
 ***/
 
 texdoc stlog, cmdlog nodo
-
+import delimited "Consortium COD database v1.csv", clear
+keep if country == "Lithuania"
+rename sex SEX
+gen sex = 0 if SEX == "F"
+replace sex = 1 if SEX == "M"
+gen age_dm = substr(age_gp1,1,2)
+replace age_dm = "30" if age_dm == "0-"
+destring age_dm, replace
+replace age_dm = age_dm+5
+gen age_nondm = substr(age_gp1,1,2)
+replace age_nondm = "15" if age_nondm == "0-"
+destring age_nondm, replace
+replace age_nondm = age_nondm+5
+replace country = substr(country,1,6)
+recode dmd_d_nondm .=0
+keep country calendar sex age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
+save Lithuania, replace
 texdoc stlog close
-
 
 /***
 \color{black}
 
 \clearpage
-\subsection{Lithuania}
-
-
-
-
 \subsection{Scotland}
-\subsection{Sweden}
+
+The Sottish data comes from X and has been described previously (citation). 
+For Scotland, we have the following variables (by age, sex, and calendar year): 
+Total population size, person-years in people with diabetes,
+deaths in people with diabetes, and deaths in the total population.
+We can calculate person-years in the total population by assuming that the person-years
+of follow-up in a given calendar year are equal to the population size in the current year
+plus the population size in the next year, divided by two (this has been performed before
+I got the dataset). I then calculate person-years in people without diabetes by substracting
+the person-years in people with diabetes from person-years in the total population; similarly
+for deaths in people without diabetes. There were a few age groups in whom the number of deaths
+from diabetes in people with diabetes was slightly greater than the total population deaths; 
+I will simply make these zero in people without diabetes. 
+
+Also note we have received two different age
+groupings for Scotland for total population deaths -- from 2006-2015: 0-39, 40-49, \ldots , 80+; from 2016-2020:
+0-39, 40-49, \ldots, 90+. For the 80+ age grouping I will assume the mean age is 87.5 years. 
 
 \color{Blue4}
 ***/
 
+texdoc stlog, cmdlog nodo
+import delimited "Consortium COD database v1.csv", clear
+keep if country == "Scotland"
+rename sex SEX
+gen sex = 0 if SEX == "F"
+replace sex = 1 if SEX == "M"
+foreach i in cvd chd cbd  hfd can dmd inf flu res liv1 liv2 ckd azd {
+quietly replace `i'_d_nondm = `i'_d_pop-`i'_d_dm
+di "`i'"
+ta `i'_d_nondm if `i'_d_nondm <0
+}
+replace dmd_d_nondm = 0 if dmd_d_nondm <0
+replace pys_nondm = pys_totpop-pys_dm
+gen age_dm = substr(age_gp1,1,2)
+replace age_dm = "30" if age_dm == "0-"
+destring age_dm, replace
+replace age_dm = age_dm+5
+gen age_nondm = substr(age_gp1,1,2)
+replace age_nondm = substr(age_gp2,1,2) if cal <= 2015
+replace age_nondm = "15" if age_nondm == "0-"
+destring age_nondm, replace
+replace age_nondm = age_nondm+5
+replace age_nondm = age_nondm+2.5 if age_nondm == 85 & cal <= 2015
+replace pys_dm =. if age_dm==.
+replace pys_nondm =. if age_nondm==.
+foreach i in cvd chd cbd  hfd can dmd inf flu res liv1 liv2 ckd azd {
+replace `i'_d_dm = . if age_dm==.
+replace `i'_d_nondm = . if age_nondm==.
+}
+keep country calendar sex age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
+save Scotland, replace
+texdoc stlog close
 
-cd /Users/jed/Documents/CM/
+/***
+\color{black}
 
+\clearpage
+\subsection{Sweden}
 
+The Swedish data comes from X and has been described previously (citation). 
+For Sweden, we have the following variables (by age, sex, and calendar year): 
+Total population size, person-years in people with diabetes,
+deaths in people with diabetes, and deaths in the total population.
+We can calculate person-years in the total population by assuming that the person-years
+of follow-up in a given calendar year are equal to the population size in the current year
+plus the population size in the next year, divided by two (this has been performed before
+I got the dataset). I then calculate person-years in people without diabetes by substracting
+the person-years in people with diabetes from person-years in the total population; similarly
+for deaths in people without diabetes. 
 
+The age groups are slightly different for Sweden -- the youngest age group is 18-39, not 0-39 like other
+ages; for people with diabetes, the mean age is still probably 35, but for people without diabetes I will assume
+it is 29. 
 
+\color{Blue4}
+***/
+
+texdoc stlog, cmdlog nodo
+import delimited "Consortium COD database v1.csv", clear
+keep if country == "Sweden"
+foreach i in cvd chd cbd  hfd can dmd inf flu res liv1 liv2 ckd azd {
+replace `i'_d_nondm = `i'_d_pop-`i'_d_dm
+}
+replace pys_nondm = pys_totpop-pys_dm
+rename sex SEX
+gen sex = 0 if SEX == "F"
+replace sex = 1 if SEX == "M"
+gen age_dm = substr(age_gp1,1,2)
+replace age_dm = "30" if age_dm == "18"
+destring age_dm, replace
+replace age_dm = age_dm+5
+gen age_nondm = substr(age_gp1,1,2)
+replace age_nondm = "24" if age_nondm == "18"
+destring age_nondm, replace
+replace age_nondm = age_nondm+5
+replace country = substr(country,1,6)
+recode dmd_d_nondm .=0
+keep country calendar sex age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
+save Sweden, replace
+texdoc stlog close
 
 /***
 \color{black}
@@ -674,6 +795,15 @@ Proportion of deaths?
 
 \color{Blue4}
 ***/
+
+
+
+cd /Users/jed/Documents/CM/
+
+
+
+
+
 
 
 /***
