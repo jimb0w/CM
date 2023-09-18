@@ -2,7 +2,6 @@
 texdoc init CM, replace logdir(CM_log) gropts(optargs(width=0.8\textwidth))
 set linesize 100
 
-
 /***
 
 \documentclass[11pt]{article}
@@ -153,6 +152,8 @@ Because Australian data are unreliable before 2005, I will drop data from 2002-2
 texdoc stlog, cmdlog nodo
 cd /Users/jed/Documents/CM/
 mkdir GPH
+texdoc stlog close
+texdoc stlog, cmdlog 
 import delimited "Consortium COD database v1.csv", clear
 keep if substr(country,1,9)=="Australia"
 drop if cal < 2005
@@ -198,7 +199,7 @@ population counts.
 \color{Blue4}
 ***/
 
-texdoc stlog cmdlog nodo
+texdoc stlog, cmdlog nodo
 preserve
 gen agegp = 1 if age_gp1!=""
 replace agegp = 2 if age_gp3!=""
@@ -397,7 +398,7 @@ population counts.
 \color{Blue4}
 ***/
 
-texdoc stlog cmdlog nodo
+texdoc stlog, cmdlog nodo
 preserve
 gen agegp = 1 if age_gp1!=""
 replace agegp = 2 if age_gp3!=""
@@ -789,12 +790,185 @@ texdoc stlog close
 \clearpage
 \section{Crude rates}
 
-Talk about CKD in Australia
+\color{Blue4}
+***/
 
-Proportion of deaths?
+texdoc stlog, cmdlog nodo
+foreach c in Australia Canada Finland France Lithuania Scotland Sweden {
+use `c', clear
+collapse (sum) pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm, by(calendar sex)
+foreach i in cvd chd cbd hfd can dmd inf flu res liv1 liv2 ckd azd {
+if "`i'" == "cvd" {
+local ii = "Cardiovascular disease"
+}
+if "`i'" == "chd" {
+local ii = "Ischaemic heart disease"
+}
+if "`i'" == "cbd" {
+local ii = "Cerebrovascular disease"
+}
+if "`i'" == "hfd" {
+local ii = "Heart failure"
+}
+if "`i'" == "can" {
+local ii = "Cancer"
+}
+if "`i'" == "dmd" {
+local ii = "Diabetes"
+}
+if "`i'" == "inf" {
+local ii = "Infectious diseases"
+}
+if "`i'" == "flu" {
+local ii = "Influenza and pneumonia"
+}
+if "`i'" == "res" {
+local ii = "Chronic lower respiratory disease"
+}
+if "`i'" == "liv1" {
+local ii = "Liver disease"
+}
+if "`i'" == "liv2" {
+local ii = "Liver disease (excluding alcoholic liver disease)"
+}
+if "`i'" == "ckd" {
+local ii = "Renal disease"
+}
+if "`i'" == "azd" {
+local ii = "Alzheimer's disease"
+}
+foreach iii in dm nondm {
+if "`iii'" == "dm" {
+local dd = "with"
+}
+if "`iii'" == "nondm" {
+local dd = "without"
+}
+gen `iii'_`i' = 1000*`i'_d_`iii'/pys_`iii'
+twoway ///
+(connected `iii'_`i' cal if sex == 0, col(red)) ///
+(connected `iii'_`i' cal if sex == 1, col(blue)) ///
+, graphregion(color(white)) ///
+ytitle(Mortality rate (per 1,000 person-years), margin(a+2)) ///
+xtitle(Calendar year) ///
+legend(order( ///
+1 "Females" ///
+2 "Males" ///
+) cols(1) position(3) region(lcolor(none) color(none))) ///
+ylabel(,angle(0) format(%9.2f)) ///
+title("`ii', people `dd' diabetes, `c'", placement(west) size(medium) col(black))
+graph save GPH/cr_`i'_`iii'_`c', replace
+}
+}
+}
+texdoc stlog close
+texdoc stlog, cmdlog
+foreach c in Australia Canada Finland France Lithuania Scotland Sweden {
+graph combine ///
+GPH/cr_cvd_dm_`c'.gph ///
+GPH/cr_cvd_nondm_`c'.gph ///
+GPH/cr_chd_dm_`c'.gph ///
+GPH/cr_chd_nondm_`c'.gph ///
+GPH/cr_cbd_dm_`c'.gph ///
+GPH/cr_cbd_nondm_`c'.gph ///
+GPH/cr_hfd_dm_`c'.gph ///
+GPH/cr_hfd_nondm_`c'.gph ///
+GPH/cr_can_dm_`c'.gph ///
+GPH/cr_can_nondm_`c'.gph ///
+GPH/cr_dmd_dm_`c'.gph ///
+GPH/cr_dmd_nondm_`c'.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(2)
+texdoc graph, label(CR1_`c') optargs(width=0.5\textwidth) ///
+caption(Crude mortality rate by cause of death, sex, and diabetes status. `c'. ///
+Cardiovascular disease, ischaemic heart disease, cerebrovascular disease, ///
+heart failure, cancer, and diabetes.)
+graph combine ///
+GPH/cr_inf_dm_`c'.gph ///
+GPH/cr_inf_nondm_`c'.gph ///
+GPH/cr_flu_dm_`c'.gph ///
+GPH/cr_flu_nondm_`c'.gph ///
+GPH/cr_res_dm_`c'.gph ///
+GPH/cr_res_nondm_`c'.gph ///
+GPH/cr_liv1_dm_`c'.gph ///
+GPH/cr_liv1_nondm_`c'.gph ///
+GPH/cr_liv2_dm_`c'.gph ///
+GPH/cr_liv2_nondm_`c'.gph ///
+GPH/cr_ckd_dm_`c'.gph ///
+GPH/cr_ckd_nondm_`c'.gph ///
+GPH/cr_azd_dm_`c'.gph ///
+GPH/cr_azd_nondm_`c'.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(2)
+texdoc graph, label(CR2_`c') optargs(width=0.5\textwidth) ///
+caption(Crude mortality rate by cause of death, sex, and diabetes status. `c'. ///
+Infectious diseases, influenza and pneumonia, chronic lower respiratory disease, ///
+liver disease, liver disease (excluding alcoholic liver disease), renal disease, and Alzheimer's disease.)
+}
+texdoc stlog close
+
+/***
+\color{black}
+
+A few suspected coding changes to note:
+\begin{itemize}
+\item Figure~\ref{CR2_Australia}, renal disease in 2013. 
+\item Figure~\ref{CR1_Finland}, heart failure: while gradual, there is a massive decline in heart failure to near-zero by 2017. 
+This suggests to me that coding practices could have changed over time to not include HF as the primary cause of death. 
+\item Figure~\ref{CR2_Finland}, influenze and pneumonia from 2000-2005.
+\item Figure~\ref{CR2_Scotland}, renal disease in 2017.
+\end{itemize}
+
+Additionally, the data from Sweden (Figure~\ref{CR1_Sweden}) is clearly ``wrong'' -- most major causes
+of death increase in people with diabetes from 2007-2012(ish) before stabilising or dropping, while 
+dropping continuously in the general population. Indeed, the size of the Swedish registry increased 
+massively over time (Figure~\ref{Swchk}), potentially explaining this. 
 
 \color{Blue4}
 ***/
+
+texdoc stlog, cmdlog
+use Sweden, clear
+collapse (sum) pys_dm, by(cal)
+twoway ///
+(connected pys_dm cal, col(black)) ///
+, graphregion(color(white)) ///
+ytitle(Person-years in people with diabetes) ///
+ylabel(0(100000)600000, format(%9.0fc) angle(0)) ///
+xtitle(Year)
+texdoc graph, label(Swchk) ///
+caption(Person-years in people with diabetes by calendar year in the Swedish dataset.)
+texdoc stlog close
+
+/***
+\color{black}
+
+\clearpage
+\section{Cause-specific mortality rates}
+
+\subsection{Methods}
+
+To generate age- and period-specific rates, as well as age-standardised rates, 
+We will model mortality rates using age-period-cohort models \cite{CarstensenSTATMED2007}.
+Each model will be a Poisson model, parameterised using 
+spline effects of age, period, and cohort (period-age), with log 
+of person-years as the offset. 
+Age is defined as above (i.e., the midpoint of the interval in most cases) and models are
+fit separately in people with and without diabetes and by sex. 
+
+These models will be used to predict mortality rates for single year ages and calendar years.
+These predicted rates will first be plotted by age and period, then used to generate
+age-standardised rates in people with and without diabetes, using direct standardisation
+(using the total diabetes population formed by pooling the consortium data) by period. 
+
+Then, to generate an overall estimate of trends over time, we will fit a model with spline
+effects of age but a linear effect of period and calculate the annual percent change for 
+each data source in people with and without diabetes, by sex. 
+
+
+\color{Blue4}
+***/
+
+use Australia, clear
+
 
 
 
@@ -802,8 +976,44 @@ cd /Users/jed/Documents/CM/
 
 
 
+/***
+\color{black}
+
+\clearpage
+\subsection{Age- and period-specific rates}
+
+\subsection{Age-standardised rates}
+
+\subsection{Annual percent changes}
 
 
+
+\color{Blue4}
+***/
+
+
+
+/***
+\color{black}
+
+
+\clearpage
+\section{Cause-specific standardised mortality ratios}
+
+ We calculated the standardised mortality ratio (SMR) by 
+calculating the ratio of the observed number of deaths in the diabetes population to the expected 
+number if mortality was the same as in the population without diabetes. An SMR of 1 implies 
+identical mortality in people with and without diabetes.
+
+We modelled the SMR similarly to how we modelled the mortality rates, 
+using Poisson regression for multiplicative models with observed number 
+of deaths as the outcome and the log(expected number of deaths) as the offset. 
+We modelled SMR by fitting models with a linear effect of calendar time for each data source, 
+providing an overall summary of the annual changes in SMR by sex for each data source. 
+A description of statistical models used is in the appendix (pp 5–7).
+
+\color{Blue4}
+***/
 
 
 /***
