@@ -783,9 +783,22 @@ keep country calendar sex age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cv
 save Sweden, replace
 texdoc stlog close
 
+
 /***
 \color{black}
 
+\clearpage
+\subsection{Data summary}
+
+\color{red}
+So like a table with years of follow-up n shit
+
+
+\color{Blue4}
+***/
+
+/***
+\color{black}
 
 \clearpage
 \section{Crude rates}
@@ -952,7 +965,11 @@ Each model will be a Poisson model, parameterised using
 spline effects of age, period, and cohort (period-age), with log 
 of person-years as the offset. 
 Age is defined as above (i.e., the midpoint of the interval in most cases) and models are
-fit separately in people with and without diabetes and by sex. 
+fit separately for each cause of death and country in people with and without diabetes and by sex. 
+Because this will be \begin{math} 13 \times 7 \ times 2 \times 2 = 364 \end{math} models, 
+we won't check model fit with different knot numbers and placements for each model. Instead, 
+to check model fit we will select a few at random and check the predicted and actual rates as well as 
+the Pearson residuals. 
 
 These models will be used to predict mortality rates for single year ages and calendar years.
 These predicted rates will first be plotted by age and period, then used to generate
@@ -967,8 +984,210 @@ each data source in people with and without diabetes, by sex.
 \color{Blue4}
 ***/
 
-use Australia, clear
+mkdir MD
+foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
+foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
+foreach iii in dm nondm {
+foreach iiii in 0 1 {
+use `i', clear
+keep if sex == `iiii'
+replace calendar = calendar-2010
+gen coh = calendar-age_dm
+centile(age_dm), centile(5 35 65 95)
+local A1 = r(c_1)
+local A2 = r(c_2)
+local A3 = r(c_3)
+local A4 = r(c_4)
+mkspline agesp = age_dm, cubic knots(`A1' `A2' `A3' `A4')
+su(calendar), detail
+local rang = r(max)-r(min)
+if `rang' < 8 {
+centile calendar, centile(25 75)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2')
+}
+else if inrange(`rang',8,11.9) {
+centile calendar, centile(10 50 90)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3')
+}
+else if inrange(`rang',12,15.9) {
+centile calendar, centile(5 35 65 95)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+local CK3 = r(c_4)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4')
+}
+else {
+centile calendar, centile(5 27.5 50 72.5 95)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+local CK3 = r(c_4)
+local CK3 = r(c_5)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4' `CK5')
+}
+centile(coh), centile(5 35 65 95)
+local CO1 = r(c_1)
+local CO2 = r(c_2)
+local CO3 = r(c_3)
+local CO4 = r(c_4)
+mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
+poisson `ii'_d_`iii' agesp* timesp* cohsp*, exposure(pys_`iii')
+predict pred
+save MD/RC_pred_`i'_`ii'_`iii'_`iiii', replace
+keep age_`iii' calendar pys_`iii'
+expand 100
+replace pys=pys/100
+bysort cal age : replace age = age+((_n/10)-5.1)
+expand 10
+replace pys = pys/10
+bysort age cal : replace cal = cal+(_n/10)-0.1
+gen coh = calendar-age
+mkspline agesp = age, cubic knots(`A1' `A2' `A3' `A4')
+if `rang' < 7.99 {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2')
+}
+else if inrange(`rang',8,11.99) {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3')
+}
+else if inrange(`rang',12,15.99) {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4')
+}
+else {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4' `CK5')
+}
+mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
+predict _Rate, ir
+predict errr, stdp
+replace _Rate = _Rate*1000
+gen lb = exp(ln(_Rate)-1.96*errr)
+gen ub = exp(ln(_Rate)+1.96*errr)
+gen country = "`i'"
+gen OC = "`ii'"
+gen DM = "`iii'"
+gen sex = `iiii'
+replace cal = cal+2010
+tostring age_`iii', replace force format(%9.1f)
+destring age_`iii', replace
+save MD/R_`i'_`ii'_`iii'_`iiii', replace
+}
+}
+}
+}
 
+foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
+foreach ii in dmd {
+foreach iii in dm {
+foreach iiii in 0 1 {
+use `i', clear
+keep if sex == `iiii'
+replace calendar = calendar-2010
+gen coh = calendar-age_dm
+centile(age_dm), centile(5 35 65 95)
+local A1 = r(c_1)
+local A2 = r(c_2)
+local A3 = r(c_3)
+local A4 = r(c_4)
+mkspline agesp = age_dm, cubic knots(`A1' `A2' `A3' `A4')
+su(calendar), detail
+local rang = r(max)-r(min)
+if `rang' < 8 {
+centile calendar, centile(25 75)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2')
+}
+else if inrange(`rang',8,11.9) {
+centile calendar, centile(10 50 90)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3')
+}
+else if inrange(`rang',12,15.9) {
+centile calendar, centile(5 35 65 95)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+local CK3 = r(c_4)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4')
+}
+else {
+centile calendar, centile(5 27.5 50 72.5 95)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+local CK3 = r(c_4)
+local CK3 = r(c_5)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4' `CK5')
+}
+centile(coh), centile(5 35 65 95)
+local CO1 = r(c_1)
+local CO2 = r(c_2)
+local CO3 = r(c_3)
+local CO4 = r(c_4)
+mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
+poisson `ii'_d_`iii' agesp* timesp* cohsp*, exposure(pys_`iii')
+predict pred
+save MD/RC_pred_`i'_`ii'_`iii'_`iiii', replace
+keep age_`iii' calendar pys_`iii'
+expand 100
+replace pys=pys/100
+bysort cal age : replace age = age+((_n/10)-5.1)
+expand 10
+replace pys = pys/10
+bysort age cal : replace cal = cal+(_n/10)-0.1
+gen coh = calendar-age
+mkspline agesp = age, cubic knots(`A1' `A2' `A3' `A4')
+if `rang' < 7.99 {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2')
+}
+else if inrange(`rang',8,11.99) {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3')
+}
+else if inrange(`rang',12,15.99) {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4')
+}
+else {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4' `CK5')
+}
+mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
+predict _Rate, ir
+predict errr, stdp
+replace _Rate = _Rate*1000
+gen lb = exp(ln(_Rate)-1.96*errr)
+gen ub = exp(ln(_Rate)+1.96*errr)
+gen country = "`i'"
+gen OC = "`ii'"
+gen DM = "`iii'"
+gen sex = `iiii'
+replace cal = cal+2010
+tostring age_`iii', replace force format(%9.1f)
+destring age_`iii', replace
+save MD/R_`i'_`ii'_`iii'_`iiii', replace
+}
+}
+}
+}
+
+
+twoway scatter age_dm cal
+tostring age_dm, replace force format(%9.1f)
+destring age_dm, replace 
+replace cal = cal+2010
+drop pys_dm
+merge 1:m age_dm cal using Australia
+drop if sex == 0
+ta _merge
+
+gen rrr = 1000*cvd_d_dm/pys_dm
+twoway scatter _Rate rrr age_dm if cal == 2018
+br
 
 
 
@@ -981,6 +1200,7 @@ cd /Users/jed/Documents/CM/
 
 \clearpage
 \subsection{Age- and period-specific rates}
+
 
 \subsection{Age-standardised rates}
 
