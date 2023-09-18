@@ -1079,7 +1079,6 @@ save MD/R_`i'_`ii'_`iii'_`iiii', replace
 }
 }
 }
-
 foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
 foreach ii in dmd {
 foreach iii in dm {
@@ -1174,6 +1173,42 @@ save MD/R_`i'_`ii'_`iii'_`iiii', replace
 }
 }
 }
+set seed 1234
+clear
+gen A =.
+foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
+foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
+foreach iii in dm nondm {
+foreach iiii in 0 1 {
+local B = runiform()
+append using MD/RC_pred_`i'_`ii'_`iii'_`iiii'
+recode A .=`B'
+keep if A < 0.02
+}
+}
+}
+}
+save RCc, replace
+
+set seed 1234
+clear
+gen A =.
+foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
+foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
+foreach iii in dm nondm {
+foreach iiii in 0 1 {
+local B = runiform()
+append using MD/R_`i'_`ii'_`iii'_`iiii'
+recode A .=`B'
+keep if A < 0.02
+}
+}
+}
+}
+save Rc, replace
+
+
+**PICKUP -- complete the random checks of model fit. 
 
 
 twoway scatter age_dm cal
