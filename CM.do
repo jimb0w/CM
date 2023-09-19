@@ -12,6 +12,7 @@ set linesize 100
 \usepackage[x11names]{xcolor}
 \bibliographystyle{unsrt}
 \usepackage{natbib}
+\usepackage{pdflscape}
 
 \usepackage{chngcntr}
 \counterwithin{figure}{section}
@@ -788,14 +789,104 @@ texdoc stlog close
 \color{black}
 
 \clearpage
-\subsection{Data summary}
+\subsection{Summary}
 
-\color{red}
-So like a table with years of follow-up n shit
+Table~\ref{cleansumtab} shows a summary of the data included in this analysis. 
 
+\begin{landscape}
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Summary of data included in the analysis.}
+	\hspace*{-2.5cm}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{4}{*}{##1}}}},
+	  display columns/1/.style={column name=Period,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{4}{*}{##1}}}},
+	  display columns/2/.style={column name=Diabetes status,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{2}{*}{##1}}}},
+      display columns/3/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/4/.style={column name=Person-years of follow-up, column type={r}},
+      display columns/5/.style={column name=CVD, column type={r}},
+      display columns/6/.style={column name=CHD, column type={r}},
+      display columns/7/.style={column name=CBD, column type={r}},
+      display columns/8/.style={column name=HFD, column type={r}},
+      display columns/9/.style={column name=CAN, column type={r}},
+      display columns/10/.style={column name=DMD, column type={r}},
+      display columns/11/.style={column name=INF, column type={r}},
+      display columns/12/.style={column name=FLU, column type={r}},
+      display columns/13/.style={column name=RES, column type={r}},
+      display columns/14/.style={column name=LIV1, column type={r}},
+      display columns/15/.style={column name=LIV2, column type={r}},
+      display columns/16/.style={column name=CKD, column type={r}},
+      display columns/17/.style={column name=AZD, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					& & & & & \multicolumn{13}{c}{Death counts by cause of death} \\
+					},
+        after row={\midrule}
+            },
+        every nth row={4}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{T1.csv}
+  \end{center}
+Abbreviations: CVD -- Cardiovascular disease; CHD -- Ischaemic heart disease; CBD -- Cerebrovascular disease;
+HFD -- Heart failure; CAN -- Cancer; DMD -- Diabetes; INF -- Infectious diseases; FLU --
+Influenza and pneumonia; RES -- Chronic lower respiratory disease; LIV1 -- Liver disease; 
+LIV2 -- Liver disease (excluding alcoholic liver disease); CKD -- Renal disease; 
+AZD -- Alzheimer's disease.
+\end{table}
+\end{landscape}
 
 \color{Blue4}
 ***/
+
+texdoc stlog, cmdlog nodo
+clear
+foreach c in Australia Canada Finland France Lithuania Scotland Sweden {
+append using `c'
+}
+bysort country (cal) : egen lb = min(cal)
+bysort country (cal) : egen ub = max(cal)
+tostring lb ub, replace
+gen rang = lb+ "-" + ub
+collapse (sum) pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm, by(country sex rang)
+expand 2
+bysort country sex : gen DM = _n-1
+tostring sex pys_dm-DM, replace force format(%15.0fc)
+gen pys = pys_dm if DM == "1"
+replace pys = pys_nondm if DM == "0"
+foreach i in cvd chd cbd hfd can dmd inf flu res liv1 liv2 ckd azd {
+gen `i' = `i'_d_dm if DM == "1"
+replace `i' = `i'_d_nondm if DM == "0"
+}
+keep country-rang DM-azd
+order country rang DM sex
+sort country rang DM sex
+gen njm = _n
+bysort country DM (njm) : replace DM ="" if _n!=1
+bysort country (njm) : replace country ="" if _n!=1
+bysort rang (njm) : replace rang ="" if _n!=1
+sort njm
+replace DM = "No diabetes" if DM == "0"
+replace DM = "Diabetes" if DM == "1"
+replace sex = "Female" if sex == "0"
+replace sex = "Male" if sex == "1"
+drop njm
+export delimited using T1.csv, delimiter(":") novarnames replace
+texdoc stlog close
 
 /***
 \color{black}
@@ -979,7 +1070,6 @@ age-standardised rates in people with and without diabetes, using direct standar
 Then, to generate an overall estimate of trends over time, we will fit a model with spline
 effects of age but a linear effect of period and calculate the annual percent change for 
 each data source in people with and without diabetes, by sex. 
-
 
 \color{Blue4}
 ***/
@@ -1316,9 +1406,9 @@ local cmu = calmen[1]
 twoway ///
 (rarea ub lb age_`d' if cale == `cmu', color(black%30) fintensity(inten80) lwidth(none)) ///
 (line _Rate age_`d' if cale == `cmu', color(black)) ///
-(scatter rate age_`d' if cale == `cmu', col(black)) ///
+(scatter rate age_`d' if cale == `cmu' & rate !=0, col(black)) ///
 , graphregion(color(white)) ylabel( ///
-0.01 "0.01" 0.1 "0.1" 1 10, angle(0)) ///
+0.01 "0.01" 0.1 "0.1" 1 10 100, angle(0)) ///
 xlabel(30(10)100) ytitle("Incidence rate (per 1000 person-years)") ///
 xtitle(Age) yscale(log) legend(order( ///
 2 "Predicted" ///
@@ -1329,15 +1419,15 @@ graph save GPH/Rc_`c'_`o'_`d'_`s'_age, replace
 twoway ///
 (rarea ub lb cale if age_`d' == 45, color(gs0%30) fintensity(inten80) lwidth(none)) ///
 (line _Rate cale if age_`d' == 45, color(gs0)) ///
-(scatter rate cale if age_`d' == 45, col(gs0)) ///
+(scatter rate cale if age_`d' == 45 & rate !=0, col(gs0)) ///
 (rarea ub lb cale if age_`d' == 65, color(gs5%30) fintensity(inten80) lwidth(none)) ///
 (line _Rate cale if age_`d' == 65, color(gs5)) ///
-(scatter rate cale if age_`d' == 65, col(gs5)) ///
+(scatter rate cale if age_`d' == 65 & rate !=0, col(gs5)) ///
 (rarea ub lb cale if age_`d' == 85, color(gs10%30) fintensity(inten80) lwidth(none)) ///
 (line _Rate cale if age_`d' == 85, color(gs10)) ///
-(scatter rate cale if age_`d' == 85, col(gs10)) ///
+(scatter rate cale if age_`d' == 85 & rate !=0, col(gs10)) ///
 , graphregion(color(white)) ylabel( ///
-0.01 "0.01" 0.1 "0.1" 1 10, angle(0)) ///
+0.01 "0.01" 0.1 "0.1" 1 10 100, angle(0)) ///
 ytitle("Incidence rate (per 1000 person-years)") ///
 xtitle(Year) yscale(log) legend(order( ///
 2 "Predicted" ///
@@ -1393,46 +1483,81 @@ GPH/Rc_Canada_chd_dm_0_age.gph ///
 GPH/Rc_Australia_flu_nondm_1_age.gph ///
 GPH/Rc_Sweden_cvd_dm_0_age.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(3)
-
-
-
-
-
-(
-(line 
-
-
-
-
-twoway scatter rate _Rate age_nondm
-sort rate
-
-levelsof(country)
-
-
-
-
-twoway scatter age_dm cal
-tostring age_dm, replace force format(%9.1f)
-destring age_dm, replace 
-replace cal = cal+2010
-drop pys_dm
-merge 1:m age_dm cal using Australia
-drop if sex == 0
-ta _merge
-
-gen rrr = 1000*cvd_d_dm/pys_dm
-twoway scatter _Rate rrr age_dm if cal == 2018
-br
-
-
-
-cd /Users/jed/Documents/CM/
-
-
+texdoc graph, label(MC1) ///
+caption(Predicted and actual mortality rates by age for 10 randomly selected ///
+country/cause of death/diabetes status/sex combinations.)
+graph combine ///
+GPH/Rc_France_liv2_dm_1_period.gph ///
+GPH/Rc_France_ckd_nondm_0_period.gph ///
+GPH/Rc_Scotland_liv1_dm_1_period.gph ///
+GPH/Rc_Canada_res_dm_0_period.gph ///
+GPH/Rc_Canada_res_nondm_0_period.gph ///
+GPH/Rc_Sweden_can_nondm_1_period.gph ///
+GPH/Rc_Australia_res_nondm_1_period.gph ///
+GPH/Rc_Canada_chd_dm_0_period.gph ///
+GPH/Rc_Australia_flu_nondm_1_period.gph ///
+GPH/Rc_Sweden_cvd_dm_0_period.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(3)
+texdoc graph, label(MC2) ///
+caption(Predicted and actual mortality rates by year for 10 randomly selected ///
+country/cause of death/diabetes status/sex combinations.)
+graph combine ///
+GPH/RCc_France_liv2_dm_1_age.gph ///
+GPH/RCc_France_ckd_nondm_0_age.gph ///
+GPH/RCc_Scotland_liv1_dm_1_age.gph ///
+GPH/RCc_Canada_res_dm_0_age.gph ///
+GPH/RCc_Canada_res_nondm_0_age.gph ///
+GPH/RCc_Sweden_can_nondm_1_age.gph ///
+GPH/RCc_Australia_res_nondm_1_age.gph ///
+GPH/RCc_Canada_chd_dm_0_age.gph ///
+GPH/RCc_Australia_flu_nondm_1_age.gph ///
+GPH/RCc_Sweden_cvd_dm_0_age.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(3)
+texdoc graph, label(MC3) ///
+caption(Pearson residuals by age for 10 randomly selected ///
+country/cause of death/diabetes status/sex combinations.)
+graph combine ///
+GPH/RCc_France_liv2_dm_1_period.gph ///
+GPH/RCc_France_ckd_nondm_0_period.gph ///
+GPH/RCc_Scotland_liv1_dm_1_period.gph ///
+GPH/RCc_Canada_res_dm_0_period.gph ///
+GPH/RCc_Canada_res_nondm_0_period.gph ///
+GPH/RCc_Sweden_can_nondm_1_period.gph ///
+GPH/RCc_Australia_res_nondm_1_period.gph ///
+GPH/RCc_Canada_chd_dm_0_period.gph ///
+GPH/RCc_Australia_flu_nondm_1_period.gph ///
+GPH/RCc_Sweden_cvd_dm_0_period.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(3)
+texdoc graph, label(MC4) ///
+caption(Pearson residuals by age for 10 randomly selected ///
+country/cause of death/diabetes status/sex combinations.)
+graph combine ///
+GPH/RCc_France_liv2_dm_1_cohort.gph ///
+GPH/RCc_France_ckd_nondm_0_cohort.gph ///
+GPH/RCc_Scotland_liv1_dm_1_cohort.gph ///
+GPH/RCc_Canada_res_dm_0_cohort.gph ///
+GPH/RCc_Canada_res_nondm_0_cohort.gph ///
+GPH/RCc_Sweden_can_nondm_1_cohort.gph ///
+GPH/RCc_Australia_res_nondm_1_cohort.gph ///
+GPH/RCc_Canada_chd_dm_0_cohort.gph ///
+GPH/RCc_Australia_flu_nondm_1_cohort.gph ///
+GPH/RCc_Sweden_cvd_dm_0_cohort.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(3)
+texdoc graph, label(MC5) //
+caption(Pearson residuals by age for 10 randomly selected ///
+country/cause of death/diabetes status/sex combinations.) 
+texdoc stlog close
 
 /***
 \color{black}
+
+We see that the models fit the data well (Figures~\ref{MC1}-~\ref{MC5}). 
+
+\color{red}
+Maybe another knot or two for age? I am not sure it would effect overall conclusions but the fit 
+is good enough in my opinion (Figure~\ref{MC1}).
+\color{black}
+
 
 \clearpage
 \subsection{Age- and period-specific rates}
@@ -1446,6 +1571,11 @@ cd /Users/jed/Documents/CM/
 
 \color{Blue4}
 ***/
+
+
+**PICKUP -- plot age and period-specific rates
+
+cd /Users/jed/Documents/CM/
 
 
 
