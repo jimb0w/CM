@@ -968,7 +968,7 @@ Age is defined as above (i.e., the midpoint of the interval in most cases) and m
 fit separately for each cause of death and country in people with and without diabetes and by sex. 
 Because this will be \begin{math} 13 \times 7 \ times 2 \times 2 = 364 \end{math} models, 
 we won't check model fit with different knot numbers and placements for each model. Instead, 
-to check model fit we will select a few at random and check the predicted and actual rates as well as 
+to check model fit we will select ten at random and check the predicted and actual rates as well as 
 the Pearson residuals. 
 
 These models will be used to predict mortality rates for single year ages and calendar years.
@@ -984,6 +984,7 @@ each data source in people with and without diabetes, by sex.
 \color{Blue4}
 ***/
 
+texdoc stlog, cmdlog nodo
 mkdir MD
 foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
 foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
@@ -1039,14 +1040,14 @@ local CO4 = r(c_4)
 mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
 poisson `ii'_d_`iii' agesp* timesp* cohsp*, exposure(pys_`iii')
 predict pred
+gen OC = "`ii'"
+gen DM = "`iii'"
 save MD/RC_pred_`i'_`ii'_`iii'_`iiii', replace
-keep age_`iii' calendar pys_`iii'
-expand 100
-replace pys=pys/100
-bysort cal age : replace age = age+((_n/10)-5.1)
-expand 10
-replace pys = pys/10
-bysort age cal : replace cal = cal+(_n/10)-0.1
+keep calendar
+bysort cal : keep if _n == 1
+expand 700
+bysort cal : gen age_`iii' = (_n/10)+29.9
+gen pys_`iii' = 1
 gen coh = calendar-age
 mkspline agesp = age, cubic knots(`A1' `A2' `A3' `A4')
 if `rang' < 7.99 {
@@ -1133,14 +1134,14 @@ local CO4 = r(c_4)
 mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
 poisson `ii'_d_`iii' agesp* timesp* cohsp*, exposure(pys_`iii')
 predict pred
+gen OC = "`ii'"
+gen DM = "`iii'"
 save MD/RC_pred_`i'_`ii'_`iii'_`iiii', replace
-keep age_`iii' calendar pys_`iii'
-expand 100
-replace pys=pys/100
-bysort cal age : replace age = age+((_n/10)-5.1)
-expand 10
-replace pys = pys/10
-bysort age cal : replace cal = cal+(_n/10)-0.1
+keep calendar
+bysort cal : keep if _n == 1
+expand 700
+bysort cal : gen age_`iii' = (_n/10)+29.9
+gen pys_`iii' = 1
 gen coh = calendar-age
 mkspline agesp = age, cubic knots(`A1' `A2' `A3' `A4')
 if `rang' < 7.99 {
@@ -1183,13 +1184,12 @@ foreach iiii in 0 1 {
 local B = runiform()
 append using MD/RC_pred_`i'_`ii'_`iii'_`iiii'
 recode A .=`B'
-keep if A < 0.02
+keep if A < 0.021
 }
 }
 }
 }
 save RCc, replace
-
 set seed 1234
 clear
 gen A =.
@@ -1200,15 +1200,216 @@ foreach iiii in 0 1 {
 local B = runiform()
 append using MD/R_`i'_`ii'_`iii'_`iiii'
 recode A .=`B'
-keep if A < 0.02
+keep if A < 0.021
 }
 }
 }
 }
 save Rc, replace
+texdoc stlog close
+texdoc stlog
+use RCc, clear
+bysort A : keep if _n == 1
+list country OC DM sex
+texdoc stlog close
+texdoc stlog, cmdlog nodo
+forval i = 1/10 {
+if `i' == 1 {
+local c = "France"
+local o = "liv2"
+local oo = "liver disease (excluding alcoholic liver disease)"
+local s = 1
+local ss = "males"
+local d = "dm"
+local dd = "with"
+}
+if `i' == 2 {
+local c = "France"
+local o = "ckd"
+local oo = "renal disease"
+local s = 0
+local ss = "females"
+local d = "nondm"
+local dd = "without"
+}
+if `i' == 3 {
+local c = "Scotland"
+local o = "liv1"
+local oo = "liver disease"
+local s = 1
+local ss = "males"
+local d = "dm"
+local dd = "with"
+}
+if `i' == 4 {
+local c = "Canada"
+local o = "res"
+local oo = "chronic lower respiratory disease"
+local s = 0
+local ss = "females"
+local d = "dm"
+local dd = "with"
+}
+if `i' == 5 {
+local c = "Canada"
+local o = "res"
+local oo = "chronic lower respiratory disease"
+local s = 0
+local ss = "females"
+local d = "nondm"
+local dd = "without"
+}
+if `i' == 6 {
+local c = "Sweden"
+local o = "can"
+local oo = "cancer"
+local s = 1
+local ss = "males"
+local d = "nondm"
+local dd = "without"
+}
+if `i' == 7 {
+local c = "Australia"
+local o = "res"
+local oo = "chronic lower respiratory disease"
+local s = 1
+local ss = "males"
+local d = "nondm"
+local dd = "without"
+}
+if `i' == 8 {
+local c = "Canada"
+local o = "chd"
+local oo = "ischaemic heart disease"
+local s = 0
+local ss = "females"
+local d = "dm"
+local dd = "with"
+}
+if `i' == 9 {
+local c = "Australia"
+local o = "flu"
+local oo = "influenza and pneumonia"
+local s = 1
+local ss = "males"
+local d = "nondm"
+local dd = "without"
+}
+if `i' == 10 {
+local c = "Sweden"
+local o = "cvd"
+local oo = "cardiovascular disease"
+local s = 0
+local ss = "females"
+local d = "dm"
+local dd = "with"
+}
+use Rc, clear
+keep if country == "`c'" & OC == "`o'" & sex == `s' & DM == "`d'"
+drop pys_nondm pys_dm
+merge 1:1 age_`d' sex cal using `c'
+drop if _merge == 2
+gen rate = 1000*`o'_d_`d'/pys_`d'
+egen calmen = mean(calendar)
+replace calmen = round(calmen,1)
+local cmu = calmen[1]
+twoway ///
+(rarea ub lb age_`d' if cale == `cmu', color(black%30) fintensity(inten80) lwidth(none)) ///
+(line _Rate age_`d' if cale == `cmu', color(black)) ///
+(scatter rate age_`d' if cale == `cmu', col(black)) ///
+, graphregion(color(white)) ylabel( ///
+0.01 "0.01" 0.1 "0.1" 1 10, angle(0)) ///
+xlabel(30(10)100) ytitle("Incidence rate (per 1000 person-years)") ///
+xtitle(Age) yscale(log) legend(order( ///
+2 "Predicted" ///
+3 "Actual" ///
+) ring(0) cols(1) position(11) region(lcolor(none) col(none))) ///
+title("`c', `oo', people `dd' diabetes, `ss'", col(black) placement(west) size(medium))
+graph save GPH/Rc_`c'_`o'_`d'_`s'_age, replace
+twoway ///
+(rarea ub lb cale if age_`d' == 45, color(gs0%30) fintensity(inten80) lwidth(none)) ///
+(line _Rate cale if age_`d' == 45, color(gs0)) ///
+(scatter rate cale if age_`d' == 45, col(gs0)) ///
+(rarea ub lb cale if age_`d' == 65, color(gs5%30) fintensity(inten80) lwidth(none)) ///
+(line _Rate cale if age_`d' == 65, color(gs5)) ///
+(scatter rate cale if age_`d' == 65, col(gs5)) ///
+(rarea ub lb cale if age_`d' == 85, color(gs10%30) fintensity(inten80) lwidth(none)) ///
+(line _Rate cale if age_`d' == 85, color(gs10)) ///
+(scatter rate cale if age_`d' == 85, col(gs10)) ///
+, graphregion(color(white)) ylabel( ///
+0.01 "0.01" 0.1 "0.1" 1 10, angle(0)) ///
+ytitle("Incidence rate (per 1000 person-years)") ///
+xtitle(Year) yscale(log) legend(order( ///
+2 "Predicted" ///
+2 "45" 5 "65" 8 "85" ///
+3 "Actual" ///
+3 "40-49" 6 "60-69" 9 "80-89" ///
+) ring(0) cols(4) position(11) region(lcolor(none) col(none))) ///
+title("`c', `oo', people `dd' diabetes, `ss'", col(black) placement(west) size(medium))
+graph save GPH/Rc_`c'_`o'_`d'_`s'_period, replace
+use RCc, clear
+replace coh= coh+2010
+keep if country == "`c'" & OC == "`o'" & sex == `s' & DM == "`d'"
+gen res = (`o'_d_`d'-pred)/sqrt(pred)
+twoway ///
+(scatter res age_`d', col(black)) ///
+, legend(off) ///
+graphregion(color(white)) ///
+ylabel(, format(%9.0f) grid angle(0)) ///
+ytitle("Pearson residuals", margin(a+2)) ///
+xtitle("Age (years)") ///
+title("`c', `oo', people `dd' diabetes, `ss'", col(black) placement(west) size(medium))
+graph save GPH/RCc_`c'_`o'_`d'_`s'_age, replace
+twoway ///
+(scatter res cale, col(black)) ///
+, legend(off) ///
+graphregion(color(white)) ///
+ylabel(, format(%9.0f) grid angle(0)) ///
+ytitle("Pearson residuals", margin(a+2)) ///
+xtitle("Period") ///
+title("`c', `oo', people `dd' diabetes, `ss'", col(black) placement(west) size(medium))
+graph save GPH/RCc_`c'_`o'_`d'_`s'_period, replace
+twoway ///
+(scatter res coh, col(black)) ///
+, legend(off) ///
+graphregion(color(white)) ///
+ylabel(, format(%9.0f) grid angle(0)) ///
+ytitle("Pearson residuals", margin(a+2)) ///
+xtitle("Cohort") ///
+title("`c', `oo', people `dd' diabetes, `ss'", col(black) placement(west) size(medium))
+graph save GPH/RCc_`c'_`o'_`d'_`s'_cohort, replace
+}
+texdoc stlog close
+texdoc stlog, cmdlog
+graph combine ///
+GPH/Rc_France_liv2_dm_1_age.gph ///
+GPH/Rc_France_ckd_nondm_0_age.gph ///
+GPH/Rc_Scotland_liv1_dm_1_age.gph ///
+GPH/Rc_Canada_res_dm_0_age.gph ///
+GPH/Rc_Canada_res_nondm_0_age.gph ///
+GPH/Rc_Sweden_can_nondm_1_age.gph ///
+GPH/Rc_Australia_res_nondm_1_age.gph ///
+GPH/Rc_Canada_chd_dm_0_age.gph ///
+GPH/Rc_Australia_flu_nondm_1_age.gph ///
+GPH/Rc_Sweden_cvd_dm_0_age.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(3)
 
 
-**PICKUP -- complete the random checks of model fit. 
+
+
+
+(
+(line 
+
+
+
+
+twoway scatter rate _Rate age_nondm
+sort rate
+
+levelsof(country)
+
+
 
 
 twoway scatter age_dm cal
