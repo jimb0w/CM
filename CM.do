@@ -2022,17 +2022,13 @@ rename age_dm age
 save refpop, replace
 texdoc stlog close
 
-use refpop, clear
-**PICKUP 
+**PICKUP -- check the code below gives useable outputs. Why is Sweden getting missing values?
 
 cd /Users/jed/Documents/CM/
 
 **#
 
-use Scotland, clear
-use Sweden, clear
-
-
+quietly {
 foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
 foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
 foreach iii in dm nondm {
@@ -2086,8 +2082,29 @@ local CO3 = r(c_3)
 local CO4 = r(c_4)
 mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
 poisson `ii'_d_`iii' agesp* timesp* cohsp*, exposure(pys_`iii')
-
 keep calendar pys_`iii' age_`iii'
+if "`i'" == "Scotland" & "`iii'" == "nondm" {
+egen mina = min(age_`iii')
+expand 10 if age_`iii'!=mina & age_`iii'!=87.5
+expand 20 if age_`iii'==87.5
+expand 40 if age_`iii'==mina
+replace pys = pys/10 if age_`iii'!=mina & age_`iii'!=87.5
+replace pys = pys/20 if age_`iii'==87.5
+replace pys = pys/40 if age_`iii'==mina
+bysort cal age : replace age = age+_n-6 if age_`iii'!=mina & age_`iii'!=87.5
+bysort cal age : replace age = age+_n-8.5 if age_`iii'==87.5
+bysort cal age : replace age = _n-1 if age_`iii'==mina
+}
+else if "`i'" == "Sweden" {
+egen mina = min(age_`iii')
+expand 10 if age_`iii'!=mina
+expand 22 if age_`iii'==mina
+replace pys = pys/10 if age_`iii'!=mina
+replace pys = pys/22 if age_`iii'==mina
+bysort cal age : replace age = age+_n-6 if age_`iii'!=mina
+bysort cal age : replace age = _n+17 if age_`iii'==mina
+}
+else {
 egen mina = min(age_`iii')
 expand 10 if age_`iii'!=mina
 expand 40 if age_`iii'==mina
@@ -2095,6 +2112,7 @@ replace pys = pys/10 if age_`iii'!=mina
 replace pys = pys/40 if age_`iii'==mina
 bysort cal age : replace age = age+_n-6 if age_`iii'!=mina
 bysort cal age : replace age = _n-1 if age_`iii'==mina
+}
 gen coh = calendar-age
 mkspline agesp = age, cubic knots(`A1' `A2' `A3' `A4')
 if `rang' < 7.99 {
@@ -2113,7 +2131,6 @@ mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
 predict _Rate, ir
 rename age_`iii' age
 merge m:1 age using refpop
-
 drop _merge
 gen double expdeath = _Rate*B
 bysort cal : egen double expdeath1 = sum(expdeath)
@@ -2124,7 +2141,11 @@ gen double SE = sqrt(SEC2)
 gen lb = 1000*(expdeath1-1.96*SE)
 gen ub = 1000*(expdeath1+1.96*SE)
 bysort cal (age) : keep if _n == 1
-noisily count if lb < 0
+count if lb < 0
+if r(N) != 0 {
+noisily di "`i'" " " "`ii'" " " "`iii'" " " "`iiii'"
+replace lb = 0 if lb < 0
+}
 keep cal stdrate lb ub
 gen country = "`i'"
 gen OC = "`ii'"
@@ -2132,12 +2153,15 @@ gen DM = "`iii'"
 gen sex = `iiii'
 replace cal = cal+2010
 save MD/STD_`i'_`ii'_`iii'_`iiii', replace
+}
+}
+}
+}
+}
 
-}
-}
-}
-}
 
+
+use MD/STD_Lithuania_hfd_dm_1, replace
 
 
 foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
