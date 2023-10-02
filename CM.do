@@ -1964,6 +1964,11 @@ we will pool the person-years among people with diabetes from all datasets excep
 the person-years in the youngest age group are only for people aged 18-39)
 and convert the estimates into a single-year values for our standard population. 
 
+\color{red}
+
+Sweden poses a problem -- the rates are from a different population (18+) than the others,
+so how should we standardise Swedish data? One idea is to just use the 40+ population. 
+
 \color{Blue4}
 ***/
 
@@ -2023,14 +2028,7 @@ replace age_dm = age-0.5
 rename age_dm age
 save refpop, replace
 texdoc stlog close
-
-**PICKUP -- check the code below gives useable outputs. Sweden can't be standardised because only 18+? 
-*Should we exclude or stdize all to 18+?
-
-cd /Users/jed/Documents/CM/
-
-**#
-
+texdoc stlog, cmdlog nodo
 quietly {
 foreach i in Australia Canada Finland France Lithuania Scotland {
 foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
@@ -2146,7 +2144,7 @@ bysort cal (age) : keep if _n == 1
 count if lb < 0
 if r(N) != 0 {
 noisily di "`i'" " " "`ii'" " " "`iii'" " " "`iiii'"
-replace lb = 0 if lb < 0
+replace lb = 0.001 if lb < 0
 }
 keep cal stdrate lb ub
 gen country = "`i'"
@@ -2157,7 +2155,6 @@ save MD/STD_`i'_`ii'_`iii', replace
 }
 }
 }
-
 foreach i in Australia Canada Finland France Lithuania Scotland {
 foreach ii in dmd {
 foreach iii in dm {
@@ -2272,7 +2269,7 @@ bysort cal (age) : keep if _n == 1
 count if lb < 0
 if r(N) != 0 {
 noisily di "`i'" " " "`ii'" " " "`iii'" " " "`iiii'"
-replace lb = 0 if lb < 0
+replace lb = 0.001 if lb < 0
 }
 keep cal stdrate lb ub
 gen country = "`i'"
@@ -2283,8 +2280,6 @@ save MD/STD_`i'_`ii'_`iii', replace
 }
 }
 }
-
-
 *By sex
 foreach i in Australia Canada Finland France Lithuania Scotland {
 foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
@@ -2401,7 +2396,7 @@ bysort cal (age) : keep if _n == 1
 count if lb < 0
 if r(N) != 0 {
 noisily di "`i'" " " "`ii'" " " "`iii'" " " "`iiii'"
-replace lb = 0 if lb < 0
+replace lb = 0.001 if lb < 0
 }
 keep cal stdrate lb ub
 gen country = "`i'"
@@ -2529,7 +2524,7 @@ bysort cal (age) : keep if _n == 1
 count if lb < 0
 if r(N) != 0 {
 noisily di "`i'" " " "`ii'" " " "`iii'" " " "`iiii'"
-replace lb = 0 if lb < 0
+replace lb = 0.001 if lb < 0
 }
 keep cal stdrate lb ub
 gen country = "`i'"
@@ -2543,13 +2538,7 @@ save MD/STD_`i'_`ii'_`iii'_`iiii', replace
 }
 }
 }
-
-
-
 foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
-
-
-
 if "`ii'" == "cvd" {
 local oo = "Cardiovascular disease"
 }
@@ -2589,15 +2578,12 @@ local oo = "Renal disease"
 if "`ii'" == "azd" {
 local oo = "Alzheimer's disease"
 }
-
-
 clear
 foreach i in Australia Canada Finland France Lithuania Scotland {
 foreach iii in dm nondm {
 append using MD/STD_`i'_`ii'_`iii'
 }
 }
-
 local col1 = "0 0 255"
 local col2 = "75 0 130"
 local col3 = "255 0 255"
@@ -2606,14 +2592,12 @@ local col5 = "255 125 0"
 local col6 = "0 125 0"
 local col7 = "0 175 255"
 local col8 = "0 0 0"
-
 preserve
 bysort country : keep if _n == 1
 forval i = 1/6 {
 local C`i' = country[`i']
 }
 restore
-
 if "`ii'" == "cvd" {
 twoway ///
 (rarea ub lb calendar if country == "`C1'" & DM == "dm", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
@@ -2649,7 +2633,7 @@ order(2 "`C1'" ///
 12 "`C6'") ///
 cols(1)) ///
 graphregion(color(white)) ///
-ylabel(2 5 10 20 50, format(%9.0f) grid angle(0)) ///
+ylabel(2 5 10 20 50, format(%9.1f) grid angle(0)) ///
 yscale(log) ///
 xscale(range(2000 2020)) ///
 xlabel(2000(5)2020, nogrid) ///
@@ -2685,7 +2669,7 @@ twoway ///
 (line stdrate calendar if country == "`C6'" & DM == "nondm", color("`col6'") lpattern(shortdash)) ///
 , legend(off) ///
 graphregion(color(white)) ///
-ylabel(, format(%9.0f) grid angle(0)) ///
+ylabel(, format(%9.1f) grid angle(0)) ///
 yscale(log) ///
 xscale(range(2000 2020)) ///
 xlabel(2000(5)2020, nogrid) ///
@@ -2705,7 +2689,6 @@ foreach iii in dm {
 append using MD/STD_`i'_`ii'_`iii'
 }
 }
-
 local col1 = "0 0 255"
 local col2 = "75 0 130"
 local col3 = "255 0 255"
@@ -2714,14 +2697,12 @@ local col5 = "255 125 0"
 local col6 = "0 125 0"
 local col7 = "0 175 255"
 local col8 = "0 0 0"
-
 preserve
 bysort country : keep if _n == 1
 forval i = 1/6 {
 local C`i' = country[`i']
 }
 restore
-
 twoway ///
 (rarea ub lb calendar if country == "`C1'" & DM == "dm", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
 (line stdrate calendar if country == "`C1'" & DM == "dm", color("`col1'") lpattern(solid)) ///
@@ -2737,7 +2718,7 @@ twoway ///
 (line stdrate calendar if country == "`C6'" & DM == "dm", color("`col6'") lpattern(solid)) ///
 , legend(off) ///
 graphregion(color(white)) ///
-ylabel(, format(%9.0f) grid angle(0)) ///
+ylabel(, format(%9.1f) grid angle(0)) ///
 yscale(log) ///
 xscale(range(2000 2020)) ///
 xlabel(2000(5)2020, nogrid) ///
@@ -2746,7 +2727,7 @@ xtitle("Calendar year") ///
 title("`oo'", placement(west) color(black) size(medium))
 graph save GPH/STD_GPH_`ii', replace
 }
-
+texdoc stlog close
 texdoc stlog, cmdlog 
 graph combine ///
 GPH/STD_GPH_cvd.gph ///
@@ -2763,8 +2744,557 @@ GPH/STD_GPH_liv2.gph ///
 GPH/STD_GPH_ckd.gph ///
 GPH/STD_GPH_azd.gph ///
 , graphregion(color(white)) cols(3) altshrink xsize(4)
-texdoc graph, label(chk1) ///
+texdoc graph, label(STDMRF) ///
 caption(Crude mortality rate by age-grouping method, by cause of death. Australia. People with diabetes.)
+texdoc stlog close
+
+/***
+\color{red}
+
+What is wrong with Canada (Figure~\ref{STDMRF})?
+It looks like the variation in person-years for people aged over 90 years with diabetes is large (Figure~\ref{Canpy}),
+which is giving us weird confidence intervals. Also, the jump in 2020 seems implausible. 
+
+Also, for Lithuania, the confidence intervals for HF go below zero because using Stata formula for confidence intervals. 
+Need another formula, Bendix or Agus?
+
+\color{Blue4}
+***/
+
+texdoc stlog, cmdlog
+use Canada, clear
+keep if age_dm > 90
+collapse (sum) pys_dm, by(cal)
+twoway ///
+(scatter pys_dm cal, col(black)) ///
+, graphregion(color(white)) ///
+ytitle(Person-years) xtitle(Year) ///
+ylabel(, angle(0))
+texdoc graph, label(Canpy) ///
+caption(Person-years  of follow-up among people aged 90 and above with diabetes in Canada)
+texdoc stlog close
+
+/***
+\color{red}
+
+To address both the Sweden and Canada problems, let's repeat the age-standardisation among people aged 40-90 only.
+This introduce another problem though -- Scotland has an 80+ age group in people without diabetes 
+for a large part of follow-up; for this, 
+I'll predict rates as above, but drop the people above 90 after. 
+
+\color{Blue4}
+***/
+
+cd /Users/jed/Documents/CM/
+
+
+
+texdoc stlog, cmdlog
+clear
+foreach i in Australia Canada Finland France Lithuania Scotland {
+append using `i'_pysdm
+}
+collapse (sum) pys_dm, by(age_dm)
+drop if age_dm > 90 | age_dm == 35
+expand 10
+replace pys_dm=pys_dm/10
+bysort age : replace age = age+_n-5.5
+mkspline agesp = age, cubic knots(45 65 85)
+glm pys_dm agesp*, family(gamma) link(log)
+predict A
+preserve
+replace pys_dm = pys_dm/1000000
+replace A = A/1000000
+twoway ///
+(scatter pys_dm age_dm, col(dknavy)) ///
+(line A age_dm, col(magenta)) ///
+, legend(symxsize(0.13cm) position(11) ring(0) region(lcolor(white) color(none)) ///
+order(1 "Actual" ///
+2 "Modelled") ///
+cols(1)) ///
+graphregion(color(white)) ///
+ylabel(, format(%9.1f) angle(0)) ///
+ytitle("Population size (millions)") xtitle("Age")
+texdoc graph, label(ESP2010N) caption(European standard population in 2010)
+restore
+su(pys_dm)
+gen age_dm_prop = pys_dm/r(sum)
+su(A)
+gen B = A/r(sum)
+twoway ///
+(bar age_dm_prop age_dm, color(dknavy%70)) ///
+(bar B age_dm, color(magenta%50)) ///
+, legend(symxsize(0.13cm) position(11) ring(0) region(lcolor(white) color(none)) ///
+order(1 "Actual" ///
+2 "Modelled") ///
+cols(1)) /// 
+ylabel(0(0.01)0.04, angle(0) format(%9.2f)) ///
+graphregion(color(white)) ///
+ytitle("Proportion") xtitle("Age")
+texdoc graph, label(ESP2010P) caption(European standard population proportions in 2010)
+keep age_dm B
+replace age_dm = age-0.5
+rename age_dm age
+save refpop_1, replace
+texdoc stlog close
+texdoc stlog, cmdlog nodo
+quietly {
+foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
+foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
+foreach iii in dm nondm {
+use `i', clear
+collapse (sum) pys_dm-azd_d_nondm, by(country age_dm age_nondm calendar)
+keep if inrange(age_`iii',40,90)
+replace calendar = calendar-2010
+gen coh = calendar-age_`iii'
+centile(age_`iii'), centile(5 35 65 95)
+local A1 = r(c_1)
+local A2 = r(c_2)
+local A3 = r(c_3)
+local A4 = r(c_4)
+mkspline agesp = age_`iii', cubic knots(`A1' `A2' `A3' `A4')
+su(calendar), detail
+local rang = r(max)-r(min)
+if `rang' < 8 {
+centile calendar, centile(25 75)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2')
+}
+else if inrange(`rang',8,11.9) {
+centile calendar, centile(10 50 90)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3')
+}
+else if inrange(`rang',12,15.9) {
+centile calendar, centile(5 35 65 95)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+local CK3 = r(c_4)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4')
+}
+else {
+centile calendar, centile(5 27.5 50 72.5 95)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+local CK3 = r(c_4)
+local CK3 = r(c_5)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4' `CK5')
+}
+centile(coh), centile(5 35 65 95)
+local CO1 = r(c_1)
+local CO2 = r(c_2)
+local CO3 = r(c_3)
+local CO4 = r(c_4)
+mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
+poisson `ii'_d_`iii' agesp* timesp* cohsp*, exposure(pys_`iii')
+keep calendar pys_`iii' age_`iii'
+if "`i'" == "Scotland" & "`iii'" == "nondm" {
+expand 10 if age_`iii'!=87.5
+expand 20 if age_`iii'==87.5
+replace pys = pys/10 if age_`iii'!=87.5
+replace pys = pys/20 if age_`iii'==87.5
+bysort cal age : replace age = age+_n-6 if age_`iii'!=87.5
+bysort cal age : replace age = age+_n-8.5 if age_`iii'==87.5
+drop if age_`iii' >= 90
+}
+else {
+expand 10
+replace pys = pys/10
+bysort cal age : replace age = age+_n-6
+}
+gen coh = calendar-age
+mkspline agesp = age, cubic knots(`A1' `A2' `A3' `A4')
+if `rang' < 7.99 {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2')
+}
+else if inrange(`rang',8,11.99) {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3')
+}
+else if inrange(`rang',12,15.99) {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4')
+}
+else {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4' `CK5')
+}
+mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
+predict _Rate, ir
+rename age_`iii' age
+merge m:1 age using refpop_1
+drop _merge
+gen double expdeath = _Rate*B
+bysort cal : egen double expdeath1 = sum(expdeath)
+gen stdrate = 1000*expdeath1
+gen SEC1 = ((B^2)*(_Rate*(1-_Rate)))/pys_`iii'
+bysort cal : egen double SEC2 = sum(SEC1)
+gen double SE = sqrt(SEC2)
+gen lb = 1000*(expdeath1-1.96*SE)
+gen ub = 1000*(expdeath1+1.96*SE)
+bysort cal (age) : keep if _n == 1
+count if lb < 0
+if r(N) != 0 {
+noisily di "`i'" " " "`ii'" " " "`iii'" " " "`iiii'"
+replace lb = 0.001 if lb < 0
+}
+keep cal stdrate lb ub
+gen country = "`i'"
+gen OC = "`ii'"
+gen DM = "`iii'"
+replace cal = cal+2010
+save MD/STD_`i'_`ii'_`iii'_49, replace
+}
+}
+}
+
+
+
+foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
+foreach ii in dmd {
+foreach iii in dm {
+use `i', clear
+collapse (sum) pys_dm-azd_d_nondm, by(country age_dm age_nondm calendar)
+keep if inrange(age_`iii',40,90)
+replace calendar = calendar-2010
+gen coh = calendar-age_`iii'
+centile(age_`iii'), centile(5 35 65 95)
+local A1 = r(c_1)
+local A2 = r(c_2)
+local A3 = r(c_3)
+local A4 = r(c_4)
+mkspline agesp = age_`iii', cubic knots(`A1' `A2' `A3' `A4')
+su(calendar), detail
+local rang = r(max)-r(min)
+if `rang' < 8 {
+centile calendar, centile(25 75)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2')
+}
+else if inrange(`rang',8,11.9) {
+centile calendar, centile(10 50 90)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3')
+}
+else if inrange(`rang',12,15.9) {
+centile calendar, centile(5 35 65 95)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+local CK3 = r(c_4)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4')
+}
+else {
+centile calendar, centile(5 27.5 50 72.5 95)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+local CK3 = r(c_4)
+local CK3 = r(c_5)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4' `CK5')
+}
+centile(coh), centile(5 35 65 95)
+local CO1 = r(c_1)
+local CO2 = r(c_2)
+local CO3 = r(c_3)
+local CO4 = r(c_4)
+mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
+poisson `ii'_d_`iii' agesp* timesp* cohsp*, exposure(pys_`iii')
+keep calendar pys_`iii' age_`iii'
+if "`i'" == "Scotland" & "`iii'" == "nondm" {
+expand 10 if age_`iii'!=87.5
+expand 20 if age_`iii'==87.5
+replace pys = pys/10 if age_`iii'!=87.5
+replace pys = pys/20 if age_`iii'==87.5
+bysort cal age : replace age = age+_n-6 if age_`iii'!=87.5
+bysort cal age : replace age = age+_n-8.5 if age_`iii'==87.5
+drop if age_`iii' >= 90
+}
+else {
+expand 10
+replace pys = pys/10
+bysort cal age : replace age = age+_n-6
+}
+gen coh = calendar-age
+mkspline agesp = age, cubic knots(`A1' `A2' `A3' `A4')
+if `rang' < 7.99 {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2')
+}
+else if inrange(`rang',8,11.99) {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3')
+}
+else if inrange(`rang',12,15.99) {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4')
+}
+else {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4' `CK5')
+}
+mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
+predict _Rate, ir
+rename age_`iii' age
+merge m:1 age using refpop_1
+drop _merge
+gen double expdeath = _Rate*B
+bysort cal : egen double expdeath1 = sum(expdeath)
+gen stdrate = 1000*expdeath1
+gen SEC1 = ((B^2)*(_Rate*(1-_Rate)))/pys_`iii'
+bysort cal : egen double SEC2 = sum(SEC1)
+gen double SE = sqrt(SEC2)
+gen lb = 1000*(expdeath1-1.96*SE)
+gen ub = 1000*(expdeath1+1.96*SE)
+bysort cal (age) : keep if _n == 1
+count if lb < 0
+if r(N) != 0 {
+noisily di "`i'" " " "`ii'" " " "`iii'" " " "`iiii'"
+replace lb = 0.001 if lb < 0
+}
+keep cal stdrate lb ub
+gen country = "`i'"
+gen OC = "`ii'"
+gen DM = "`iii'"
+replace cal = cal+2010
+save MD/STD_`i'_`ii'_`iii'_49, replace
+}
+}
+}
+
+
+
+}
+foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
+if "`ii'" == "cvd" {
+local oo = "Cardiovascular disease"
+}
+if "`ii'" == "chd" {
+local oo = "Ischaemic heart disease"
+}
+if "`ii'" == "cbd" {
+local oo = "Cerebrovascular disease"
+}
+if "`ii'" == "hfd" {
+local oo = "Heart failure"
+}
+if "`ii'" == "can" {
+local oo = "Cancer"
+}
+if "`ii'" == "dmd" {
+local oo = "Diabetes"
+}
+if "`ii'" == "inf" {
+local oo = "Infectious diseases"
+}
+if "`ii'" == "flu" {
+local oo = "Influenza and pneumonia"
+}
+if "`ii'" == "res" {
+local oo = "Chronic lower respiratory disease"
+}
+if "`ii'" == "liv1" {
+local oo = "Liver disease"
+}
+if "`ii'" == "liv2" {
+local oo = "Liver disease (excluding alcoholic liver disease)"
+}
+if "`ii'" == "ckd" {
+local oo = "Renal disease"
+}
+if "`ii'" == "azd" {
+local oo = "Alzheimer's disease"
+}
+clear
+foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
+foreach iii in dm nondm {
+append using MD/STD_`i'_`ii'_`iii'_49
+}
+}
+local col1 = "0 0 255"
+local col2 = "75 0 130"
+local col3 = "255 0 255"
+local col4 = "255 0 0"
+local col5 = "255 125 0"
+local col6 = "0 125 0"
+local col7 = "0 175 255"
+local col8 = "0 0 0"
+preserve
+bysort country : keep if _n == 1
+forval i = 1/7 {
+local C`i' = country[`i']
+}
+restore
+if "`ii'" == "cvd" {
+twoway ///
+(rarea ub lb calendar if country == "`C1'" & DM == "dm", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C1'" & DM == "dm", color("`col1'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C2'" & DM == "dm", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C2'" & DM == "dm", color("`col2'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C3'" & DM == "dm", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C3'" & DM == "dm", color("`col3'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C4'" & DM == "dm", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C4'" & DM == "dm", color("`col4'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C5'" & DM == "dm", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C5'" & DM == "dm", color("`col5'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C6'" & DM == "dm", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C6'" & DM == "dm", color("`col6'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C7'" & DM == "dm", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C7'" & DM == "dm", color("`col7'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C1'" & DM == "nondm", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C1'" & DM == "nondm", color("`col1'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C2'" & DM == "nondm", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C2'" & DM == "nondm", color("`col2'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C3'" & DM == "nondm", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C3'" & DM == "nondm", color("`col3'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C4'" & DM == "nondm", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C4'" & DM == "nondm", color("`col4'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C5'" & DM == "nondm", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C5'" & DM == "nondm", color("`col5'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C6'" & DM == "nondm", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C6'" & DM == "nondm", color("`col6'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C7'" & DM == "nondm", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C7'" & DM == "nondm", color("`col7'") lpattern(shortdash)) ///
+, legend(symxsize(0.13cm) position(7) ring(0) region(lcolor(white) color(none)) ///
+order(2 "`C1'" ///
+4 "`C2'" ///
+6 "`C3'" ///
+8 "`C4'" ///
+10 "`C5'" ///
+12 "`C6'" ///
+14 "`C7'") ///
+cols(1)) ///
+graphregion(color(white)) ///
+ylabel(2 5 10 20 50, format(%9.1f) grid angle(0)) ///
+yscale(log) ///
+xscale(range(2000 2020)) ///
+xlabel(2000(5)2020, nogrid) ///
+ytitle("Mortality rate (per 1,000 person-years)", margin(a+2)) ///
+xtitle("Calendar year") ///
+title("`oo'", placement(west) color(black) size(medium))
+}
+else {
+twoway ///
+(rarea ub lb calendar if country == "`C1'" & DM == "dm", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C1'" & DM == "dm", color("`col1'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C2'" & DM == "dm", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C2'" & DM == "dm", color("`col2'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C3'" & DM == "dm", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C3'" & DM == "dm", color("`col3'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C4'" & DM == "dm", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C4'" & DM == "dm", color("`col4'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C5'" & DM == "dm", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C5'" & DM == "dm", color("`col5'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C6'" & DM == "dm", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C6'" & DM == "dm", color("`col6'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C7'" & DM == "dm", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C7'" & DM == "dm", color("`col7'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C1'" & DM == "nondm", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C1'" & DM == "nondm", color("`col1'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C2'" & DM == "nondm", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C2'" & DM == "nondm", color("`col2'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C3'" & DM == "nondm", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C3'" & DM == "nondm", color("`col3'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C4'" & DM == "nondm", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C4'" & DM == "nondm", color("`col4'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C5'" & DM == "nondm", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C5'" & DM == "nondm", color("`col5'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C6'" & DM == "nondm", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C6'" & DM == "nondm", color("`col6'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C7'" & DM == "nondm", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C7'" & DM == "nondm", color("`col7'") lpattern(shortdash)) ///
+, legend(off) ///
+graphregion(color(white)) ///
+ylabel(, format(%9.1f) grid angle(0)) ///
+yscale(log) ///
+xscale(range(2000 2020)) ///
+xlabel(2000(5)2020, nogrid) ///
+ytitle("Mortality rate (per 1,000 person-years)", margin(a+2)) ///
+xtitle("Calendar year") ///
+title("`oo'", placement(west) color(black) size(medium))
+}
+graph save GPH/STD_GPH_`ii'_49, replace
+}
+foreach ii in dmd {
+if "`ii'" == "dmd" {
+local oo = "Diabetes"
+}
+clear
+foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
+foreach iii in dm {
+append using MD/STD_`i'_`ii'_`iii'_49
+}
+}
+local col1 = "0 0 255"
+local col2 = "75 0 130"
+local col3 = "255 0 255"
+local col4 = "255 0 0"
+local col5 = "255 125 0"
+local col6 = "0 125 0"
+local col7 = "0 175 255"
+local col8 = "0 0 0"
+preserve
+bysort country : keep if _n == 1
+forval i = 1/7 {
+local C`i' = country[`i']
+}
+restore
+twoway ///
+(rarea ub lb calendar if country == "`C1'" & DM == "dm", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C1'" & DM == "dm", color("`col1'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C2'" & DM == "dm", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C2'" & DM == "dm", color("`col2'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C3'" & DM == "dm", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C3'" & DM == "dm", color("`col3'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C4'" & DM == "dm", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C4'" & DM == "dm", color("`col4'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C5'" & DM == "dm", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C5'" & DM == "dm", color("`col5'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C6'" & DM == "dm", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C6'" & DM == "dm", color("`col6'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C7'" & DM == "dm", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C7'" & DM == "dm", color("`col7'") lpattern(solid)) ///
+, legend(off) ///
+graphregion(color(white)) ///
+ylabel(, format(%9.1f) grid angle(0)) ///
+yscale(log) ///
+xscale(range(2000 2020)) ///
+xlabel(2000(5)2020, nogrid) ///
+ytitle("Mortality rate (per 1,000 person-years)", margin(a+2)) ///
+xtitle("Calendar year") ///
+title("`oo'", placement(west) color(black) size(medium))
+graph save GPH/STD_GPH_`ii'_49, replace
+}
+texdoc stlog close
+texdoc stlog, cmdlog 
+graph combine ///
+GPH/STD_GPH_cvd_49.gph ///
+GPH/STD_GPH_chd_49.gph ///
+GPH/STD_GPH_cbd_49.gph ///
+GPH/STD_GPH_hfd_49.gph ///
+GPH/STD_GPH_can_49.gph ///
+GPH/STD_GPH_dmd_49.gph ///
+GPH/STD_GPH_inf_49.gph ///
+GPH/STD_GPH_flu_49.gph ///
+GPH/STD_GPH_res_49.gph ///
+GPH/STD_GPH_liv1_49.gph ///
+GPH/STD_GPH_liv2_49.gph ///
+GPH/STD_GPH_ckd_49.gph ///
+GPH/STD_GPH_azd_49.gph ///
+, graphregion(color(white)) cols(3) altshrink xsize(4)
+texdoc graph, label(STDMRF) ///
+caption(Crude mortality rate by age-grouping method, by cause of death. Australia. People with diabetes.)
+texdoc stlog close
+
+
+
+
+
+
+
+
+
 
 
 
