@@ -150,7 +150,7 @@ Because Australian data are unreliable before 2005, I will drop data from 2002-2
 \color{Blue4}
 ***/
 
-texdoc stlog, cmdlog nodo
+texdoc stlog, cmdlog
 cd /Users/jed/Documents/CM/
 *mkdir GPH
 texdoc stlog close
@@ -2887,18 +2887,17 @@ caption(Standardised mortality ratio by cause of death.)
 texdoc stlog close
 
 /***
-\color{red}
+\color{black}
 
 \clearpage
 \subsection{Annual percent changes}
 
-
 \color{Blue4}
 ***/
 
-
+**PICKUP -- APCs in rates and SMR
+**ALSO need to stratify results by sex 
 cd /Users/jed/Documents/CM/
-
 
 /***
 \color{black}
