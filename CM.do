@@ -33,7 +33,7 @@ set linesize 100
 \begin{titlepage}
     \begin{flushright}
         \Huge
-        \textbf{International trends in cause-specific mortality among people with diabetes}
+        \textbf{International trends in cause-specific mortality among people with and without diabetes}
 \color{black}
 \rule{16cm}{2mm} \\
 \Large
@@ -1084,7 +1084,7 @@ foreach iii in dm nondm {
 foreach iiii in 0 1 {
 use `i', clear
 keep if sex == `iiii'
-replace calendar = calendar-2010
+replace calendar = calendar-2009.5
 gen coh = calendar-age_`iii'
 centile(age_`iii'), centile(5 35 65 95)
 local A1 = r(c_1)
@@ -1138,7 +1138,7 @@ save MD/RC_pred_`i'_`ii'_`iii'_`iiii', replace
 keep calendar
 bysort cal : keep if _n == 1
 expand 10
-bysort cal : replace cal = cal+((_n-1)/10)
+bysort cal : replace cal = cal+((_n-6)/10)
 expand 700
 bysort cal : gen age_`iii' = (_n/10)+29.9
 gen pys_`iii' = 1
@@ -1180,7 +1180,7 @@ foreach iii in dm {
 foreach iiii in 0 1 {
 use `i', clear
 keep if sex == `iiii'
-replace calendar = calendar-2010
+replace calendar = calendar-2009.5
 gen coh = calendar-age_`iii'
 centile(age_`iii'), centile(5 35 65 95)
 local A1 = r(c_1)
@@ -1234,7 +1234,7 @@ save MD/RC_pred_`i'_`ii'_`iii'_`iiii', replace
 keep calendar
 bysort cal : keep if _n == 1
 expand 10
-bysort cal : replace cal = cal+((_n-1)/10)
+bysort cal : replace cal = cal+((_n-6)/10)
 expand 700
 bysort cal : gen age_`iii' = (_n/10)+29.9
 gen pys_`iii' = 1
@@ -1987,8 +1987,6 @@ keep age_dm B
 replace age_dm = age-0.5
 rename age_dm age
 save refpop, replace
-
-
 foreach i in Australia Finland France Lithuania Scotland {
 use `i', clear
 collapse (sum) pys_dm, by(sex age_dm)
@@ -2069,9 +2067,6 @@ keep sex age_dm B
 replace age_dm = age-0.5
 rename age_dm age
 save refpops, replace
-
-
-
 texdoc stlog close
 texdoc stlog, cmdlog nodo
 quietly {
@@ -2081,7 +2076,7 @@ foreach iii in dm nondm {
 foreach iiii in 0 1 {
 use `i', clear
 keep if sex == `iiii'
-replace calendar = calendar-2010
+replace calendar = calendar-2009.5
 gen coh = calendar-age_`iii'
 centile(age_`iii'), centile(5 35 65 95)
 local A1 = r(c_1)
@@ -2197,7 +2192,7 @@ keep cal stdrate lb ub sex
 gen country = "`i'"
 gen OC = "`ii'"
 gen DM = "`iii'"
-replace cal = cal+2010
+replace cal = cal+2009.5
 save MD/STD_`i'_`ii'_`iii'_`iiii', replace
 }
 clear
@@ -2223,7 +2218,7 @@ keep cal stdrate lb ub
 gen country = "`i'"
 gen OC = "`ii'"
 gen DM = "`iii'"
-replace cal = cal+2010
+replace cal = cal+2009.5
 save MD/STD_`i'_`ii'_`iii', replace
 }
 }
@@ -2234,7 +2229,7 @@ foreach iii in dm {
 foreach iiii in 0 1 {
 use `i', clear
 keep if sex == `iiii'
-replace calendar = calendar-2010
+replace calendar = calendar-2009.5
 gen coh = calendar-age_`iii'
 centile(age_`iii'), centile(5 35 65 95)
 local A1 = r(c_1)
@@ -2350,7 +2345,7 @@ keep cal stdrate lb ub sex
 gen country = "`i'"
 gen OC = "`ii'"
 gen DM = "`iii'"
-replace cal = cal+2010
+replace cal = cal+2009.5
 save MD/STD_`i'_`ii'_`iii'_`iiii', replace
 }
 clear
@@ -2376,7 +2371,7 @@ keep cal stdrate lb ub
 gen country = "`i'"
 gen OC = "`ii'"
 gen DM = "`iii'"
-replace cal = cal+2010
+replace cal = cal+2009.5
 save MD/STD_`i'_`ii'_`iii', replace
 }
 }
@@ -2765,14 +2760,19 @@ save refpops_1, replace
 
 texdoc stlog close
 texdoc stlog, cmdlog nodo
+
+
+
+
 quietly {
-foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
+foreach i in Australia Canada Finland France Scotland Sweden {
 foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
 foreach iii in dm nondm {
+foreach iiii in 0 1 {
 use `i', clear
-collapse (sum) pys_dm-azd_d_nondm, by(country age_dm age_nondm calendar)
 keep if inrange(age_`iii',40,90)
-replace calendar = calendar-2010
+keep if sex == `iiii'
+replace calendar = calendar-2009.5
 gen coh = calendar-age_`iii'
 centile(age_`iii'), centile(5 35 65 95)
 local A1 = r(c_1)
@@ -2819,7 +2819,7 @@ local CO3 = r(c_3)
 local CO4 = r(c_4)
 mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
 poisson `ii'_d_`iii' agesp* timesp* cohsp*, exposure(pys_`iii')
-keep calendar pys_`iii' age_`iii'
+keep sex calendar pys_`iii' age_`iii'
 if "`i'" == "Scotland" & "`iii'" == "nondm" {
 expand 10 if age_`iii'!=87.5
 expand 20 if age_`iii'==87.5
@@ -2850,8 +2850,35 @@ mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4' `CK5')
 }
 mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
 predict _Rate, ir
+save MD/STDi_`i'_`ii'_`iii'_`iiii'_49, replace
 rename age_`iii' age
 merge m:1 age using refpop_1
+drop _merge
+gen double expdeath = _Rate*B
+bysort cal : egen double expdeath1 = sum(expdeath)
+gen stdrate = 1000*expdeath1
+gen SEC1 = ((B^2)*(_Rate*(1-_Rate)))/pys_`iii'
+bysort cal : egen double SEC2 = sum(SEC1)
+gen double SE = sqrt(SEC2)
+gen lb = 1000*(expdeath1-1.96*SE)
+gen ub = 1000*(expdeath1+1.96*SE)
+bysort cal (age) : keep if _n == 1
+count if lb < 0
+if r(N) != 0 {
+noisily di "`i'" " " "`ii'" " " "`iii'" " " "`iiii'"
+replace lb = 0.001 if lb < 0
+}
+keep cal stdrate lb ub sex
+gen country = "`i'"
+gen OC = "`ii'"
+gen DM = "`iii'"
+replace cal = cal+2009.5
+save MD/STD_`i'_`ii'_`iii'_`iiii'_49, replace
+}
+clear
+append using MD/STDi_`i'_`ii'_`iii'_0_49 MD/STDi_`i'_`ii'_`iii'_1_49
+rename age_`iii' age
+merge m:1 sex age using refpops_1
 drop _merge
 gen double expdeath = _Rate*B
 bysort cal : egen double expdeath1 = sum(expdeath)
@@ -2871,21 +2898,19 @@ keep cal stdrate lb ub
 gen country = "`i'"
 gen OC = "`ii'"
 gen DM = "`iii'"
-replace cal = cal+2010
+replace cal = cal+2009.5
 save MD/STD_`i'_`ii'_`iii'_49, replace
 }
 }
 }
-
-
-
 foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
 foreach ii in dmd {
 foreach iii in dm {
+foreach iiii in 0 1 {
 use `i', clear
-collapse (sum) pys_dm-azd_d_nondm, by(country age_dm age_nondm calendar)
 keep if inrange(age_`iii',40,90)
-replace calendar = calendar-2010
+keep if sex == `iiii'
+replace calendar = calendar-2009.5
 gen coh = calendar-age_`iii'
 centile(age_`iii'), centile(5 35 65 95)
 local A1 = r(c_1)
@@ -2932,7 +2957,7 @@ local CO3 = r(c_3)
 local CO4 = r(c_4)
 mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
 poisson `ii'_d_`iii' agesp* timesp* cohsp*, exposure(pys_`iii')
-keep calendar pys_`iii' age_`iii'
+keep sex calendar pys_`iii' age_`iii'
 if "`i'" == "Scotland" & "`iii'" == "nondm" {
 expand 10 if age_`iii'!=87.5
 expand 20 if age_`iii'==87.5
@@ -2963,8 +2988,35 @@ mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4' `CK5')
 }
 mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
 predict _Rate, ir
+save MD/STDi_`i'_`ii'_`iii'_`iiii'_49, replace
 rename age_`iii' age
 merge m:1 age using refpop_1
+drop _merge
+gen double expdeath = _Rate*B
+bysort cal : egen double expdeath1 = sum(expdeath)
+gen stdrate = 1000*expdeath1
+gen SEC1 = ((B^2)*(_Rate*(1-_Rate)))/pys_`iii'
+bysort cal : egen double SEC2 = sum(SEC1)
+gen double SE = sqrt(SEC2)
+gen lb = 1000*(expdeath1-1.96*SE)
+gen ub = 1000*(expdeath1+1.96*SE)
+bysort cal (age) : keep if _n == 1
+count if lb < 0
+if r(N) != 0 {
+noisily di "`i'" " " "`ii'" " " "`iii'" " " "`iiii'"
+replace lb = 0.001 if lb < 0
+}
+keep cal stdrate lb ub sex
+gen country = "`i'"
+gen OC = "`ii'"
+gen DM = "`iii'"
+replace cal = cal+2009.5
+save MD/STD_`i'_`ii'_`iii'_`iiii'_49, replace
+}
+clear
+append using MD/STDi_`i'_`ii'_`iii'_0_49 MD/STDi_`i'_`ii'_`iii'_1_49
+rename age_`iii' age
+merge m:1 sex age using refpops_1
 drop _merge
 gen double expdeath = _Rate*B
 bysort cal : egen double expdeath1 = sum(expdeath)
@@ -2984,15 +3036,162 @@ keep cal stdrate lb ub
 gen country = "`i'"
 gen OC = "`ii'"
 gen DM = "`iii'"
-replace cal = cal+2010
+replace cal = cal+2009.5
+save MD/STD_`i'_`ii'_`iii'_49, replace
+}
+}
+}
+foreach i in Lithuania {
+foreach ii in cvd chd cbd can inf flu res liv1 liv2 ckd {
+foreach iii in dm nondm {
+foreach iiii in 0 1 {
+use `i', clear
+keep if inrange(age_`iii',40,90)
+keep if sex == `iiii'
+replace calendar = calendar-2009.5
+gen coh = calendar-age_`iii'
+centile(age_`iii'), centile(5 35 65 95)
+local A1 = r(c_1)
+local A2 = r(c_2)
+local A3 = r(c_3)
+local A4 = r(c_4)
+mkspline agesp = age_`iii', cubic knots(`A1' `A2' `A3' `A4')
+su(calendar), detail
+local rang = r(max)-r(min)
+if `rang' < 8 {
+centile calendar, centile(25 75)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2')
+}
+else if inrange(`rang',8,11.9) {
+centile calendar, centile(10 50 90)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3')
+}
+else if inrange(`rang',12,15.9) {
+centile calendar, centile(5 35 65 95)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+local CK4 = r(c_4)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4')
+}
+else {
+centile calendar, centile(5 27.5 50 72.5 95)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+local CK4 = r(c_4)
+local CK5 = r(c_5)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4' `CK5')
+}
+centile(coh), centile(5 35 65 95)
+local CO1 = r(c_1)
+local CO2 = r(c_2)
+local CO3 = r(c_3)
+local CO4 = r(c_4)
+mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
+poisson `ii'_d_`iii' agesp* timesp* cohsp*, exposure(pys_`iii')
+keep sex calendar pys_`iii' age_`iii'
+if "`i'" == "Scotland" & "`iii'" == "nondm" {
+expand 10 if age_`iii'!=87.5
+expand 20 if age_`iii'==87.5
+replace pys = pys/10 if age_`iii'!=87.5
+replace pys = pys/20 if age_`iii'==87.5
+bysort cal age : replace age = age+_n-6 if age_`iii'!=87.5
+bysort cal age : replace age = age+_n-8.5 if age_`iii'==87.5
+drop if age_`iii' >= 90
+}
+else {
+expand 10
+replace pys = pys/10
+bysort cal age : replace age = age+_n-6
+}
+gen coh = calendar-age
+mkspline agesp = age, cubic knots(`A1' `A2' `A3' `A4')
+if `rang' < 7.99 {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2')
+}
+else if inrange(`rang',8,11.99) {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3')
+}
+else if inrange(`rang',12,15.99) {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4')
+}
+else {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4' `CK5')
+}
+mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
+predict _Rate, ir
+save MD/STDi_`i'_`ii'_`iii'_`iiii'_49, replace
+rename age_`iii' age
+merge m:1 age using refpop_1
+drop _merge
+gen double expdeath = _Rate*B
+bysort cal : egen double expdeath1 = sum(expdeath)
+gen stdrate = 1000*expdeath1
+gen SEC1 = ((B^2)*(_Rate*(1-_Rate)))/pys_`iii'
+bysort cal : egen double SEC2 = sum(SEC1)
+gen double SE = sqrt(SEC2)
+gen lb = 1000*(expdeath1-1.96*SE)
+gen ub = 1000*(expdeath1+1.96*SE)
+bysort cal (age) : keep if _n == 1
+count if lb < 0
+if r(N) != 0 {
+noisily di "`i'" " " "`ii'" " " "`iii'" " " "`iiii'"
+replace lb = 0.001 if lb < 0
+}
+keep cal stdrate lb ub sex
+gen country = "`i'"
+gen OC = "`ii'"
+gen DM = "`iii'"
+replace cal = cal+2009.5
+save MD/STD_`i'_`ii'_`iii'_`iiii'_49, replace
+}
+clear
+append using MD/STDi_`i'_`ii'_`iii'_0_49 MD/STDi_`i'_`ii'_`iii'_1_49
+rename age_`iii' age
+merge m:1 sex age using refpops_1
+drop _merge
+gen double expdeath = _Rate*B
+bysort cal : egen double expdeath1 = sum(expdeath)
+gen stdrate = 1000*expdeath1
+gen SEC1 = ((B^2)*(_Rate*(1-_Rate)))/pys_`iii'
+bysort cal : egen double SEC2 = sum(SEC1)
+gen double SE = sqrt(SEC2)
+gen lb = 1000*(expdeath1-1.96*SE)
+gen ub = 1000*(expdeath1+1.96*SE)
+bysort cal (age) : keep if _n == 1
+count if lb < 0
+if r(N) != 0 {
+noisily di "`i'" " " "`ii'" " " "`iii'" " " "`iiii'"
+replace lb = 0.001 if lb < 0
+}
+keep cal stdrate lb ub
+gen country = "`i'"
+gen OC = "`ii'"
+gen DM = "`iii'"
+replace cal = cal+2009.5
 save MD/STD_`i'_`ii'_`iii'_49, replace
 }
 }
 }
 
-
-
 }
+
+clear
+set obs 1
+gen country = "Lithuania"
+save MD/STD_Lithuania_hfd_dm_49, replace
+save MD/STD_Lithuania_hfd_nondm_49, replace
+save MD/STD_Lithuania_azd_dm_49, replace
+save MD/STD_Lithuania_azd_nondm_49, replace
+
+
+
 foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
 if "`ii'" == "cvd" {
 local oo = "Cardiovascular disease"
@@ -3214,13 +3413,10 @@ texdoc graph, label(STDMRF49) ///
 caption(Age-standardised mortality rate by cause of death, people aged 40-89 only. Solid lines for people with diabetes; dashed lines for people without diabetes.)
 texdoc stlog close
 
-
-
 /***
 \color{red}
 
-This has fixed the Canada issue, and Sweden can now be included. 
-However, these plots are a bit hard to see. 
+These plots are a bit hard to see. 
 I will try plotting the rates stratified:
 
 \color{Blue4}
@@ -3422,7 +3618,7 @@ GPH/STD_GPH_can_49_dm.gph ///
 GPH/STD_GPH_can_49_nondm.gph ///
 GPH/STD_GPH_dmd_49_dm.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(2)
-texdoc graph, label(STDMRF491) ///
+texdoc graph, label(STDMRF491) optargs(width=0.5\textwidth) ///
 caption(Age-standardised mortality rate by cause of death, people aged 40-89 only. ///
 Cardiovascular disease, ischaemic heart disease, cerebrovascular disease, ///
 heart failure, cancer, and diabetes.)
@@ -3442,7 +3638,7 @@ GPH/STD_GPH_ckd_49_nondm.gph ///
 GPH/STD_GPH_azd_49_dm.gph ///
 GPH/STD_GPH_azd_49_nondm.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(2)
-texdoc graph, label(STDMRF492) ///
+texdoc graph, label(STDMRF492) optargs(width=0.5\textwidth) ///
 caption(Age-standardised mortality rate by cause of death, people aged 40-89 only. ///
 Infectious diseases, influenza and pneumonia, chronic lower respiratory disease, ///
 liver disease, liver disease (excluding alcoholic liver disease), renal disease, and Alzheimer's disease.)
@@ -3455,37 +3651,19 @@ Personally, this is my preferred way to present these data
 (aged 40-90, with and without diabetes on separate panels; Figures~\ref{STDMRF491} and~\ref{STDMRF492}). 
 If we agree, I can polish these graphs (make the axes the same for people with and without diabetes, add legends, remove data from certain countries, stratify by sex)
 
+Question 5: 
+Which way should we present these graphs?
+
+
 \color{black}
 
 \clearpage
 \section{Cause-specific standardised mortality ratios}
 
- We calculated the standardised mortality ratio (SMR) by 
-calculating the ratio of the observed number of deaths in the diabetes population to the expected 
-number if mortality was the same as in the population without diabetes. An SMR of 1 implies 
-identical mortality in people with and without diabetes.
-
-We modelled the SMR similarly to how we modelled the mortality rates, 
-using Poisson regression for multiplicative models with observed number 
-of deaths as the outcome and the log(expected number of deaths) as the offset. 
-We modelled SMR by fitting models with a linear effect of calendar time for each data source, 
-providing an overall summary of the annual changes in SMR by sex for each data source. 
-A description of statistical models used is in the appendix (pp 5–7).
-
-
-
-\clearpage
-\subsection{Annual percent changes}
-
-
 \color{Blue4}
 ***/
 
-
-
-
-cd /Users/jed/Documents/CM/
-
+texdoc stlog, cmdlog nodo
 foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
 use `i', clear
 expand 2
@@ -3498,13 +3676,11 @@ drop `ii'_dm `ii'_nondm
 drop if age==.
 save `i'_long, replace
 }
-
-
 quietly {
 foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
 foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
 use `i'_long, clear
-replace calendar = calendar-2010
+replace calendar = calendar-2009.5
 gen coh = calendar-age
 centile(age), centile(5 35 65 95)
 local A1 = r(c_1)
@@ -3632,15 +3808,12 @@ replace A1 = exp(A1)
 replace A2 = exp(A2)
 replace A3 = exp(A3)
 gen OC = "`ii'"
-replace cal = cal+2010
+replace cal = cal+2009.5
 save MD/SMR_`i'_`ii', replace
 }
 }
 }
-
-
 foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
-
 if "`ii'" == "cvd" {
 local oo = "Cardiovascular disease"
 }
@@ -3741,7 +3914,8 @@ xtitle("Calendar year") ///
 title("`oo'", placement(west) color(black) size(medium))
 graph save GPH/SMR_`ii', replace
 }
-
+texdoc stlog close
+texdoc stlog, cmdlog
 graph combine ///
 GPH/SMR_cvd.gph ///
 GPH/SMR_chd.gph ///
@@ -3758,20 +3932,24 @@ GPH/SMR_azd.gph ///
 , graphregion(color(white)) cols(3) altshrink xsize(3)
 texdoc graph, label(SMRoverallfig) ///
 caption(Standardised mortality ratio by cause of death.)
+texdoc stlog close
 
 /***
 \color{red}
 
 Well Canada is very obviously not right (as is Sweden, but we knew that). 
+
+Question 6:
+What do we do about Canada?
+
 Could this be increasing representation of First Nations people over time? 
 Let's repeat that without Canada:
 
 \color{Blue4}
 ***/
 
-
+texdoc stlog, cmdlog nodo
 foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
-
 if "`ii'" == "cvd" {
 local oo = "Cardiovascular disease"
 }
@@ -3817,12 +3995,10 @@ local w = "with"
 if "`iii'" == "nondm" {
 local w = "without"
 }
-
 clear
 foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
 append using MD/SMR_`i'_`ii'
 }
-
 local col1 = "0 0 255"
 local col2 = "75 0 130"
 local col3 = "255 0 255"
@@ -3837,7 +4013,6 @@ forval i = 1/7 {
 local C`i' = country[`i']
 }
 restore
-
 twoway ///
 (rarea A3 A2 calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
 (line A1 calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
@@ -3869,7 +4044,8 @@ xtitle("Calendar year") ///
 title("`oo'", placement(west) color(black) size(medium))
 graph save GPH/SMR_`ii'_NC, replace
 }
-
+texdoc stlog close
+texdoc stlog, cmdlog
 graph combine ///
 GPH/SMR_cvd_NC.gph ///
 GPH/SMR_chd_NC.gph ///
@@ -3886,7 +4062,20 @@ GPH/SMR_azd_NC.gph ///
 , graphregion(color(white)) cols(3) altshrink xsize(3)
 texdoc graph, label(SMRoverallfig) ///
 caption(Standardised mortality ratio by cause of death.)
+texdoc stlog close
 
+/***
+\color{red}
+
+\clearpage
+\subsection{Annual percent changes}
+
+
+\color{Blue4}
+***/
+
+
+cd /Users/jed/Documents/CM/
 
 
 /***
