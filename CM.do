@@ -3488,21 +3488,18 @@ texdoc stlog close
 \clearpage
 \subsection{Annual percent changes}
 
-TODO: APCs in rates and SMR, then check everything stratified by sex
-and all figures there, even if not complete
+PICKUP -- write up this section
+TODO: Plot APCs, then new Canada data, then re-run all and compile the document, proofread etc.. 
+That's literally it. 
+
 
 \color{Blue4}
 ***/
 
-**PICKUP -- APCs in rates and SMR
 cd /Users/jed/Documents/CM/
 
-*APC
-agesp*##sex time
-
-*SMR
-poisson OC agesp*##DM timesp* cohsp* DM#time sex sex#DM
-
+texdoc stlog, cmdlog nodo
+quietly {
 foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
 foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
 foreach iii in dm nondm {
@@ -3516,7 +3513,6 @@ local A3 = r(c_3)
 local A4 = r(c_4)
 mkspline agesp = age_`iii', cubic knots(`A1' `A2' `A3' `A4')
 poisson `ii'_d_`iii' cal c.agesp*##sex, exposure(pys_`iii')
-mat l r(table)
 matrix A_`i'_`ii'_`iii' = (r(table)[1,1], r(table)[5,1], r(table)[6,1])
 
 foreach iiii in 0 1 {
@@ -3531,7 +3527,6 @@ local A3 = r(c_3)
 local A4 = r(c_4)
 mkspline agesp = age_`iii', cubic knots(`A1' `A2' `A3' `A4')
 poisson `ii'_d_`iii' cal c.agesp*, exposure(pys_`iii')
-mat l r(table)
 matrix A_`i'_`ii'_`iii'_`iiii' = (r(table)[1,1], r(table)[5,1], r(table)[6,1])
 }
 
@@ -3574,7 +3569,7 @@ matrix A_`i'_`ii'_`iii'_`iiii' = (r(table)[1,1], r(table)[5,1], r(table)[6,1])
 }
 }
 }
-
+}
 matrix A = (.,.,.,.,.,.,.)
 local a1 = 0
 foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
@@ -3611,6 +3606,7 @@ svmat A
 sort A1 A2 A3 A4
 drop if A1==.
 tostring A1-A3, replace format(%9.0f) force
+local a1 = 0
 foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
 local a1 = `a1'+1
 replace A1 = "`i'" if A1 == "`a1'"
@@ -3628,335 +3624,72 @@ replace A3 = "`iii'" if A3 == "`a3'"
 replace A5 = 100*(exp(A5)-1)
 replace A6 = 100*(exp(A6)-1)
 replace A7 = 100*(exp(A7)-1)
-save APCs
-
-
-
-
-
+save APCs, replace
 quietly {
 foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
 foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
-
-local i = "Australia"
-local ii = "cvd"
-
-
 use `i'_long, clear
 replace calendar = calendar-2009.5
-gen coh = calendar-age
 centile(age), centile(5 35 65 95)
 local A1 = r(c_1)
 local A2 = r(c_2)
 local A3 = r(c_3)
 local A4 = r(c_4)
 mkspline agesp = age, cubic knots(`A1' `A2' `A3' `A4')
-su(calendar), detail
-local rang = r(max)-r(min)
-local minn = r(min)
-if `rang' < 8 {
-centile calendar, centile(25 75)
-local CK1 = r(c_1)
-local CK2 = r(c_2)
-mkspline timesp = calendar, cubic knots(`CK1' `CK2')
-preserve
-clear
-local rang1 = `rang'+1
-set obs `rang1'
-gen calendar = _n-1+`minn'
-mkspline timesp = calendar, cubic knots(`CK1' `CK2')
-forval a = 1/`rang1' {
-local A1`a' = timesp1[`a']
-}
-restore
-}
-else if inrange(`rang',8,11.9) {
-centile calendar, centile(10 50 90)
-local CK1 = r(c_1)
-local CK2 = r(c_2)
-local CK3 = r(c_3)
-mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3')
-preserve
-clear
-local rang1 = `rang'+1
-set obs `rang1'
-gen calendar = _n-1+`minn'
-mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3')
-forval a = 1/`rang1' {
-local A1`a' = timesp1[`a']
-local A2`a' = timesp2[`a']
-}
-restore
-}
-else if inrange(`rang',12,15.9) {
-centile calendar, centile(5 35 65 95)
-local CK1 = r(c_1)
-local CK2 = r(c_2)
-local CK3 = r(c_3)
-local CK4 = r(c_4)
-mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4')
-preserve
-clear
-local rang1 = `rang'+1
-set obs `rang1'
-gen calendar = _n-1+`minn'
-forval a = 1/`rang1' {
-local A1`a' = cal[`a']
-}
-mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4')
-forval a = 1/`rang1' {
-local A1`a' = timesp1[`a']
-local A2`a' = timesp2[`a']
-local A3`a' = timesp3[`a']
-}
-restore
-}
-else {
-centile calendar, centile(5 27.5 50 72.5 95)
-local CK1 = r(c_1)
-local CK2 = r(c_2)
-local CK3 = r(c_3)
-local CK4 = r(c_4)
-local CK5 = r(c_5)
-mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4' `CK5')
-preserve
-clear
-local rang1 = `rang'+1
-set obs `rang1'
-gen calendar = _n-1+`minn'
-mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4' `CK5')
-forval a = 1/`rang1' {
-local A1`a' = timesp1[`a']
-local A2`a' = timesp2[`a']
-local A3`a' = timesp3[`a']
-local A4`a' = timesp4[`a']
-}
-restore
-}
-centile(coh), centile(5 35 65 95)
-local CO1 = r(c_1)
-local CO2 = r(c_2)
-local CO3 = r(c_3)
-local CO4 = r(c_4)
-mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
-
-
-poisson `ii'_d c.agesp*##i.dm cohsp* i.dm#c.cal sex i.sex#i.dm, exposure(pys)
-
-
-
-
-
-
-
-matrix A = (.,.,.)
-
-forval a = 1/`rang1' {
-margins, dydx(dm) at(cal==`A1`a'') predict(xb) atmeans
-matrix A = (A\r(table)[1,2],r(table)[5,2],r(table)[6,2])
-}
-mat l A
-stop
-
-
-
-
-predict A, ir
-
-
-
-collapse (mean) A, by(cal dm)
-gen irr = A/A[_n-1] if dm == 1
-
-
-use MD/SMR_Australia_cvd, clear
-
-
-margins, dydx(dm) predict(xb) atmeans
-
-(timesp1==0.5 timesp2==0.6377551 timesp3==0) 
-br
-
-matrix A = (.,.,.)
-if `rang' < 8 {
-forval a = 1/`rang1' {
-margins, dydx(dm) at(timesp1==`A1`a'') predict(xb) atmeans
-matrix A = (A\r(table)[1,2],r(table)[5,2],r(table)[6,2])
-}
-}
-else if inrange(`rang',8,11.9) {
-forval a = 1/`rang1' {
-margins, dydx(dm) at(timesp1==`A1`a'' timesp2==`A2`a'') predict(xb) atmeans
-matrix A = (A\r(table)[1,2],r(table)[5,2],r(table)[6,2])
-}
-}
-else if inrange(`rang',12,15.9) {
-forval a = 1/`rang1' {
-margins, dydx(dm) at(timesp1==`A1`a'' timesp2==`A2`a'' timesp3==`A3`a'') predict(xb) atmeans
-matrix A = (A\r(table)[1,2],r(table)[5,2],r(table)[6,2])
-}
-}
-else {
-forval a = 1/`rang1' {
-margins, dydx(dm) at(timesp1==`A1`a'' timesp2==`A2`a'' timesp3==`A3`a'' timesp4==`A4`a'') predict(xb) atmeans
-matrix A = (A\r(table)[1,2],r(table)[5,2],r(table)[6,2])
-}
-}
-local rang2 = `rang1'+1
-mat A = A[2..`rang2',1..3]
-keep country cal
-bysort cal : keep if _n == 1
-svmat A
-replace A1 = exp(A1)
-replace A2 = exp(A2)
-replace A3 = exp(A3)
-gen OC = "`ii'"
-replace cal = cal+2009.5
-save MD/SMR_`i'_`ii', replace
-}
-}
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-mat l A
-
-
-svmat A_Australia_cvd_dm
-br
-_`iiii'
-
-
-
-
-
-}
-di 100*(exp(-0.038888)-1)
-
-
-
-predict pred
-gen OC = "`ii'"
-gen DM = "`iii'"
-save MD/RC_pred_`i'_`ii'_`iii'_`iiii', replace
-keep calendar
-bysort cal : keep if _n == 1
-expand 10
-bysort cal : replace cal = cal+((_n-6)/10)
-expand 700
-bysort cal : gen age_`iii' = (_n/10)+29.9
-gen pys_`iii' = 1
-gen coh = calendar-age
-mkspline agesp = age, cubic knots(`A1' `A2' `A3' `A4')
-if `rang' < 7.99 {
-mkspline timesp = calendar, cubic knots(`CK1' `CK2')
-}
-else if inrange(`rang',8,11.99) {
-mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3')
-}
-else if inrange(`rang',12,15.99) {
-mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4')
-}
-else {
-mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4' `CK5')
-}
-mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
-predict _Rate, ir
-predict errr, stdp
-replace _Rate = _Rate*1000
-gen lb = exp(ln(_Rate)-1.96*errr)
-gen ub = exp(ln(_Rate)+1.96*errr)
-gen country = "`i'"
-gen OC = "`ii'"
-gen DM = "`iii'"
-gen sex = `iiii'
-replace cal = cal+2010
-tostring age_`iii', replace force format(%9.1f)
-destring age_`iii', replace
-save MD/R_`i'_`ii'_`iii'_`iiii', replace
-}
-}
-}
-}
-foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
-foreach ii in dmd {
-foreach iii in dm {
-foreach iiii in 0 1 {
-
-
-foreach i in Australia {
-foreach ii in cvd {
-use `i'_long, clear
-replace calendar = calendar-2009.5
-gen coh = calendar-age
-centile(age), centile(5 35 65 95)
-local A1 = r(c_1)
-local A2 = r(c_2)
-local A3 = r(c_3)
-local A4 = r(c_4)
-mkspline agesp = age, cubic knots(`A1' `A2' `A3' `A4')
-su(calendar), detail
-local rang = r(max)-r(min)
-local minn = r(min)
-
-preserve
-clear
-local rang1 = `rang'+1
-set obs `rang1'
-gen calendar = _n-1+`minn'
-forval a = 1/`rang1' {
-local A1`a' = cal[`a']
-}
-restore
-
 poisson `ii'_d agesp* sex c.cal*##i.dm, exposure(pys)
-
-poisson `ii'_d c.agesp*##i.dm timesp* cohsp* i.dm#c.cal sex i.sex#i.dm, exposure(pys)
-
-
-matrix A = (.,.,.)
-
-forval a = 1/`rang1' {
-margins, dydx(dm) at(cal==`A1`a'') predict(xb) atmeans
-matrix A = (A\r(table)[1,2],r(table)[5,2],r(table)[6,2])
+matrix A_`i'_`ii' = (r(table)[1,9], r(table)[5,9], r(table)[6,9])
+foreach iii in 0 1 {
+use `i'_long, clear
+keep if sex == `iii'
+replace calendar = calendar-2009.5
+centile(age), centile(5 35 65 95)
+local A1 = r(c_1)
+local A2 = r(c_2)
+local A3 = r(c_3)
+local A4 = r(c_4)
+mkspline agesp = age, cubic knots(`A1' `A2' `A3' `A4')
+poisson `ii'_d agesp* sex c.cal*##i.dm, exposure(pys)
+matrix A_`i'_`ii'_`iii' = (r(table)[1,9], r(table)[5,9], r(table)[6,9])
 }
-mat l A
-stop
-
-local rang2 = `rang1'+1
-mat A = A[2..`rang2',1..3]
-keep country cal
-bysort cal : keep if _n == 1
+}
+}
+}
+matrix A = (.,.,.,.,.,.)
+local a1 = 0
+foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
+local a1 = `a1'+1
+local a2 = 0
+foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
+local a2 = `a2'+1
+matrix A = (A\0`a1',`a2',2,A_`i'_`ii')
+foreach iii in 0 1 {
+matrix A = (A\0`a1',`a2',`iii',A_`i'_`ii'_`iii')
+}
+}
+}
+clear
 svmat A
-replace A1 = exp(A1)
-replace A2 = exp(A2)
-replace A3 = exp(A3)
-gen OC = "`ii'"
-replace cal = cal+2009.5
-save MD/SMR_`i'_`ii', replace
+sort A1 A2 A3
+drop if A1==.
+tostring A1 A2, replace format(%9.0f) force
+local a1 = 0
+foreach i in Australia Canada Finland France Lithuania Scotland Sweden {
+local a1 = `a1'+1
+replace A1 = "`i'" if A1 == "`a1'"
+local a2 = 0
+foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
+local a2 = `a2'+1
+replace A2 = "`ii'" if A2 == "`a2'"
 }
 }
-}
+replace A4 = 100*(exp(A4)-1)
+replace A5 = 100*(exp(A5)-1)
+replace A6 = 100*(exp(A6)-1)
+save SMR_APCs, replace
 
-
+use APCs, clear
+twoway ///
+(rcap A7 A6, horizontal
 
 
 
