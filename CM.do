@@ -3093,37 +3093,6 @@ ytitle("Standardised mortality ratio", margin(a+2)) ///
 xtitle("Calendar year") ///
 title("`oo'", placement(west) color(black) size(medium))
 graph save GPH/SMR_`ii', replace
-
-twoway ///
-(rarea A3 A2 calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
-, legend(off) ///
-graphregion(color(white)) ///
-ylabel(, grid angle(0)) ///
-xscale(range(2000 2020)) ///
-xlabel(2000(5)2020, nogrid) ///
-yline(1, lcol(black)) ///
-ytitle("Standardised mortality ratio", margin(a+2)) ///
-xtitle("Calendar year") ///
-title("`oo'", placement(west) color(black) size(medium))
-graph save GPH/SMR_`ii'_noleg, replace
-
 }
 forval iii = 0/1 {
 foreach ii in cvd chd cbd hfd can inf flu res liv1 liv2 ckd azd {
@@ -3213,7 +3182,7 @@ twoway ///
 (line A1 calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
 (rarea A3 A2 calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
 (line A1 calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
-, legend(symxsize(0.13cm) position(11) ring(0) region(lcolor(white) color(none)) ///
+, legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
 6 "`C3'" ///
@@ -3446,7 +3415,7 @@ local A3 = r(c_3)
 local A4 = r(c_4)
 mkspline agesp = age, cubic knots(`A1' `A2' `A3' `A4')
 poisson `ii'_d agesp* sex c.cal*##i.dm, exposure(pys)
-matrix A_`i'_`ii' = (r(table)[1,9], r(table)[5,9], r(table)[6,9], r(table)[4,1])
+matrix A_`i'_`ii' = (r(table)[1,9], r(table)[5,9], r(table)[6,9], r(table)[4,9])
 foreach iii in 0 1 {
 use `i'_long, clear
 keep if sex == `iii'
@@ -3458,7 +3427,7 @@ local A3 = r(c_3)
 local A4 = r(c_4)
 mkspline agesp = age, cubic knots(`A1' `A2' `A3' `A4')
 poisson `ii'_d agesp* sex c.cal*##i.dm, exposure(pys)
-matrix A_`i'_`ii'_`iii' = (r(table)[1,9], r(table)[5,9], r(table)[6,9], r(table)[4,1])
+matrix A_`i'_`ii'_`iii' = (r(table)[1,9], r(table)[5,9], r(table)[6,9], r(table)[4,9])
 }
 }
 }
@@ -3755,7 +3724,7 @@ texdoc stlog close
 use SMR_APCs, clear
 keep if A3 == 2
 drop if country == "Sweden"
-gen B = "*" if A7 < 0.001
+gen B = "*" if A7 < 0.01
 tostring A4, replace force format(%9.2f)
 replace B = "" if A4 == "."
 replace A4 = "" if A4 == "."
