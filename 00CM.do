@@ -848,6 +848,7 @@ graph combine ///
 GPH/cr_`i'_dm_`c'.gph ///
 GPH/cr_`i'_nondm_`c'.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(10)
+texdoc graph, label(cr_`i'_`c') ///
 caption(Crude mortality rate by cause of death, sex, and diabetes status. `ii'. `c'.)
 }
 }
@@ -1021,7 +1022,7 @@ texdoc stlog close
 
 
 
-NEEDS TO BE FIXED WHEN FINALISED
+*NEEDS TO BE FIXED WHEN FINALISED
 
 
 
@@ -1751,37 +1752,64 @@ save MD/STD_Scotland_ckd_nondm_0, replace
 save MD/STD_Scotland_ckd_nondm_1, replace
 texdoc stlog close
 texdoc stlog, cmdlog nodo
-foreach ii in cvd can inf flu res liv ckd azd {
+foreach ii in cvd can dmd inf flu res liv ckd azd {
 foreach iii in dm nondm {
+if "`ii'" == "dmd" & "`iii'" == "nondm" {
+}
+else {
 if "`ii'" == "cvd" {
 local oo = "Cardiovascular disease"
 local ylab = "2 5 10 20 50"
 local yform = "%9.0f"
-local yrange = "1 50"
+local yrange = "1.8 50"
 }
 if "`ii'" == "can" {
 local oo = "Cancer"
+local ylab = "2 5 10 20"
+local yform = "%9.0f"
+local yrange = "1.8 20"
 }
 if "`ii'" == "dmd" {
 local oo = "Diabetes"
+local ylab = "1 2 5 10"
+local yform = "%9.0f"
+local yrange = "0.5 10"
 }
 if "`ii'" == "inf" {
 local oo = "Infectious diseases"
+local ylab = "0.1 0.2 0.5 1 2"
+local yform = "%9.1f"
+local yrange = "0.05 2"
 }
 if "`ii'" == "flu" {
 local oo = "Influenza and pneumonia"
+local ylab = "0.1 0.2 0.5 1 2"
+local yform = "%9.1f"
+local yrange = "0.05 3"
 }
 if "`ii'" == "res" {
 local oo = "Chronic lower respiratory disease"
+local ylab = "0.2 0.5 1 2"
+local yform = "%9.1f"
+local yrange = "0.2 4"
 }
 if "`ii'" == "liv" {
 local oo = "Liver disease"
+local ylab = "0.05 0.1 0.2 0.5 1 2"
+local yform = "%9.2f"
+local yrange = "0.05 2.1"
 }
 if "`ii'" == "ckd" {
 local oo = "Renal disease"
+local ylab = "0.05 0.1 0.2 0.5 1 2"
+local yform = "%9.2f"
+local yrange = "0.05 2"
 }
 if "`ii'" == "azd" {
 local oo = "Alzheimer's disease"
+local ylab = "0.05 0.1 0.2 0.5 1 2"
+local yform = "%9.2f"
+local yrange = "0.05 4"
 }
 if "`iii'" == "dm" {
 local w = "with"
@@ -1843,21 +1871,16 @@ ytitle("Mortality rate (per 1,000 person-years)", margin(a+2)) ///
 xtitle("Calendar year") ///
 title("`oo', people `w' diabetes", placement(west) color(black) size(medium))
 graph save GPH/STD_GPH_`ii'_`iii', replace
+forval iiii = 0/1 {
+if `iiii' == 0 {
+local s = "females"
 }
-stop
-}
-
-
-update to include an if statement so you can get rid of the dm specific code. do the same above. 
-
-foreach ii in dmd {
-foreach iii in dm {
-if "`ii'" == "dmd" {
-local oo = "Diabetes"
+if `iiii' == 1 {
+local s = "males"
 }
 clear
 foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
-append using MD/STD_`i'_`ii'_`iii'
+append using MD/STD_`i'_`ii'_`iii'_`iiii'
 }
 local col1 = "0 0 255"
 local col2 = "75 0 130"
@@ -1901,19 +1924,21 @@ order(2 "`C1'" ///
 16 "`C8'") ///
 cols(1)) ///
 graphregion(color(white)) ///
-ylabel(, format(%9.1f) grid angle(0)) ///
-yscale(log) ///
+ylabel(`ylab', format(`yform') grid angle(0)) ///
+yscale(log range(`yrange')) ///
 xscale(range(2000 2020)) ///
 xlabel(2000(5)2020, nogrid) ///
 ytitle("Mortality rate (per 1,000 person-years)", margin(a+2)) ///
 xtitle("Calendar year") ///
-title("`oo'", placement(west) color(black) size(medium))
-graph save GPH/STD_GPH_`ii'_`iii', replace
+title("`oo', `s' `w' diabetes", placement(west) color(black) size(medium))
+graph save GPH/STD_GPH_`ii'_`iii'_`iiii', replace
 }
 }
+}
+}
+texdoc stlog close
+texdoc stlog, cmdlog 
 foreach ii in cvd can inf flu res liv ckd azd {
-foreach iii in dm nondm {
-forval iiii = 0/1 {
 if "`ii'" == "cvd" {
 local oo = "Cardiovascular disease"
 }
@@ -1941,147 +1966,17 @@ local oo = "Renal disease"
 if "`ii'" == "azd" {
 local oo = "Alzheimer's disease"
 }
-if "`iii'" == "dm" {
-local w = "with"
-}
-if "`iii'" == "nondm" {
-local w = "without"
-}
-if `iiii' == 0 {
-local s = "females"
-}
-if `iiii' == 1 {
-local s = "males"
-}
-clear
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
-append using MD/STD_`i'_`ii'_`iii'_`iiii'
-}
-local col1 = "0 0 255"
-local col2 = "75 0 130"
-local col3 = "255 0 255"
-local col4 = "255 0 0"
-local col5 = "255 125 0"
-local col6 = "0 125 0"
-local col7 = "0 175 255"
-local col8 = "0 0 0"
-preserve
-bysort country : keep if _n == 1
-forval i = 1/8 {
-local C`i' = country[`i']
-}
-restore
-twoway ///
-(rarea ub lb calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
-, legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
-order(2 "`C1'" ///
-4 "`C2'" ///
-6 "`C3'" ///
-8 "`C4'" ///
-10 "`C5'" ///
-12 "`C6'" ///
-14 "`C7'" ///
-16 "`C8'") ///
-cols(1)) ///
-graphregion(color(white)) ///
-ylabel(, format(%9.1f) grid angle(0)) ///
-yscale(log) ///
-xscale(range(2000 2020)) ///
-xlabel(2000(5)2020, nogrid) ///
-ytitle("Mortality rate (per 1,000 person-years)", margin(a+2)) ///
-xtitle("Calendar year") ///
-title("`oo', `s' `w' diabetes", placement(west) color(black) size(medium))
-graph save GPH/STD_GPH_`ii'_`iii'_`iiii', replace
-}
-}
-}
-foreach ii in dmd {
-foreach iii in dm {
-forval iiii = 0/1 {
+
 if "`ii'" == "dmd" {
-local oo = "Diabetes"
+graph combine ///
+GPH/STD_GPH_`ii'_dm.gph ///
+GPH/STD_GPH_`ii'_dm_0.gph ///
+GPH/STD_GPH_`ii'_dm_1.gph ///
+, graphregion(color(white)) cols(1) altshrink xsize(2)
+texdoc graph, label(STDMRF_`ii') ///
+caption(Age-standardised mortality rate by cause of death, people aged 40-89. `oo')
 }
-if `iiii' == 0 {
-local s = "females"
-}
-if `iiii' == 1 {
-local s = "males"
-}
-clear
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
-append using MD/STD_`i'_`ii'_`iii'_`iiii'
-}
-local col1 = "0 0 255"
-local col2 = "75 0 130"
-local col3 = "255 0 255"
-local col4 = "255 0 0"
-local col5 = "255 125 0"
-local col6 = "0 125 0"
-local col7 = "0 175 255"
-local col8 = "0 0 0"
-preserve
-bysort country : keep if _n == 1
-forval i = 1/8 {
-local C`i' = country[`i']
-}
-restore
-twoway ///
-(rarea ub lb calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
-, legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
-order(2 "`C1'" ///
-4 "`C2'" ///
-6 "`C3'" ///
-8 "`C4'" ///
-10 "`C5'" ///
-12 "`C6'" ///
-14 "`C7'" ///
-16 "`C8'") ///
-cols(1)) ///
-graphregion(color(white)) ///
-ylabel(, format(%9.1f) grid angle(0)) ///
-yscale(log) ///
-xscale(range(2000 2020)) ///
-xlabel(2000(5)2020, nogrid) ///
-ytitle("Mortality rate (per 1,000 person-years)", margin(a+2)) ///
-xtitle("Calendar year") ///
-title("`oo', `s' with diabetes", placement(west) color(black) size(medium))
-graph save GPH/STD_GPH_`ii'_`iii'_`iiii', replace
-}
-}
-}
-texdoc stlog close
-texdoc stlog, cmdlog 
-foreach ii in cvd can inf flu res liv ckd azd {
+else {
 graph combine ///
 GPH/STD_GPH_`ii'_dm.gph ///
 GPH/STD_GPH_`ii'_nondm.gph ///
@@ -2089,103 +1984,16 @@ GPH/STD_GPH_`ii'_dm_0.gph ///
 GPH/STD_GPH_`ii'_nondm_0.gph ///
 GPH/STD_GPH_`ii'_dm_1.gph ///
 GPH/STD_GPH_`ii'_nondm_1.gph ///
-, graphregion(color(white)) cols(2) altshrink
-texdoc graph, label(STDMRF1) ///
-caption(Age-standardised mortality rate by cause of death, people aged 40-89. ///
-Cardiovascular disease, ischaemic heart disease, cerebrovascular disease, ///
-heart failure, cancer, and diabetes.)
-stop
+, graphregion(color(white)) cols(2) altshrink xsize(4)
+texdoc graph, label(STDMRF_`ii') ///
+caption(Age-standardised mortality rate by cause of death, people aged 40-89. `oo')
+}
 }
 
-GPH/STD_GPH_can_dm.gph ///
-GPH/STD_GPH_can_nondm.gph ///
-GPH/STD_GPH_dmd_dm.gph ///
-
-graph combine ///
-GPH/STD_GPH_inf_dm.gph ///
-GPH/STD_GPH_inf_nondm.gph ///
-GPH/STD_GPH_flu_dm.gph ///
-GPH/STD_GPH_flu_nondm.gph ///
-GPH/STD_GPH_res_dm.gph ///
-GPH/STD_GPH_res_nondm.gph ///
-GPH/STD_GPH_liv1_dm.gph ///
-GPH/STD_GPH_liv1_nondm.gph ///
-GPH/STD_GPH_liv2_dm.gph ///
-GPH/STD_GPH_liv2_nondm.gph ///
-GPH/STD_GPH_ckd_dm.gph ///
-GPH/STD_GPH_ckd_nondm.gph ///
-GPH/STD_GPH_azd_dm.gph ///
-GPH/STD_GPH_azd_nondm.gph ///
-, graphregion(color(white)) cols(2) altshrink xsize(2)
-texdoc graph, label(STDMRF2) optargs(width=0.5\textwidth) ///
-caption(Age-standardised mortality rate by cause of death, people aged 40-89. ///
-Infectious diseases, influenza and pneumonia, chronic lower respiratory disease, ///
-liver disease, liver disease (excluding alcoholic liver disease), ///
-renal disease, and Alzheimer's disease.)
-graph combine ///
-GPH/STD_GPH_cvd_dm_0.gph ///
-GPH/STD_GPH_cvd_nondm_0.gph ///
-GPH/STD_GPH_cvd_dm_1.gph ///
-GPH/STD_GPH_cvd_nondm_1.gph ///
-GPH/STD_GPH_chd_dm_0.gph ///
-GPH/STD_GPH_chd_nondm_0.gph ///
-GPH/STD_GPH_chd_dm_1.gph ///
-GPH/STD_GPH_chd_nondm_1.gph ///
-GPH/STD_GPH_cbd_dm_0.gph ///
-GPH/STD_GPH_cbd_nondm_0.gph ///
-GPH/STD_GPH_cbd_dm_1.gph ///
-GPH/STD_GPH_cbd_nondm_1.gph ///
-GPH/STD_GPH_hfd_dm_0.gph ///
-GPH/STD_GPH_hfd_nondm_0.gph ///
-GPH/STD_GPH_hfd_dm_1.gph ///
-GPH/STD_GPH_hfd_nondm_1.gph ///
-GPH/STD_GPH_can_dm_0.gph ///
-GPH/STD_GPH_can_nondm_0.gph ///
-GPH/STD_GPH_can_dm_1.gph ///
-GPH/STD_GPH_can_nondm_1.gph ///
-GPH/STD_GPH_dmd_dm_0.gph ///
-GPH/STD_GPH_dmd_dm_1.gph ///
-, graphregion(color(white)) cols(4) altshrink xsize(4) holes(22)
-texdoc graph, label(STDMRF491s) optargs(width=0.5\textwidth) ///
-caption(Age-standardised mortality rate by cause of death and sex, people aged 40-89. ///
-Cardiovascular disease, ischaemic heart disease, cerebrovascular disease, ///
-heart failure, cancer, and diabetes.)
-graph combine ///
-GPH/STD_GPH_inf_dm_0.gph ///
-GPH/STD_GPH_inf_nondm_0.gph ///
-GPH/STD_GPH_inf_dm_1.gph ///
-GPH/STD_GPH_inf_nondm_1.gph ///
-GPH/STD_GPH_flu_dm_0.gph ///
-GPH/STD_GPH_flu_nondm_0.gph ///
-GPH/STD_GPH_flu_dm_1.gph ///
-GPH/STD_GPH_flu_nondm_1.gph ///
-GPH/STD_GPH_res_dm_0.gph ///
-GPH/STD_GPH_res_nondm_0.gph ///
-GPH/STD_GPH_res_dm_1.gph ///
-GPH/STD_GPH_res_nondm_1.gph ///
-GPH/STD_GPH_liv1_dm_0.gph ///
-GPH/STD_GPH_liv1_nondm_0.gph ///
-GPH/STD_GPH_liv1_dm_1.gph ///
-GPH/STD_GPH_liv1_nondm_1.gph ///
-GPH/STD_GPH_liv2_dm_0.gph ///
-GPH/STD_GPH_liv2_nondm_0.gph ///
-GPH/STD_GPH_liv2_dm_1.gph ///
-GPH/STD_GPH_liv2_nondm_1.gph ///
-GPH/STD_GPH_ckd_dm_0.gph ///
-GPH/STD_GPH_ckd_nondm_0.gph ///
-GPH/STD_GPH_ckd_dm_1.gph ///
-GPH/STD_GPH_ckd_nondm_1.gph ///
-GPH/STD_GPH_azd_dm_0.gph ///
-GPH/STD_GPH_azd_nondm_0.gph ///
-GPH/STD_GPH_azd_dm_1.gph ///
-GPH/STD_GPH_azd_nondm_1.gph ///
-, graphregion(color(white)) cols(4) altshrink xsize(4)
-texdoc graph, label(STDMRF2s) optargs(width=0.5\textwidth) ///
-caption(Age-standardised mortality rate by cause of death and sex, people aged 40-89. ///
-Infectious diseases, influenza and pneumonia, chronic lower respiratory disease, ///
-liver disease, liver disease (excluding alcoholic liver disease), ///
-renal disease, and Alzheimer's disease.)
 texdoc stlog close
+
+*PICKUP -- keep changing with new CODs etc.
+
 
 /***
 \color{black}
