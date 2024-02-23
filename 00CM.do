@@ -13,6 +13,7 @@ set linesize 100
 \bibliographystyle{unsrt}
 \usepackage{natbib}
 \usepackage{pdflscape}
+\usepackage[section]{placeins}
 
 \usepackage{chngcntr}
 \counterwithin{figure}{section}
@@ -790,7 +791,7 @@ CKD -- Renal disease; AZD -- Alzheimer's disease; OTH -- All other causes.
 \color{Blue4}
 ***/
 
-texdoc stlog, cmdlog
+texdoc stlog, cmdlog nodo
 foreach c in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
 use `c', clear
 collapse (sum) pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm, by(calendar sex)
@@ -851,6 +852,74 @@ GPH/cr_`i'_nondm_`c'.gph ///
 texdoc graph, label(cr_`i'_`c') ///
 caption(Crude mortality rate by cause of death, sex, and diabetes status. `ii'. `c'.)
 }
+}
+texdoc stlog close
+texdoc stlog, nolog
+foreach c in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+use `c', clear
+collapse (sum) pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm, by(calendar sex)
+foreach i in cvd can dmd inf flu res liv ckd azd {
+if "`i'" == "cvd" {
+local ii = "Cardiovascular disease"
+}
+if "`i'" == "can" {
+local ii = "Cancer"
+}
+if "`i'" == "dmd" {
+local ii = "Diabetes"
+}
+if "`i'" == "inf" {
+local ii = "Infectious diseases"
+}
+if "`i'" == "flu" {
+local ii = "Influenza and pneumonia"
+}
+if "`i'" == "res" {
+local ii = "Chronic lower respiratory disease"
+}
+if "`i'" == "liv" {
+local ii = "Liver disease"
+}
+if "`i'" == "ckd" {
+local ii = "Renal disease"
+}
+if "`i'" == "azd" {
+local ii = "Alzheimer's disease"
+}
+foreach iii in dm nondm {
+if "`iii'" == "dm" {
+local dd = "with"
+}
+if "`iii'" == "nondm" {
+local dd = "without"
+}
+gen `iii'_`i' = 1000*`i'_d_`iii'/pys_`iii'
+twoway ///
+(connected `iii'_`i' cal if sex == 0, col(red)) ///
+(connected `iii'_`i' cal if sex == 1, col(blue)) ///
+, graphregion(color(white)) ///
+ytitle(Mortality rate (per 1,000 person-years), margin(a+2)) ///
+xtitle(Calendar year) ///
+legend(order( ///
+1 "Females" ///
+2 "Males" ///
+) cols(1) position(3) region(lcolor(none) color(none))) ///
+ylabel(,angle(0) format(%9.2f)) ///
+title("`ii', people `dd' diabetes, `c'", placement(west) size(medium) col(black))
+graph save GPH/cr_`i'_`iii'_`c', replace
+}
+graph combine ///
+GPH/cr_`i'_dm_`c'.gph ///
+GPH/cr_`i'_nondm_`c'.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(10)
+texdoc graph, label(cr_`i'_`c') ///
+caption(Crude mortality rate by cause of death, sex, and diabetes status. `ii'. `c'.)
+}
+texdoc stlog close
+/***
+\clearpage
+***/
+texdoc stlog, nolog
 }
 texdoc stlog close
 
@@ -1697,7 +1766,6 @@ save MD/STD_`i'_`ii'_`iii', replace
 }
 }
 texdoc stlog close
-
 
 /***
 \color{black}
