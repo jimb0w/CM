@@ -1091,7 +1091,7 @@ texdoc stlog close
 
 
 
-*NEEDS TO BE FIXED WHEN FINALISED
+*PICKUP NEEDS TO BE FIXED WHEN FINALISED
 
 
 
@@ -1857,27 +1857,27 @@ local yrange = "0.05 3"
 }
 if "`ii'" == "res" {
 local oo = "Chronic lower respiratory disease"
-local ylab = "0.2 0.5 1 2"
+local ylab = "0.1 0.2 0.5 1 2"
 local yform = "%9.1f"
-local yrange = "0.2 4"
+local yrange = "0.05 4"
 }
 if "`ii'" == "liv" {
 local oo = "Liver disease"
-local ylab = "0.05 0.1 0.2 0.5 1 2"
+local ylab = "0.02 0.05 0.1 0.2 0.5 1 2"
 local yform = "%9.2f"
-local yrange = "0.05 2.1"
+local yrange = "0.02 2.1"
 }
 if "`ii'" == "ckd" {
 local oo = "Renal disease"
-local ylab = "0.05 0.1 0.2 0.5 1 2"
+local ylab = "0.01 0.02 0.05 0.1 0.2 0.5 1 2"
 local yform = "%9.2f"
-local yrange = "0.05 2"
+local yrange = "0.005 2"
 }
 if "`ii'" == "azd" {
 local oo = "Alzheimer's disease"
-local ylab = "0.05 0.1 0.2 0.5 1 2"
+local ylab = "0.01 0.02 0.05 0.1 0.2 0.5 1 2 5"
 local yform = "%9.2f"
-local yrange = "0.05 4"
+local yrange = "0.005 5"
 }
 if "`iii'" == "dm" {
 local w = "with"
@@ -2006,7 +2006,7 @@ graph save GPH/STD_GPH_`ii'_`iii'_`iiii', replace
 }
 texdoc stlog close
 texdoc stlog, cmdlog 
-foreach ii in cvd can inf flu res liv ckd azd {
+foreach ii in cvd can dmd inf flu res liv ckd azd {
 if "`ii'" == "cvd" {
 local oo = "Cardiovascular disease"
 }
@@ -2057,11 +2057,7 @@ texdoc graph, label(STDMRF_`ii') ///
 caption(Age-standardised mortality rate by cause of death, people aged 40-89. `oo')
 }
 }
-
 texdoc stlog close
-
-*PICKUP -- keep changing with new CODs etc.
-
 
 /***
 \color{black}
@@ -2081,7 +2077,7 @@ foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
 use `i', clear
 expand 2
 bysort cal age_dm sex : gen dm = _n-1
-foreach ii in cvd_d chd_d cbd_d hfd_d can_d dmd_d inf_d flu_d res_d liv1_d liv2_d ckd_d azd_d pys age {
+foreach ii in cvd_d can_d dmd_d inf_d flu_d res_d liv_d ckd_d azd_d pys age {
 gen `ii' = `ii'_dm if dm == 1
 replace `ii' = `ii'_nondm if dm == 0
 drop `ii'_dm `ii'_nondm
@@ -2272,7 +2268,6 @@ local CO2 = r(c_2)
 local CO3 = r(c_3)
 local CO4 = r(c_4)
 mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
-
 su agesp1
 local B1 = r(mean)
 su agesp2
@@ -2280,7 +2275,6 @@ local B2 = r(mean)
 su agesp3
 local B3 = r(mean)
 keep if sex == `iii'
-
 poisson `ii'_d agesp* c.timesp*##i.dm, exposure(pys)
 matrix A = (.,.,.)
 if `rang' < 10 {
@@ -2319,9 +2313,6 @@ save MD/SMR_`i'_`ii'_`iii', replace
 clear
 set obs 1
 gen country = "Lithuania"
-save MD/SMR_Lithuania_hfd, replace
-save MD/SMR_Lithuania_hfd_0, replace
-save MD/SMR_Lithuania_hfd_1, replace
 save MD/SMR_Lithuania_ckd_1, replace
 clear
 set obs 1
@@ -2337,12 +2328,6 @@ save MD/SMR_Australia_ckd_1, replace
 clear
 set obs 1
 gen country = "Finland"
-save MD/SMR_Finland_hfd, replace
-save MD/SMR_Finland_hfd_0, replace
-save MD/SMR_Finland_hfd_1, replace
-clear
-set obs 1
-gen country = "Finland"
 save MD/SMR_Finland_flu, replace
 save MD/SMR_Finland_flu_0, replace
 save MD/SMR_Finland_flu_1, replace
@@ -2355,44 +2340,52 @@ save MD/SMR_Scotland_ckd_1, replace
 foreach ii in cvd can inf flu res liv ckd azd {
 if "`ii'" == "cvd" {
 local oo = "Cardiovascular disease"
-}
-if "`ii'" == "chd" {
-local oo = "Ischaemic heart disease"
-}
-if "`ii'" == "cbd" {
-local oo = "Cerebrovascular disease"
-}
-if "`ii'" == "hfd" {
-local oo = "Heart failure"
+local ylab = "1 1.5 2 2.5 3"
+local yform = "%9.1f"
+local yrange = "1 3"
 }
 if "`ii'" == "can" {
 local oo = "Cancer"
-}
-if "`ii'" == "dmd" {
-local oo = "Diabetes"
+local ylab = "1 1.5 2"
+local yform = "%9.1f"
+local yrange = "1 2"
 }
 if "`ii'" == "inf" {
 local oo = "Infectious diseases"
+local ylab = "0.5 1 2 3 4 5"
+local yform = "%9.1f"
+local yrange = "0.5 5.5"
 }
 if "`ii'" == "flu" {
 local oo = "Influenza and pneumonia"
+local ylab = "0.5 1 2 3"
+local yform = "%9.1f"
+local yrange = "0.4 3.1"
 }
 if "`ii'" == "res" {
 local oo = "Chronic lower respiratory disease"
+local ylab = "0.5 1 1.5 2 2.5"
+local yform = "%9.1f"
+local yrange = "0.5 2.5"
 }
-if "`ii'" == "liv1" {
+if "`ii'" == "liv" {
 local oo = "Liver disease"
-}
-if "`ii'" == "liv2" {
-local oo = "Liver disease (excluding alcoholic liver disease)"
+local ylab = "1 2 5 10"
+local yform = "%9.0f"
+local yrange = "1 10"
 }
 if "`ii'" == "ckd" {
 local oo = "Renal disease"
+local ylab = "0.5 1 2 5 10"
+local yform = "%9.0f"
+local yrange = "0.5 11"
 }
 if "`ii'" == "azd" {
 local oo = "Alzheimer's disease"
+local ylab = "0.5 1 1.5"
+local yform = "%9.0f"
+local yrange = "0.3 1.5"
 }
-
 clear
 foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
 append using MD/SMR_`i'_`ii'
@@ -2404,11 +2397,10 @@ local col4 = "255 0 0"
 local col5 = "255 125 0"
 local col6 = "0 125 0"
 local col7 = "0 175 255"
-local col8 = "0 255 127"
-local col9 = "0 0 0"
+local col8 = "0 0 0"
 preserve
 bysort country : keep if _n == 1
-forval i = 1/9 {
+forval i = 1/8 {
 local C`i' = country[`i']
 }
 restore
@@ -2429,8 +2421,6 @@ twoway ///
 (line A1 calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
 (rarea A3 A2 calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
 (line A1 calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -2439,32 +2429,85 @@ order(2 "`C1'" ///
 10 "`C5'" ///
 12 "`C6'" ///
 14 "`C7'" ///
-16 "`C8'" ///
-18 "`C9'") ///
+16 "`C8'") ///
 cols(1)) ///
 graphregion(color(white)) ///
-ylabel(, grid angle(0)) ///
+ylabel(`ylab', grid format(`yform') angle(0)) ///
 xscale(range(2000 2020)) ///
 xlabel(2000(5)2020, nogrid) ///
-yline(1, lcol(black)) ///
+yline(1, lcol(black)) yscale(log range(`yrange')) ///
 ytitle("Standardised mortality ratio", margin(a+2)) ///
 xtitle("Calendar year") ///
 title("`oo'", placement(west) color(black) size(medium))
 graph save GPH/SMR_`ii', replace
-}
 forval iii = 0/1 {
+if `iii' == 0 {
+local s = "females"
+}
+if `iii' == 1 {
+local s = "males"
+}
+clear
+foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+append using MD/SMR_`i'_`ii'_`iii'
+}
+local col1 = "0 0 255"
+local col2 = "75 0 130"
+local col3 = "255 0 255"
+local col4 = "255 0 0"
+local col5 = "255 125 0"
+local col6 = "0 125 0"
+local col7 = "0 175 255"
+local col8 = "0 0 0"
+preserve
+bysort country : keep if _n == 1
+forval i = 1/8 {
+local C`i' = country[`i']
+}
+restore
+twoway ///
+(rarea A3 A2 calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
+, legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
+order(2 "`C1'" ///
+4 "`C2'" ///
+6 "`C3'" ///
+8 "`C4'" ///
+10 "`C5'" ///
+12 "`C6'" ///
+14 "`C7'" ///
+16 "`C8'") ///
+cols(1)) ///
+graphregion(color(white)) ///
+ylabel(`ylab', format(`yform') grid angle(0)) ///
+xscale(range(2000 2020)) ///
+xlabel(2000(5)2020, nogrid) ///
+yline(1, lcol(black)) yscale(log range(`yrange')) ///
+ytitle("Standardised mortality ratio", margin(a+2)) ///
+xtitle("Calendar year") ///
+title("`oo', `s'", placement(west) color(black) size(medium))
+graph save GPH/SMR_`ii'_`iii', replace
+}
+}
+texdoc stlog close
+texdoc stlog, cmdlog 
 foreach ii in cvd can inf flu res liv ckd azd {
 if "`ii'" == "cvd" {
 local oo = "Cardiovascular disease"
-}
-if "`ii'" == "chd" {
-local oo = "Ischaemic heart disease"
-}
-if "`ii'" == "cbd" {
-local oo = "Cerebrovascular disease"
-}
-if "`ii'" == "hfd" {
-local oo = "Heart failure"
 }
 if "`ii'" == "can" {
 local oo = "Cancer"
@@ -2481,11 +2524,8 @@ local oo = "Influenza and pneumonia"
 if "`ii'" == "res" {
 local oo = "Chronic lower respiratory disease"
 }
-if "`ii'" == "liv1" {
+if "`ii'" == "liv" {
 local oo = "Liver disease"
-}
-if "`ii'" == "liv2" {
-local oo = "Liver disease (excluding alcoholic liver disease)"
 }
 if "`ii'" == "ckd" {
 local oo = "Renal disease"
@@ -2493,123 +2533,24 @@ local oo = "Renal disease"
 if "`ii'" == "azd" {
 local oo = "Alzheimer's disease"
 }
-if `iii' == 0 {
-local s = "females"
-}
-if `iii' == 1 {
-local s = "males"
-}
-
-clear
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
-append using MD/SMR_`i'_`ii'_`iii'
-}
-
-local col1 = "0 0 255"
-local col2 = "75 0 130"
-local col3 = "255 0 255"
-local col4 = "255 0 0"
-local col5 = "255 125 0"
-local col6 = "0 125 0"
-local col7 = "0 175 255"
-local col8 = "0 255 127"
-local col9 = "0 0 0"
-preserve
-bysort country : keep if _n == 1
-forval i = 1/9 {
-local C`i' = country[`i']
-}
-restore
-
-twoway ///
-(rarea A3 A2 calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
-, legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
-order(2 "`C1'" ///
-4 "`C2'" ///
-6 "`C3'" ///
-8 "`C4'" ///
-10 "`C5'" ///
-12 "`C6'" ///
-14 "`C7'" ///
-16 "`C8'" ///
-18 "`C9'") ///
-cols(1)) ///
-graphregion(color(white)) ///
-ylabel(, grid angle(0)) ///
-xscale(range(2000 2020)) ///
-xlabel(2000(5)2020, nogrid) ///
-yline(1, lcol(black)) ///
-ytitle("Standardised mortality ratio", margin(a+2)) ///
-xtitle("Calendar year") ///
-title("`oo', `s'", placement(west) color(black) size(medium))
-graph save GPH/SMR_`ii'_`iii', replace
+else {
+graph combine ///
+GPH/SMR_`ii'.gph ///
+GPH/SMR_`ii'_0.gph ///
+GPH/SMR_`ii'_1.gph ///
+, graphregion(color(white)) cols(3) altshrink xsize(8)
+texdoc graph, label(STDMRF_`ii') ///
+caption(Standardised mortality ratio by cause of death and sex. `oo')
 }
 }
 texdoc stlog close
-texdoc stlog, cmdlog
-graph combine ///
-GPH/SMR_cvd.gph ///
-GPH/SMR_chd.gph ///
-GPH/SMR_cbd.gph ///
-GPH/SMR_hfd.gph ///
-GPH/SMR_can.gph ///
-GPH/SMR_inf.gph ///
-GPH/SMR_flu.gph ///
-GPH/SMR_res.gph ///
-GPH/SMR_liv1.gph ///
-GPH/SMR_liv2.gph ///
-GPH/SMR_ckd.gph ///
-GPH/SMR_azd.gph ///
-, graphregion(color(white)) cols(3) altshrink xsize(4)
-texdoc graph, label(SMRoverallfig) ///
-caption(Standardised mortality ratio by cause of death.)
-graph combine ///
-GPH/SMR_cvd_0.gph ///
-GPH/SMR_cvd_1.gph ///
-GPH/SMR_chd_0.gph ///
-GPH/SMR_chd_1.gph ///
-GPH/SMR_cbd_0.gph ///
-GPH/SMR_cbd_1.gph ///
-GPH/SMR_hfd_0.gph ///
-GPH/SMR_hfd_1.gph ///
-GPH/SMR_can_0.gph ///
-GPH/SMR_can_1.gph ///
-GPH/SMR_inf_0.gph ///
-GPH/SMR_inf_1.gph ///
-GPH/SMR_flu_0.gph ///
-GPH/SMR_flu_1.gph ///
-GPH/SMR_res_0.gph ///
-GPH/SMR_res_1.gph ///
-GPH/SMR_liv1_0.gph ///
-GPH/SMR_liv1_1.gph ///
-GPH/SMR_liv2_0.gph ///
-GPH/SMR_liv2_1.gph ///
-GPH/SMR_ckd_0.gph ///
-GPH/SMR_ckd_1.gph ///
-GPH/SMR_azd_0.gph ///
-GPH/SMR_azd_1.gph ///
-, graphregion(color(white)) cols(4) altshrink xsize(3)
-texdoc graph, label(SMRsexfig) ///
-caption(Standardised mortality ratio by cause of death and sex.)
-texdoc stlog close
 
+
+*PICKUP -- update the below
+1. make code cleaner with the ifelse for diabetes
+2. check code
+3. make graphs by disease as above
+4. drop diseases
 
 /***
 \color{black}
@@ -2663,8 +2604,6 @@ mkspline agesp = age_`iii', cubic knots(`A1' `A2' `A3' `A4')
 poisson `ii'_d_`iii' cal c.agesp*, exposure(pys_`iii')
 matrix A_`i'_`ii'_`iii'_`iiii' = (r(table)[1,1], r(table)[5,1], r(table)[6,1], r(table)[4,1])
 }
-
-
 }
 }
 }
@@ -2698,8 +2637,6 @@ poisson `ii'_d_`iii' cal c.agesp*, exposure(pys_`iii')
 mat l r(table)
 matrix A_`i'_`ii'_`iii'_`iiii' = (r(table)[1,1], r(table)[5,1], r(table)[6,1], r(table)[4,1])
 }
-
-
 }
 }
 }
