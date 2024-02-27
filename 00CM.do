@@ -78,7 +78,7 @@ Baker Heart and Diabetes Institute, Melbourne, Australia \\
 \tableofcontents
 
 \clearpage
-\section{Preface}
+\texbf{Preface}
 
 This is the protocol for an analysis of trends in cause of death in people with and without 
 diabetes across several countries over the period spanning 2000 to 2021. The methods
@@ -699,6 +699,7 @@ bysort country (cal) : egen lb = min(cal)
 bysort country (cal) : egen ub = max(cal)
 tostring lb ub, replace
 gen rang = lb+ "-" + ub
+recode dmd_d_nondm .=0
 gen other_d_dm = alldeath_d_dm - ///
 (cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm)
 gen other_d_nondm = alldeath_d_nondm - ///
@@ -849,8 +850,8 @@ graph combine ///
 GPH/cr_`i'_dm_`c'.gph ///
 GPH/cr_`i'_nondm_`c'.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(10)
-texdoc graph, label(cr_`i'_`c') ///
-caption(Crude mortality rate by cause of death, sex, and diabetes status. `ii'. `c'.)
+*texdoc graph, label(cr_`i'_`c') ///
+*caption(Crude mortality rate by cause of death, sex, and diabetes status. `ii'. `c'.)
 }
 }
 texdoc stlog close
@@ -929,9 +930,9 @@ texdoc stlog close
 \clearpage
 A few suspected coding changes to note:
 \begin{itemize}
-\item Figure~\ref{CR2_Australia}, Australia, renal disease in 2013. 
-\item Figure~\ref{CR2_Finland}, Finland, influenza and pneumonia from 2000-2005.
-\item Figure~\ref{CR2_Scotland}, Scotland, renal disease in 2017.
+\item Figure~\ref{cr_ckd_Australia}, Australia, renal disease in 2013. 
+\item Figure~\ref{cr_flu_Finland}, Finland, influenza and pneumonia from 2000-2005.
+\item Figure~\ref{cr_ckd_Scotland}, Scotland, renal disease in 2017.
 \end{itemize}
 
 \clearpage
@@ -2041,7 +2042,7 @@ GPH/STD_GPH_`ii'_dm.gph ///
 GPH/STD_GPH_`ii'_dm_0.gph ///
 GPH/STD_GPH_`ii'_dm_1.gph ///
 , graphregion(color(white)) cols(1) altshrink xsize(2)
-texdoc graph, label(STDMRF_`ii') ///
+texdoc graph, label(STDMRF_`ii') optargs(width=0.6\textwidth) ///
 caption(Age-standardised mortality rate by cause of death, people aged 40-89. `oo')
 }
 else {
@@ -2533,24 +2534,16 @@ local oo = "Renal disease"
 if "`ii'" == "azd" {
 local oo = "Alzheimer's disease"
 }
-else {
 graph combine ///
 GPH/SMR_`ii'.gph ///
 GPH/SMR_`ii'_0.gph ///
 GPH/SMR_`ii'_1.gph ///
-, graphregion(color(white)) cols(3) altshrink xsize(8)
+, graphregion(color(white)) cols(3) altshrink xsize(15)
 texdoc graph, label(STDMRF_`ii') ///
 caption(Standardised mortality ratio by cause of death and sex. `oo')
 }
-}
+
 texdoc stlog close
-
-
-*PICKUP -- update the below
-1. make code cleaner with the ifelse for diabetes
-2. check code
-3. make graphs by disease as above
-4. drop diseases
 
 /***
 \color{black}
@@ -2577,8 +2570,11 @@ from the coefficient associated with this term in the model).
 texdoc stlog, cmdlog nodo
 quietly {
 foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
-foreach ii in cvd can inf flu res liv ckd azd {
+foreach ii in cvd can dmd inf flu res liv ckd azd {
 foreach iii in dm nondm {
+if "`ii'" == "dmd" & "`iii'" == "nondm" {
+}
+else {
 use `i', clear
 replace calendar = calendar-2009.5
 gen coh = calendar-age_`iii'
@@ -2604,38 +2600,6 @@ mkspline agesp = age_`iii', cubic knots(`A1' `A2' `A3' `A4')
 poisson `ii'_d_`iii' cal c.agesp*, exposure(pys_`iii')
 matrix A_`i'_`ii'_`iii'_`iiii' = (r(table)[1,1], r(table)[5,1], r(table)[6,1], r(table)[4,1])
 }
-}
-}
-}
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
-foreach ii in dmd {
-foreach iii in dm {
-use `i', clear
-replace calendar = calendar-2009.5
-gen coh = calendar-age_`iii'
-centile(age_`iii'), centile(5 35 65 95)
-local A1 = r(c_1)
-local A2 = r(c_2)
-local A3 = r(c_3)
-local A4 = r(c_4)
-mkspline agesp = age_`iii', cubic knots(`A1' `A2' `A3' `A4')
-poisson `ii'_d_`iii' cal c.agesp*##sex, exposure(pys_`iii')
-mat l r(table)
-matrix A_`i'_`ii'_`iii' = (r(table)[1,1], r(table)[5,1], r(table)[6,1], r(table)[4,1])
-foreach iiii in 0 1 {
-use `i', clear
-keep if sex == `iiii'
-replace calendar = calendar-2009.5
-gen coh = calendar-age_`iii'
-centile(age_`iii'), centile(5 35 65 95)
-local A1 = r(c_1)
-local A2 = r(c_2)
-local A3 = r(c_3)
-local A4 = r(c_4)
-mkspline agesp = age_`iii', cubic knots(`A1' `A2' `A3' `A4')
-poisson `ii'_d_`iii' cal c.agesp*, exposure(pys_`iii')
-mat l r(table)
-matrix A_`i'_`ii'_`iii'_`iiii' = (r(table)[1,1], r(table)[5,1], r(table)[6,1], r(table)[4,1])
 }
 }
 }
@@ -2646,28 +2610,18 @@ local a1 = 0
 foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
 local a1 = `a1'+1
 local a2 = 0
-foreach ii in cvd can inf flu res liv ckd azd {
+foreach ii in cvd can dmd inf flu res liv ckd azd {
 local a2 = `a2'+1
 local a3 = 0
 foreach iii in dm nondm {
+if "`ii'" == "dmd" & "`iii'" == "nondm" {
+}
+else {
 local a3 = `a3'+1
 matrix A = (A\0`a1',`a2',`a3',2,A_`i'_`ii'_`iii')
 foreach iiii in 0 1 {
 matrix A = (A\0`a1',`a2',`a3',`iiii',A_`i'_`ii'_`iii'_`iiii')
 }
-}
-}
-}
-local a1 = 0
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
-local a1 = `a1'+1
-foreach ii in dmd {
-local a3 = 0
-foreach iii in dm {
-local a3 = `a3'+1
-matrix A = (A\0`a1',13,`a3',2,A_`i'_`ii'_`iii')
-foreach iiii in 0 1 {
-matrix A = (A\0`a1',13,`a3',`iiii',A_`i'_`ii'_`iii'_`iiii')
 }
 }
 }
@@ -2683,7 +2637,7 @@ foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
 local a1 = `a1'+1
 replace country = "`i'" if A1 == `a1'
 local a2 = 0
-foreach ii in cvd can inf flu res liv ckd azd {
+foreach ii in cvd can dmd inf flu res liv ckd azd {
 local a2 = `a2'+1
 replace A2 = "`ii'" if A2 == "`a2'"
 local a3 = 0
@@ -2697,6 +2651,13 @@ replace A2 = "dmd" if A2 == "13"
 replace A5 = 100*(exp(A5)-1)
 replace A6 = 100*(exp(A6)-1)
 replace A7 = 100*(exp(A7)-1)
+foreach var of varlist A5-A7 {
+replace `var' = . if country == "Lithuania" & (A2 == "ckd")
+replace `var' = . if country == "Australia" & (A2 == "ckd")
+replace `var' = . if country == "Finland" & (A2 == "flu")
+replace `var' = . if country == "Scotland" & (A2 == "ckd")
+replace `var' = . if country == "SKorea" & (A2 == "azd")
+}
 save APCs, replace
 quietly {
 foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
@@ -2759,22 +2720,10 @@ replace A2 = "`ii'" if A2 == "`a2'"
 replace A4 = 100*(exp(A4)-1)
 replace A5 = 100*(exp(A5)-1)
 replace A6 = 100*(exp(A6)-1)
-save SMR_APCs, replace
-
-use APCs, clear
-foreach var of varlist A5-A7 {
-replace `var' = . if country == "Lithuania" & (A2 == "hfd" | A2 == "ckd")
-replace `var' = . if country == "Australia" & (A2 == "ckd")
-replace `var' = . if country == "Finland" & (A2 == "hfd" | A2 == "flu")
-replace `var' = . if country == "Scotland" & (A2 == "ckd")
-replace `var' = . if country == "SKorea" & (A2 == "azd")
-}
-save APCs, replace
-use SMR_APCs, clear
 foreach var of varlist A4-A6 {
-replace `var' = . if country == "Lithuania" & (A2 == "hfd" | A2 == "ckd")
+replace `var' = . if country == "Lithuania" & (A2 == "ckd")
 replace `var' = . if country == "Australia" & (A2 == "ckd")
-replace `var' = . if country == "Finland" & (A2 == "hfd" | A2 == "flu")
+replace `var' = . if country == "Finland" & (A2 == "flu")
 replace `var' = . if country == "Scotland" & (A2 == "ckd")
 replace `var' = . if country == "SKorea" & (A2 == "azd")
 }
@@ -2782,49 +2731,63 @@ save SMR_APCs, replace
 foreach i in cvd can dmd inf flu res liv ckd azd {
 if "`i'" == "cvd" {
 local ii = "cardiovascular disease"
-}
-if "`i'" == "chd" {
-local ii = "ischaemic heart disease"
-}
-if "`i'" == "cbd" {
-local ii = "cerebrovascular disease"
-}
-if "`i'" == "hfd" {
-local ii = "heart failure"
+local xlab = "-8(2)0"
+local xlabs = "-4(1)1"
+local legp = 11
 }
 if "`i'" == "can" {
 local ii = "cancer"
+local xlab = "-6(2)4"
+local xlabs = "-2(1)3"
+local legp = 1
 }
 if "`i'" == "dmd" {
 local ii = "diabetes"
+local xlab = "-20(10)20"
+local legp = 11
 }
 if "`i'" == "inf" {
 local ii = "infectious diseases"
+local xlab = "-15(5)10"
+local xlabs = "-10(5)10"
+local legp = 11
 }
 if "`i'" == "flu" {
 local ii = "influenza and pneumonia"
+local xlab = "-10(5)15"
+local xlabs = "-10(5)10"
+local legp = 1
 }
 if "`i'" == "res" {
 local ii = "chronic lower respiratory disease"
+local xlab = "-15(5)10"
+local xlabs = "-10(5)10"
+local legp = 11
 }
-if "`i'" == "liv1" {
+if "`i'" == "liv" {
 local ii = "liver disease"
-}
-if "`i'" == "liv2" {
-local ii = "liver disease (excluding alcoholic liver disease)"
+local xlab = "-10(5)5"
+local xlabs = "-10(5)5"
+local legp = 11
 }
 if "`i'" == "ckd" {
 local ii = "renal disease"
+local xlab = "-10(5)10"
+local xlabs = "-10(5)5"
+local legp = 1
 }
 if "`i'" == "azd" {
 local ii = "alzheimer's disease"
+local xlab = "-5(5)30"
+local xlabs = "-10(5)20"
+local legp = 1
 }
 use APCs, clear
 gen AA = -A1+0.15 if A3 == "dm"
 replace AA = -A1-0.15 if A3 == "nondm"
 preserve
 bysort A1 : keep if _n == 1
-forval c = 1/9 {
+forval c = 1/8 {
 local C`c' = country[`c']
 }
 restore
@@ -2835,7 +2798,7 @@ twoway ///
 (scatter AA A5 if A2 == "`i'" & A3 == "nondm" & A4 == 2, col(green)) ///
 , graphregion(color(white)) legend(order( ///
 2 "Diabetes" 4 "No diabetes") cols(1) ///
-ring(0) region(lcolor(none) color(none)) position(1)) ///
+ring(0) region(lcolor(none) color(none)) position(`legp')) ///
 ylabel( ///
 -1 "`C1'" ///
 -2 "`C2'" ///
@@ -2845,27 +2808,37 @@ ylabel( ///
 -6 "`C6'" ///
 -7 "`C7'" ///
 -8 "`C8'" ///
--9 "`C9'" ///
 , angle(0) nogrid) ytitle("") xline(0, lcol(black)) ///
+xlabel(`xlab', format(%9.0f)) ///
 title("Mortality rate, `ii'", placement(west) col(black) size(medium))
 graph save GPH/APCo_`i', replace
+
+
+
 use APCs, clear
-gen AA = -A1+0.15 if A4 == 0
-replace AA = -A1-0.15 if A4 == 1
+gen AA = -A1-0.1 if A4 == 0
+replace AA = -A1-0.25 if A4 == 1
+replace AA = AA + 0.35 if A3=="nondm"
 preserve
 bysort A1 : keep if _n == 1
-forval c = 1/9 {
+forval c = 1/8 {
 local C`c' = country[`c']
 }
 restore
 twoway ///
+(rcap A7 A6 AA if A2 == "`i'" & A3 == "nondm" & A4 == 0, horizontal col(red)) ///
+(scatter AA A5 if A2 == "`i'" & A3 == "nondm" & A4 == 0, col(red) msize(small) msymbol(S)) ///
+(rcap A7 A6 AA if A2 == "`i'" & A3 == "nondm" & A4 == 1, horizontal col(blue)) ///
+(scatter AA A5 if A2 == "`i'" & A3 == "nondm" & A4 == 1, col(blue) msize(small) msymbol(S)) ///
 (rcap A7 A6 AA if A2 == "`i'" & A3 == "dm" & A4 == 0, horizontal col(red)) ///
-(scatter AA A5 if A2 == "`i'" & A3 == "dm" & A4 == 0, col(red)) ///
+(scatter AA A5 if A2 == "`i'" & A3 == "dm" & A4 == 0, col(red) msize(small)) ///
 (rcap A7 A6 AA if A2 == "`i'" & A3 == "dm" & A4 == 1, horizontal col(blue)) ///
-(scatter AA A5 if A2 == "`i'" & A3 == "dm" & A4 == 1, col(blue)) ///
+(scatter AA A5 if A2 == "`i'" & A3 == "dm" & A4 == 1, col(blue) msize(small)) ///
 , graphregion(color(white)) legend(order( ///
-2 "Females" 4 "Males") cols(1) ///
-ring(0) region(lcolor(none) color(none)) position(1)) ///
+2 "Females without diabetes" 4 "Males without diabetes" ///
+6 "Females with diabetes" 8 "Males with diabetes" ///
+) cols(1) ///
+ring(0) region(lcolor(none) color(none)) position(`legp')) ///
 ylabel( ///
 -1 "`C1'" ///
 -2 "`C2'" ///
@@ -2875,8 +2848,8 @@ ylabel( ///
 -6 "`C6'" ///
 -7 "`C7'" ///
 -8 "`C8'" ///
--9 "`C9'" ///
 , angle(0) nogrid) ytitle("") xline(0, lcol(black)) ///
+xlabel(`xlab', format(%9.0f)) ///
 title("Mortality rate, `ii'", placement(west) col(black) size(medium))
 graph save GPH/APCs_`i', replace
 if "`i'" != "dmd" {
@@ -2884,7 +2857,7 @@ use SMR_APCs, clear
 gen AA = -A1
 preserve
 bysort A1 : keep if _n == 1
-forval c = 1/9 {
+forval c = 1/8 {
 local C`c' = country[`c']
 }
 restore
@@ -2901,8 +2874,8 @@ ylabel( ///
 -6 "`C6'" ///
 -7 "`C7'" ///
 -8 "`C8'" ///
--9 "`C9'" ///
 , angle(0) nogrid) ytitle("") xline(0, lcol(black)) ///
+xlabel(`xlabs', format(%9.0f)) ///
 title("SMR, `ii'", placement(west) col(black) size(medium))
 graph save GPH/SAPCo_`i', replace
 use SMR_APCs, clear
@@ -2921,7 +2894,7 @@ twoway ///
 (scatter AA A4 if A2 == "`i'" & A3 == 1, col(blue)) ///
 , graphregion(color(white)) legend(order( ///
 2 "Females" 4 "Males") cols(1) ///
-ring(0) region(lcolor(none) color(none)) position(1)) ///
+ring(0) region(lcolor(none) color(none)) position(`legp')) ///
 ylabel( ///
 -1 "`C1'" ///
 -2 "`C2'" ///
@@ -2931,156 +2904,63 @@ ylabel( ///
 -6 "`C6'" ///
 -7 "`C7'" ///
 -8 "`C8'" ///
--9 "`C9'" ///
 , angle(0) nogrid) ytitle("") xline(0, lcol(black)) ///
+xlabel(`xlabs', format(%9.0f)) ///
 title("SMR, `ii'", placement(west) col(black) size(medium))
 graph save GPH/SAPCs_`i', replace
 }
 }
 texdoc stlog close
-texdoc stlog, cmdlog
+texdoc stlog, cmdlog 
+foreach ii in cvd can dmd inf flu res liv ckd azd {
+if "`ii'" == "cvd" {
+local oo = "Cardiovascular disease"
+}
+if "`ii'" == "can" {
+local oo = "Cancer"
+}
+if "`ii'" == "dmd" {
+local oo = "Diabetes"
+}
+if "`ii'" == "inf" {
+local oo = "Infectious diseases"
+}
+if "`ii'" == "flu" {
+local oo = "Influenza and pneumonia"
+}
+if "`ii'" == "res" {
+local oo = "Chronic lower respiratory disease"
+}
+if "`ii'" == "liv" {
+local oo = "Liver disease"
+}
+if "`ii'" == "ckd" {
+local oo = "Renal disease"
+}
+if "`ii'" == "azd" {
+local oo = "Alzheimer's disease"
+}
+if "`ii'" == "dmd" {
+local ii = "dmd"
 graph combine ///
-GPH/APCo_cvd.gph ///
-GPH/SAPCo_cvd.gph ///
-GPH/APCo_chd.gph ///
-GPH/SAPCo_chd.gph ///
-GPH/APCo_cbd.gph ///
-GPH/SAPCo_cbd.gph ///
-GPH/APCo_hfd.gph ///
-GPH/SAPCo_hfd.gph ///
-GPH/APCo_can.gph ///
-GPH/SAPCo_can.gph ///
-GPH/APCo_dmd.gph ///
-, graphregion(color(white)) cols(2) altshrink xsize(2)
-texdoc graph, label(APCo1) optargs(width=0.5\textwidth) ///
-caption(Annual percent change in mortality rate and SMR, ///
-by country. Cardiovascular disease, ischaemic heart disease, cerebrovascular disease, ///
-heart failure, cancer, and diabetes.)
+GPH/APCo_`ii'.gph ///
+GPH/APCs_`ii'.gph ///
+, graphregion(color(white)) cols(1) altshrink xsize(3)
+texdoc graph, label(APC_`ii') ///
+caption(Annual percent change in mortality rate by country. Overall (top) and by sex (bottom). `oo'.)
+}
+else {
 graph combine ///
-GPH/APCo_inf.gph ///
-GPH/SAPCo_inf.gph ///
-GPH/APCo_flu.gph ///
-GPH/SAPCo_flu.gph ///
-GPH/APCo_res.gph ///
-GPH/SAPCo_res.gph ///
-GPH/APCo_liv1.gph ///
-GPH/SAPCo_liv1.gph ///
-GPH/APCo_liv2.gph ///
-GPH/SAPCo_liv2.gph ///
-GPH/APCo_ckd.gph ///
-GPH/SAPCo_ckd.gph ///
-GPH/APCo_azd.gph ///
-GPH/SAPCo_azd.gph ///
-, graphregion(color(white)) cols(2) altshrink xsize(2)
-texdoc graph, label(APCo2) optargs(width=0.5\textwidth) ///
-caption(Annual percent change in mortality rate and SMR, ///
-by country. Infectious diseases, influenza and pneumonia, chronic lower respiratory disease, ///
-liver disease, liver disease (excluding alcoholic liver disease), renal disease, and Alzheimer's disease.)
-graph combine ///
-GPH/APCs_cvd.gph ///
-GPH/SAPCs_cvd.gph ///
-GPH/APCs_chd.gph ///
-GPH/SAPCs_chd.gph ///
-GPH/APCs_cbd.gph ///
-GPH/SAPCs_cbd.gph ///
-GPH/APCs_hfd.gph ///
-GPH/SAPCs_hfd.gph ///
-GPH/APCs_can.gph ///
-GPH/SAPCs_can.gph ///
-GPH/APCs_dmd.gph ///
-, graphregion(color(white)) cols(2) altshrink xsize(2)
-texdoc graph, label(APCo1) optargs(width=0.5\textwidth) ///
-caption(Annual percent change in mortality rate and SMR for people with diabetes, ///
-by country and sex. Cardiovascular disease, ischaemic heart disease, cerebrovascular disease, ///
-heart failure, cancer, and diabetes.)
-graph combine ///
-GPH/APCs_inf.gph ///
-GPH/SAPCs_inf.gph ///
-GPH/APCs_flu.gph ///
-GPH/SAPCs_flu.gph ///
-GPH/APCs_res.gph ///
-GPH/SAPCs_res.gph ///
-GPH/APCs_liv1.gph ///
-GPH/SAPCs_liv1.gph ///
-GPH/APCs_liv2.gph ///
-GPH/SAPCs_liv2.gph ///
-GPH/APCs_ckd.gph ///
-GPH/SAPCs_ckd.gph ///
-GPH/APCs_azd.gph ///
-GPH/SAPCs_azd.gph ///
-, graphregion(color(white)) cols(2) altshrink xsize(2)
-texdoc graph, label(APCo2) optargs(width=0.5\textwidth) ///
-caption(Annual percent change in mortality rate and SMR for people with diabetes, ///
-by country and sex. Infectious diseases, influenza and pneumonia, chronic lower respiratory disease, ///
-liver disease, liver disease (excluding alcoholic liver disease), renal disease, and Alzheimer's disease.)
+GPH/APCo_`ii'.gph ///
+GPH/SAPCo_`ii'.gph ///
+GPH/APCs_`ii'.gph ///
+GPH/SAPCs_`ii'.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(6)
+texdoc graph, label(APC_`ii') ///
+caption(Annual percent change in mortality rate and SMR by country. Overall (top) and by sex (bottom). `oo'.)
+}
+}
 texdoc stlog close
-
-
-use SMR_APCs, clear
-keep if A3 == 2
-drop if country == "Sweden"
-gen B = "*" if A7 < 0.01
-tostring A4, replace force format(%9.2f)
-replace B = "" if A4 == "."
-replace A4 = "" if A4 == "."
-gen AA = A4+" "+B
-keep AA A2 country
-reshape wide (AA), i(A2) j(country) string
-
-
-
-use SMR_APCs, clear
-keep if A3 == 2
-drop if country == "Sweden"
-keep A4 A2 country
-reshape wide (A4), i(A2) j(country) string
-
-
-
-
-use APCs, clear
-keep if A4 == 2
-keep if A3 == "dm"
-drop if country == "Sweden"
-keep A5 A2 country
-reshape wide (A5), i(A2) j(country) string
-
-use APCs, clear
-keep if A4 == 2
-keep if A3 == "dm"
-drop if country == "Sweden"
-gen B = "*" if A8 < 0.001
-tostring A5, replace force format(%9.2f)
-replace B = "" if A5 == "."
-replace A5 = "" if A5 == "."
-gen AA = A5+" "+B
-keep AA A2 country
-reshape wide (AA), i(A2) j(country) string
-
-
-
-use APCs, clear
-keep if A4 == 2
-keep if A3 == "nondm"
-drop if country == "Sweden"
-keep A5 A2 country
-reshape wide (A5), i(A2) j(country) string
-
-use APCs, clear
-keep if A4 == 2
-keep if A3 == "nondm"
-drop if country == "Sweden"
-gen B = "*" if A8 < 0.001
-tostring A5, replace force format(%9.2f)
-replace B = "" if A5 == "."
-replace A5 = "" if A5 == "."
-gen AA = A5+" "+B
-keep AA A2 country
-reshape wide (AA), i(A2) j(country) string
-
-
-
-
 
 /***
 \color{black}
