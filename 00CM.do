@@ -78,7 +78,7 @@ Baker Heart and Diabetes Institute, Melbourne, Australia \\
 \tableofcontents
 
 \clearpage
-\texbf{Preface}
+\textbf{Preface}
 
 This is the protocol for an analysis of trends in cause of death in people with and without 
 diabetes across several countries over the period spanning 2000 to 2021. The methods
@@ -1899,9 +1899,9 @@ local col5 = "255 125 0"
 local col6 = "0 125 0"
 local col7 = "0 175 255"
 local col8 = "0 0 0"
+replace country = "South Korea" if country == "SKorea"
 preserve
 bysort country : keep if _n == 1
-replace country = "South Korea" if country == "SKorea"
 forval i = 1/8 {
 local C`i' = country[`i']
 }
@@ -1961,9 +1961,9 @@ local col5 = "255 125 0"
 local col6 = "0 125 0"
 local col7 = "0 175 255"
 local col8 = "0 0 0"
+replace country = "South Korea" if country == "SKorea"
 preserve
 bysort country : keep if _n == 1
-replace country = "South Korea" if country == "SKorea"
 forval i = 1/8 {
 local C`i' = country[`i']
 }
@@ -2402,9 +2402,9 @@ local col5 = "255 125 0"
 local col6 = "0 125 0"
 local col7 = "0 175 255"
 local col8 = "0 0 0"
+replace country = "South Korea" if country == "SKorea"
 preserve
 bysort country : keep if _n == 1
-replace country = "South Korea" if country == "SKorea"
 forval i = 1/8 {
 local C`i' = country[`i']
 }
@@ -2464,9 +2464,9 @@ local col5 = "255 125 0"
 local col6 = "0 125 0"
 local col7 = "0 175 255"
 local col8 = "0 0 0"
+replace country = "South Korea" if country == "SKorea"
 preserve
 bysort country : keep if _n == 1
-replace country = "South Korea" if country == "SKorea"
 forval i = 1/8 {
 local C`i' = country[`i']
 }
@@ -2790,9 +2790,9 @@ local legp = 1
 use APCs, clear
 gen AA = -A1+0.15 if A3 == "dm"
 replace AA = -A1-0.15 if A3 == "nondm"
+replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
-replace country = "South Korea" if country == "SKorea"
 forval c = 1/8 {
 local C`c' = country[`c']
 }
@@ -2818,16 +2818,13 @@ ylabel( ///
 xlabel(`xlab', format(%9.0f)) ///
 title("Mortality rate, `ii'", placement(west) col(black) size(medium))
 graph save GPH/APCo_`i', replace
-
-
-
 use APCs, clear
 gen AA = -A1-0.1 if A4 == 0
 replace AA = -A1-0.25 if A4 == 1
 replace AA = AA + 0.35 if A3=="nondm"
+replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
-replace country = "South Korea" if country == "SKorea"
 forval c = 1/8 {
 local C`c' = country[`c']
 }
@@ -2862,9 +2859,9 @@ graph save GPH/APCs_`i', replace
 if "`i'" != "dmd" {
 use SMR_APCs, clear
 gen AA = -A1
+replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
-replace country = "South Korea" if country == "SKorea"
 forval c = 1/8 {
 local C`c' = country[`c']
 }
@@ -2889,9 +2886,9 @@ graph save GPH/SAPCo_`i', replace
 use SMR_APCs, clear
 gen AA = -A1+0.15 if A3 == 0
 replace AA = -A1-0.15 if A3 == 1
+replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
-replace country = "South Korea" if country == "SKorea"
 forval c = 1/8 {
 local C`c' = country[`c']
 }
