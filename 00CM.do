@@ -727,6 +727,7 @@ replace DM = "Diabetes" if DM == "1"
 replace sex = "Female" if sex == "0"
 replace sex = "Male" if sex == "1"
 drop njm
+replace country = "South Korea" if country == "SKorea"
 export delimited using T1.csv, delimiter(":") novarnames replace
 texdoc stlog close
 
@@ -949,11 +950,11 @@ Age is defined as above (i.e., the midpoint of the interval in most cases) and m
 fit separately for each cause of death and country in people with and without diabetes and by sex. 
 Because this will be \begin{math} 9 \times 7 \times 2 \times 2 = 252 \end{math} models, 
 we won't check model fit for each model. Instead, 
-to check model fit we will select ten at random and check the predicted and actual rates as well as 
+to check model fit we will select ten at random and check the modelled and crude rates as well as 
 the Pearson residuals. 
 
-These models will be used to predict mortality rates for single year ages and calendar years.
-These predicted rates will first be plotted by age and period, then used to generate
+These models will be used to estimate mortality rates for single year ages and calendar years.
+These modelled rates will first be plotted by age and period, then used to generate
 age-standardised rates in people with and without diabetes, using direct standardisation
 (using the total diabetes population formed by pooling the consortium data) by period. 
 
@@ -1209,8 +1210,8 @@ twoway ///
 0.01 "0.01" 0.1 "0.1" 1 10 100, angle(0)) ///
 xlabel(30(10)100) ytitle("Mortality rate (per 1000 person-years)") ///
 xtitle(Age) yscale(log) legend(order( ///
-2 "Predicted" ///
-3 "Actual" ///
+2 "Modelled" ///
+3 "Crude" ///
 ) ring(0) cols(1) position(11) region(lcolor(none) col(none))) ///
 title("`c', `oo', `ss' `dd' diabetes", col(black) placement(west) size(medium))
 graph save GPH/Rc_`c'_`o'_`d'_`s'_age, replace
@@ -1228,9 +1229,9 @@ twoway ///
 0.01 "0.01" 0.1 "0.1" 1 10 100, angle(0)) ///
 ytitle("Mortality rate (per 1000 person-years)") ///
 xtitle(Year) yscale(log) legend(order( ///
-2 "Predicted" ///
+2 "Modelled" ///
 2 "45" 5 "65" 8 "85" ///
-3 "Actual" ///
+3 "Crude" ///
 3 "40-49" 6 "60-69" 9 "80-89" ///
 ) ring(0) cols(4) position(11) region(lcolor(none) col(none))) ///
 title("`c', `oo', `ss' `dd' diabetes", col(black) placement(west) size(medium))
@@ -1282,7 +1283,7 @@ GPH/Rc_Australia_flu_nondm_1_age.gph ///
 GPH/Rc_Sweden_cvd_dm_0_age.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(3)
 texdoc graph, label(MC1) ///
-caption(Predicted and actual mortality rates by age for 10 randomly selected ///
+caption(Modelled and crude mortality rates by age for 10 randomly selected ///
 country/cause of death/diabetes status/sex combinations.)
 graph combine ///
 GPH/Rc_France_liv2_dm_1_period.gph ///
@@ -1297,7 +1298,7 @@ GPH/Rc_Australia_flu_nondm_1_period.gph ///
 GPH/Rc_Sweden_cvd_dm_0_period.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(3)
 texdoc graph, label(MC2) ///
-caption(Predicted and actual mortality rates by year for 10 randomly selected ///
+caption(Modelled and crude mortality rates by year for 10 randomly selected ///
 country/cause of death/diabetes status/sex combinations.)
 graph combine ///
 GPH/RCc_France_liv2_dm_1_age.gph ///
@@ -1394,7 +1395,7 @@ twoway ///
 (scatter pys_dm age_dm, col(dknavy)) ///
 (line A age_dm, col(magenta)) ///
 , legend(symxsize(0.13cm) position(11) ring(0) region(lcolor(white) color(none)) ///
-order(1 "Actual" ///
+order(1 "Crude" ///
 2 "Modelled") ///
 cols(1)) ///
 graphregion(color(white)) ///
@@ -1410,7 +1411,7 @@ twoway ///
 (bar age_dm_prop age_dm, color(dknavy%70)) ///
 (bar B age_dm, color(magenta%50)) ///
 , legend(symxsize(0.13cm) position(11) ring(0) region(lcolor(white) color(none)) ///
-order(1 "Actual" ///
+order(1 "Crude" ///
 2 "Modelled") ///
 cols(1)) /// 
 ylabel(0(0.01)0.04, angle(0) format(%9.2f)) ///
@@ -1450,9 +1451,9 @@ twoway ///
 (scatter pys_dm age_dm if sex == 1, col(dknavy)) ///
 (line A1 age_dm, col(blue)) ///
 , legend(symxsize(0.13cm) position(11) ring(0) region(lcolor(white) color(none)) ///
-order(1 "Actual, females" ///
+order(1 "Crude, females" ///
 2 "Modelled, females" ///
-3 "Actual, males" ///
+3 "Crude, males" ///
 4 "Modelled, males") ///
 cols(1)) ///
 graphregion(color(white)) ///
@@ -1470,7 +1471,7 @@ twoway ///
 (bar age_dm_prop age_dm if sex == 0, color(cranberry%90)) ///
 (bar B age_dm if sex == 0, color(red%50)) ///
 , legend(symxsize(0.13cm) position(11) ring(0) region(lcolor(white) color(none)) ///
-order(1 "Actual" ///
+order(1 "Crude" ///
 2 "Modelled") ///
 cols(1)) /// 
 ylabel(0(0.01)0.02, angle(0) format(%9.2f)) ///
@@ -1482,7 +1483,7 @@ twoway ///
 (bar age_dm_prop age_dm if sex == 1, color(dknavy%70)) ///
 (bar B age_dm if sex == 1, color(blue%50)) ///
 , legend(symxsize(0.13cm) position(11) ring(0) region(lcolor(white) color(none)) ///
-order(1 "Actual" ///
+order(1 "Crude" ///
 2 "Modelled") ///
 cols(1)) /// 
 ylabel(0(0.01)0.02, angle(0) format(%9.2f)) ///
@@ -1900,6 +1901,7 @@ local col7 = "0 175 255"
 local col8 = "0 0 0"
 preserve
 bysort country : keep if _n == 1
+replace country = "South Korea" if country == "SKorea"
 forval i = 1/8 {
 local C`i' = country[`i']
 }
@@ -1961,6 +1963,7 @@ local col7 = "0 175 255"
 local col8 = "0 0 0"
 preserve
 bysort country : keep if _n == 1
+replace country = "South Korea" if country == "SKorea"
 forval i = 1/8 {
 local C`i' = country[`i']
 }
@@ -2068,7 +2071,7 @@ texdoc stlog close
 
 To estimate the SMR, I will fit a model with spline effects of 
 age, a binary effect of sex, and an interaction between spline effects of calendar time and diabetes status. 
-I will then use this model to predict the SMR for each country by calendar time. 
+I will then use this model to estimate the SMR for each country by calendar time. 
 
 \color{Blue4}
 ***/
@@ -2401,6 +2404,7 @@ local col7 = "0 175 255"
 local col8 = "0 0 0"
 preserve
 bysort country : keep if _n == 1
+replace country = "South Korea" if country == "SKorea"
 forval i = 1/8 {
 local C`i' = country[`i']
 }
@@ -2462,6 +2466,7 @@ local col7 = "0 175 255"
 local col8 = "0 0 0"
 preserve
 bysort country : keep if _n == 1
+replace country = "South Korea" if country == "SKorea"
 forval i = 1/8 {
 local C`i' = country[`i']
 }
@@ -2787,6 +2792,7 @@ gen AA = -A1+0.15 if A3 == "dm"
 replace AA = -A1-0.15 if A3 == "nondm"
 preserve
 bysort A1 : keep if _n == 1
+replace country = "South Korea" if country == "SKorea"
 forval c = 1/8 {
 local C`c' = country[`c']
 }
@@ -2821,6 +2827,7 @@ replace AA = -A1-0.25 if A4 == 1
 replace AA = AA + 0.35 if A3=="nondm"
 preserve
 bysort A1 : keep if _n == 1
+replace country = "South Korea" if country == "SKorea"
 forval c = 1/8 {
 local C`c' = country[`c']
 }
@@ -2857,6 +2864,7 @@ use SMR_APCs, clear
 gen AA = -A1
 preserve
 bysort A1 : keep if _n == 1
+replace country = "South Korea" if country == "SKorea"
 forval c = 1/8 {
 local C`c' = country[`c']
 }
@@ -2883,7 +2891,8 @@ gen AA = -A1+0.15 if A3 == 0
 replace AA = -A1-0.15 if A3 == 1
 preserve
 bysort A1 : keep if _n == 1
-forval c = 1/9 {
+replace country = "South Korea" if country == "SKorea"
+forval c = 1/8 {
 local C`c' = country[`c']
 }
 restore
