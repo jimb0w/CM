@@ -796,6 +796,12 @@ CKD -- Renal disease; AZD -- Alzheimer's disease; OTH -- All other causes.
 texdoc stlog, cmdlog nodo
 foreach c in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
 use `c', clear
+if "`c'" == "SKorea" {
+local co = "South Korea"
+}
+else {
+local co = "`c'"
+}
 collapse (sum) pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm, by(calendar sex)
 foreach i in cvd can dmd inf flu res liv ckd azd {
 if "`i'" == "cvd" {
@@ -844,7 +850,7 @@ legend(order( ///
 2 "Males" ///
 ) cols(1) position(3) region(lcolor(none) color(none))) ///
 ylabel(,angle(0) format(%9.2f)) ///
-title("`ii', people `dd' diabetes, `c'", placement(west) size(medium) col(black))
+title("People `dd' diabetes", placement(west) size(medium) col(black))
 graph save GPH/cr_`i'_`iii'_`c', replace
 }
 graph combine ///
@@ -852,13 +858,19 @@ GPH/cr_`i'_dm_`c'.gph ///
 GPH/cr_`i'_nondm_`c'.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(10)
 *texdoc graph, label(cr_`i'_`c') ///
-*caption(Crude mortality rate by cause of death, sex, and diabetes status. `ii'. `c'.)
+*caption(Crude mortality rate by cause of death, sex, and diabetes status. `ii'. `co'.)
 }
 }
 texdoc stlog close
 texdoc stlog, nolog
 foreach c in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
 use `c', clear
+if "`c'" == "SKorea" {
+local co = "South Korea"
+}
+else {
+local co = "`c'"
+}
 collapse (sum) pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm, by(calendar sex)
 foreach i in cvd can dmd inf flu res liv ckd azd {
 if "`i'" == "cvd" {
@@ -907,7 +919,7 @@ legend(order( ///
 2 "Males" ///
 ) cols(1) position(3) region(lcolor(none) color(none))) ///
 ylabel(,angle(0) format(%9.2f)) ///
-title("`ii', people `dd' diabetes, `c'", placement(west) size(medium) col(black))
+title("People `dd' diabetes", placement(west) size(medium) col(black))
 graph save GPH/cr_`i'_`iii'_`c', replace
 }
 graph combine ///
@@ -915,7 +927,7 @@ GPH/cr_`i'_dm_`c'.gph ///
 GPH/cr_`i'_nondm_`c'.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(10)
 texdoc graph, label(cr_`i'_`c') ///
-caption(Crude mortality rate by cause of death, sex, and diabetes status. `ii'. `c'.)
+caption(Crude mortality rate by cause of death, sex, and diabetes status. `ii'. `co'.)
 }
 texdoc stlog close
 /***
@@ -932,6 +944,7 @@ texdoc stlog close
 A few suspected coding changes to note:
 \begin{itemize}
 \item Figure~\ref{cr_ckd_Australia}, Australia, renal disease in 2013. 
+\item Figure~\ref{cr_cvd_Finland}, Finland, cardiovascular disease.
 \item Figure~\ref{cr_flu_Finland}, Finland, influenza and pneumonia from 2000-2005.
 \item Figure~\ref{cr_ckd_Scotland}, Scotland, renal disease in 2017.
 \end{itemize}
