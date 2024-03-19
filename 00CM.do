@@ -25,6 +25,7 @@ set linesize 100
 \newcommand{\specialcell}[2][c]{%
   \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
 \newcommand{\thedate}{\today}
+\renewcommand{\bibsection}{}
 
 \usepackage{pgfplotstable}
 
@@ -64,7 +65,7 @@ Baker Heart and Diabetes Institute, Melbourne, Australia \\
 \noindent
 Bendix Carstensen \\
 Senior Statistician \\
-Steno Diabetes Center Copenhagen, Gentofte, Denmark \\
+Steno Diabetes Center Copenhagen, Herlev, Denmark \\
 Department of Biostatistics, University of Copenhagen \\
 \\
 \noindent
@@ -120,7 +121,7 @@ from the total deaths.
 
 However, Australian data restrictions prohibit the use of any cell count $<$6 for the diabetes population; thus, 
 there are many blank values (see below). I will fill them in randomly, where the number
-can be any number from 0 to 5 with equal probabilitiy, unless the number of deaths in the
+can be any number from 0 to 5 with equal probability, unless the number of deaths in the
 total population for the age/sex group is <5, in which case the upper bound will be the 
 number of deaths in the total population. (I will also check that the combined number of deaths 
 from all causes isn't more than the total number of deaths.)
@@ -258,7 +259,7 @@ GPH/dm_liv_chk1.gph ///
 GPH/dm_ckd_chk1.gph ///
 GPH/dm_azd_chk1.gph ///
 , graphregion(color(white)) cols(3) altshrink
-texdoc graph, label(chk1) ///
+texdoc graph, label(chk1) figure(h!) ///
 caption(Crude mortality rate by age-grouping method, by cause of death. Australia. People with diabetes.)
 texdoc stlog close
 
@@ -857,7 +858,7 @@ graph combine ///
 GPH/cr_`i'_dm_`c'.gph ///
 GPH/cr_`i'_nondm_`c'.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(10)
-*texdoc graph, label(cr_`i'_`c') ///
+*texdoc graph, label(cr_`i'_`c') figure(h!) ///
 *caption(Crude mortality rate by cause of death, sex, and diabetes status. `ii'. `co'.)
 }
 }
@@ -926,7 +927,7 @@ graph combine ///
 GPH/cr_`i'_dm_`c'.gph ///
 GPH/cr_`i'_nondm_`c'.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(10)
-texdoc graph, label(cr_`i'_`c') ///
+texdoc graph, label(cr_`i'_`c') figure(h!) ///
 caption(Crude mortality rate by cause of death, sex, and diabetes status. `ii'. `co'.)
 }
 texdoc stlog close
@@ -1295,7 +1296,7 @@ GPH/Rc_Canada_chd_dm_0_age.gph ///
 GPH/Rc_Australia_flu_nondm_1_age.gph ///
 GPH/Rc_Sweden_cvd_dm_0_age.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(3)
-texdoc graph, label(MC1) ///
+texdoc graph, label(MC1) figure(h!) ///
 caption(Modelled and crude mortality rates by age for 10 randomly selected ///
 country/cause of death/diabetes status/sex combinations.)
 graph combine ///
@@ -1310,7 +1311,7 @@ GPH/Rc_Canada_chd_dm_0_period.gph ///
 GPH/Rc_Australia_flu_nondm_1_period.gph ///
 GPH/Rc_Sweden_cvd_dm_0_period.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(3)
-texdoc graph, label(MC2) ///
+texdoc graph, label(MC2) figure(h!) ///
 caption(Modelled and crude mortality rates by year for 10 randomly selected ///
 country/cause of death/diabetes status/sex combinations.)
 graph combine ///
@@ -1325,7 +1326,7 @@ GPH/RCc_Canada_chd_dm_0_age.gph ///
 GPH/RCc_Australia_flu_nondm_1_age.gph ///
 GPH/RCc_Sweden_cvd_dm_0_age.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(3)
-texdoc graph, label(MC3) ///
+texdoc graph, label(MC3) figure(h!) ///
 caption(Pearson residuals by age for 10 randomly selected ///
 country/cause of death/diabetes status/sex combinations.)
 graph combine ///
@@ -1340,7 +1341,7 @@ GPH/RCc_Canada_chd_dm_0_period.gph ///
 GPH/RCc_Australia_flu_nondm_1_period.gph ///
 GPH/RCc_Sweden_cvd_dm_0_period.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(3)
-texdoc graph, label(MC4) ///
+texdoc graph, label(MC4) figure(h!) ///
 caption(Pearson residuals by period for 10 randomly selected ///
 country/cause of death/diabetes status/sex combinations.)
 graph combine ///
@@ -1355,7 +1356,7 @@ GPH/RCc_Canada_chd_dm_0_cohort.gph ///
 GPH/RCc_Australia_flu_nondm_1_cohort.gph ///
 GPH/RCc_Sweden_cvd_dm_0_cohort.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(3)
-texdoc graph, label(MC5) ///
+texdoc graph, label(MC5) figure(h!) ///
 caption(Pearson residuals by cohort for 10 randomly selected ///
 country/cause of death/diabetes status/sex combinations.) 
 texdoc stlog close
@@ -1414,7 +1415,7 @@ cols(1)) ///
 graphregion(color(white)) ///
 ylabel(, format(%9.1f) angle(0)) ///
 ytitle("Population size (millions)") xtitle("Age")
-texdoc graph, label(SPN) caption(Pooled standard population)
+texdoc graph, label(SPN) figure(h!) caption(Pooled standard population)
 restore
 su(pys_dm)
 gen age_dm_prop = pys_dm/r(sum)
@@ -1430,7 +1431,7 @@ cols(1)) ///
 ylabel(0(0.01)0.04, angle(0) format(%9.2f)) ///
 graphregion(color(white)) ///
 ytitle("Proportion") xtitle("Age")
-texdoc graph, label(SPP) caption(Pooled standard population proportion)
+texdoc graph, label(SPP) figure(h!) caption(Pooled standard population proportion)
 keep age_dm B
 replace age_dm = age-0.5
 rename age_dm age
@@ -1472,7 +1473,7 @@ cols(1)) ///
 graphregion(color(white)) ///
 ylabel(, format(%9.1f) angle(0)) ///
 ytitle("Population size (millions)") xtitle("Age")
-texdoc graph, label(SPNs) caption(Pooled standard population by sex)
+texdoc graph, label(SPNs) figure(h!) caption(Pooled standard population by sex)
 restore
 su(pys_dm)
 gen age_dm_prop = pys_dm/r(sum)
@@ -1507,7 +1508,7 @@ graph save stdprop_1, replace
 graph combine ///
 stdprop_0.gph stdprop_1.gph ///
 , graphregion(color(white)) altshrink cols(1) xsize(2.5)
-texdoc graph, label(SPPs) caption(Pooled standard population proportion by sex)
+texdoc graph, label(SPPs) figure(h!) caption(Pooled standard population proportion by sex)
 keep sex age_dm B
 replace age_dm = age-0.5
 rename age_dm age
@@ -2058,7 +2059,7 @@ GPH/STD_GPH_`ii'_dm.gph ///
 GPH/STD_GPH_`ii'_dm_0.gph ///
 GPH/STD_GPH_`ii'_dm_1.gph ///
 , graphregion(color(white)) cols(1) altshrink xsize(2)
-texdoc graph, label(STDMRF_`ii') optargs(width=0.6\textwidth) ///
+texdoc graph, label(STDMRF_`ii') figure(h!) optargs(width=0.6\textwidth) ///
 caption(Age-standardised mortality rate by cause of death, people aged 40-89. `oo')
 }
 else {
@@ -2070,7 +2071,7 @@ GPH/STD_GPH_`ii'_nondm_0.gph ///
 GPH/STD_GPH_`ii'_dm_1.gph ///
 GPH/STD_GPH_`ii'_nondm_1.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(4)
-texdoc graph, label(STDMRF_`ii') ///
+texdoc graph, label(STDMRF_`ii') figure(h!) ///
 caption(Age-standardised mortality rate by cause of death, people aged 40-89. `oo')
 }
 }
@@ -2557,7 +2558,7 @@ GPH/SMR_`ii'.gph ///
 GPH/SMR_`ii'_0.gph ///
 GPH/SMR_`ii'_1.gph ///
 , graphregion(color(white)) cols(3) altshrink xsize(15)
-texdoc graph, label(STDMRF_`ii') ///
+texdoc graph, label(STDMRF_`ii') figure(h!) ///
 caption(Standardised mortality ratio by cause of death and sex. `oo')
 }
 
@@ -2965,7 +2966,7 @@ graph combine ///
 GPH/APCo_`ii'.gph ///
 GPH/APCs_`ii'.gph ///
 , graphregion(color(white)) cols(1) altshrink xsize(3)
-texdoc graph, label(APC_`ii') ///
+texdoc graph, label(APC_`ii') figure(h!) ///
 caption(Annual percent change in mortality rate by country. Overall (top) and by sex (bottom). `oo'.)
 }
 else {
@@ -2975,7 +2976,7 @@ GPH/SAPCo_`ii'.gph ///
 GPH/APCs_`ii'.gph ///
 GPH/SAPCs_`ii'.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(6)
-texdoc graph, label(APC_`ii') ///
+texdoc graph, label(APC_`ii') figure(h!) ///
 caption(Annual percent change in mortality rate and SMR by country. Overall (top) and by sex (bottom). `oo'.)
 }
 }
@@ -2984,7 +2985,10 @@ texdoc stlog close
 /***
 \color{black}
 
+pwd
 \clearpage
+\section*{References}
+\addcontentsline{toc}{section}{References}
 \bibliography{/Users/jed/Documents/Library.bib}
 \end{document}
 ***/
