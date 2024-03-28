@@ -139,7 +139,7 @@ cd /Users/jed/Documents/CM/
 *mkdir GPH
 texdoc stlog close
 texdoc stlog, cmdlog 
-import delimited "Consortium COD database v3.csv", clear
+import delimited "Consortium COD database v4.csv", clear
 foreach i in chd cbd hfd liv2 {
 drop `i'_d_dm `i'_d_pop `i'_d_nondm
 }
@@ -581,6 +581,57 @@ recode dmd_d_nondm .=0
 rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_nondm alldeath_d_pop)
 keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
 save Lithuania, replace
+texdoc stlog close
+
+/***
+\color{black}
+
+\clearpage
+\subsection{Netherlands}
+
+For Netherland, we have the following variables (by age, sex, and calendar year): 
+Person-years and deaths in people with and without diabetes. I.e., no further
+variables need to be derived. 
+Nevertheless, Netherlands restricts counts between 0 and 9 for both people with and without
+diabetes. I will fill them in randomly, where the number
+can be any number from 0 to 9 with equal probability. 
+I will assume the mid-point of the age interval for people aged $<$40 is 35 and for 90$+$ is 95.
+
+\color{Blue4}
+***/
+
+texdoc stlog, cmdlog
+use uncleandbase, clear
+keep if country == "Netherlands"
+rename sex SEX
+gen sex = 0 if SEX == "F"
+replace sex = 1 if SEX == "M"
+set seed 934458
+rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_nondm alldeath_d_pop)
+texdoc stlog close
+texdoc stlog
+ta age_gp1
+foreach i in alldeath cvd can dmd inf flu res liv ckd azd {
+di "`i'"
+ta age_gp1 if `i'_d_nondm ==.
+quietly replace `i'_d_nondm = runiformint(0,9) if `i'_d_nondm==.
+ta age_gp1 if `i'_d_dm ==.
+quietly replace `i'_d_dm = runiformint(0,9) if `i'_d_dm ==.
+}
+replace alldeath_d_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
+replace alldeath_d_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv_d_nondm + ckd_d_nondm + azd_d_nondm
+texdoc stlog close
+texdoc stlog, cmdlog nodo
+gen age_dm = substr(age_gp1,1,2)
+replace age_dm = "30" if age_dm == "0-"
+destring age_dm, replace
+replace age_dm = age_dm+5
+gen age_nondm = substr(age_gp1,1,2)
+replace age_nondm = "15" if age_nondm == "0-"
+destring age_nondm, replace
+replace age_nondm = age_nondm+5
+keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
+save Netherlands, replace
 texdoc stlog close
 
 /***
