@@ -79,18 +79,10 @@ Baker Heart and Diabetes Institute, Melbourne, Australia \\
 \tableofcontents
 
 \clearpage
-\textbf{Preface}
+\section{Data cleaning}
 
 This is the protocol for an analysis of trends in cause of death in people with and without 
-diabetes across several countries over the period spanning 2000 to 2021. The methods
-are largely derived from Magliano et al. \cite{MaglianoLDE2022}.
-
-To generate this document, the Stata package texdoc \cite{Jann2016Stata} was used, which is 
-available from: \color{blue} \url{http://repec.sowi.unibe.ch/stata/texdoc/} \color{black} (accessed 14 November 2022). The 
-final Stata do file and this pdf are available at: \color{blue} \url{https://github.com/jimb0w/CM} \color{black}.
-
-\clearpage
-\section{Data cleaning}
+diabetes across several countries over the period spanning 2000 to 2021. 
 
 We have been provided with many different variables and some countries have restrictions
 on what data they can provide, so we need to harmonize and clean the data into an analysable format.
@@ -123,8 +115,7 @@ However, Australian data restrictions prohibit the use of any cell count $<$6 fo
 there are many blank values (see below). I will fill them in randomly, where the number
 can be any number from 0 to 5 with equal probability, unless the number of deaths in the
 total population for the age/sex group is <5, in which case the upper bound will be the 
-number of deaths in the total population. (I will also check that the combined number of deaths 
-from all causes isn't more than the total number of deaths.)
+number of deaths in the total population. 
 Further, because of this, data has been provided in both 10 and 20-year age groups, as well as
 overall (i.e., the actual counts). My intuition is that the small cell counts
 won't drive any overall results anyway, which I check below (Figure~\ref{chk1}), 
@@ -136,33 +127,36 @@ confidence intervals for age-specific analyses (which aren't actually done here)
 
 texdoc stlog, cmdlog
 cd /Users/jed/Documents/CM/
+set seed 3488717
 *mkdir GPH
 texdoc stlog close
-texdoc stlog, cmdlog 
+texdoc stlog, cmdlog nodo
 import delimited "Consortium COD database v4.csv", clear
 foreach i in chd cbd hfd liv2 {
 drop `i'_d_dm `i'_d_pop `i'_d_nondm
 }
 rename (liv1_d_dm liv1_d_pop liv1_d_nondm) (liv_d_dm liv_d_pop liv_d_nondm)
 save uncleandbase, replace
+texdoc stlog close
+texdoc stlog, cmdlog
+use uncleandbase, clear
 keep if substr(country,1,9)=="Australia"
 drop if cal < 2005
 rename sex SEX
 gen sex = 0 if SEX == "F"
 replace sex = 1 if SEX == "M"
 replace pys_nondm = pys_totpop-pys_dm
-set seed 3488717
 rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_nondm alldeath_d_pop)
 texdoc stlog close
 texdoc stlog
 ta age_gp1
-foreach i in alldeath cvd can dmd inf flu res liv ckd azd {
+foreach i in alldeath azd can cvd res dmd inf flu ckd liv {
 di "`i'"
 ta age_gp1 if `i'_d_dm ==.
 gen max_`i' = min(`i'_d_pop,5)
 quietly replace `i'_d_dm = runiformint(0,max_`i') if `i'_d_dm ==.
 }
-foreach i in alldeath cvd can dmd inf flu res liv ckd azd {
+foreach i in alldeath azd can cvd res dmd inf flu ckd liv {
 di "`i'"
 count if `i'_d_dm > `i'_d_pop
 }
@@ -171,7 +165,7 @@ ta diff if diff >0
 replace dmd_d_dm = dmd_d_pop if dmd_d_dm > dmd_d_pop
 gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
 count if alldeathc_dm > alldeath_d_dm
-foreach i in alldeath cvd can dmd inf flu res liv ckd azd {
+foreach i in alldeath azd can cvd res dmd inf flu ckd liv {
 quietly replace `i'_d_nondm = `i'_d_pop-`i'_d_dm
 }
 gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv_d_nondm + ckd_d_nondm + azd_d_nondm
@@ -200,7 +194,7 @@ gen agegp = 1 if age_gp1!=""
 replace agegp = 2 if age_gp3!=""
 replace agegp = 3 if age_gp4!=""
 collapse (sum) pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm, by(calendar agegp)
-foreach i in cvd can dmd inf flu res liv ckd azd {
+foreach i in azd can cvd res dmd inf flu ckd liv {
 if "`i'" == "cvd" {
 local ii = "Cardiovascular disease"
 }
@@ -290,7 +284,6 @@ keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm
 save Australia, replace
 texdoc stlog close
 
-
 /***
 \color{black}
 
@@ -330,12 +323,11 @@ rename sex SEX
 gen sex = 0 if SEX == "F"
 replace sex = 1 if SEX == "M"
 replace pys_nondm = pys_totpop-pys_dm
-set seed 98456
 rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_nondm alldeath_d_pop)
 texdoc stlog close
 texdoc stlog
 ta age_gp1
-foreach i in alldeath cvd can dmd inf flu res liv ckd azd {
+foreach i in alldeath azd can cvd res dmd inf flu ckd liv {
 di "`i'"
 ta age_gp1 if `i'_d_pop ==.
 gen min_`i' = max(`i'_d_dm,1) if `i'_d_dm!=.
@@ -359,20 +351,20 @@ I will re-randomise until this is fixed.
 ***/
 
 texdoc stlog
-forval ii = 1/4 {
+forval ii = 1/10 {
 gen A = 1 if alldeathc_dm > alldeath_d_dm
-foreach i in cvd can dmd inf flu res liv ckd azd {
+foreach i in azd can cvd res dmd inf flu ckd liv {
 quietly replace `i'_d_dm = runiformint(1,max_`i') if A==1 & inrange(`i'_d_dm,1,9)
 }
 drop alldeathc_dm A
 gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
 count if alldeathc_dm > alldeath_d_dm
 }
-foreach i in alldeath cvd can dmd inf flu res liv ckd azd {
+foreach i in alldeath azd can cvd res dmd inf flu ckd liv {
 di "`i'"
 count if `i'_d_dm > `i'_d_pop
 }
-foreach i in alldeath cvd can dmd inf flu res liv ckd azd {
+foreach i in alldeath azd can cvd res dmd inf flu ckd liv {
 quietly replace `i'_d_nondm = `i'_d_pop-`i'_d_dm
 }
 gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv_d_nondm + ckd_d_nondm + azd_d_nondm
@@ -380,7 +372,7 @@ count if alldeathc_nondm > alldeath_d_nondm
 texdoc stlog close
 texdoc stlog, cmdlog nodo
 keep if age_gp1!=""
-replace country = substr(country,1,6)
+replace country = "Canada"
 gen age_dm = substr(age_gp1,1,2)
 replace age_dm = "30" if age_dm == "0-"
 destring age_dm, replace
@@ -416,18 +408,24 @@ keep if substr(country,1,7)=="Denmark"
 rename sex SEX
 gen sex = 0 if SEX == "F"
 replace sex = 1 if SEX == "M"
-set seed 1203984
 rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_nondm alldeath_d_pop)
 texdoc stlog close
 texdoc stlog
 ta age_gp1
-foreach i in alldeath cvd can dmd inf flu res liv ckd azd {
+foreach i in azd can cvd res dmd inf flu ckd liv {
 di "`i'"
 ta age_gp1 if `i'_d_nondm ==.
 quietly replace `i'_d_nondm = runiformint(1,3) if `i'_d_nondm==.
 ta age_gp1 if `i'_d_dm ==.
 quietly replace `i'_d_dm = runiformint(1,3) if `i'_d_dm ==.
 }
+gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
+count if alldeathc_dm > alldeath_d_dm
+gen A = 1 if alldeathc_dm > alldeath_d_dm
+foreach i in azd can cvd res dmd inf flu ckd liv {
+quietly replace `i'_d_dm = runiformint(1,3) if A==1 & inrange(`i'_d_dm,1,3)
+}
+drop alldeathc_dm A
 gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
 count if alldeathc_dm > alldeath_d_dm
 gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv_d_nondm + ckd_d_nondm + azd_d_nondm
@@ -474,12 +472,11 @@ keep if substr(country,1,7)=="Finland"
 rename sex SEX
 gen sex = 0 if SEX == "F"
 replace sex = 1 if SEX == "M"
-set seed 0984338
 rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_nondm alldeath_d_pop)
 texdoc stlog close
 texdoc stlog
 ta age_gp1
-foreach i in alldeath cvd can dmd inf flu res liv ckd azd {
+foreach i in alldeath azd can cvd res dmd inf flu ckd liv {
 di "`i'"
 ta age_gp1 if `i'_d_nondm ==.
 quietly replace `i'_d_nondm = runiformint(1,5) if `i'_d_nondm==.
@@ -524,7 +521,6 @@ we will exclude the data from 2020.
 texdoc stlog, cmdlog nodo
 use uncleandbase, clear
 keep if substr(country,1,8)=="France_1"
-drop if cal == 2020
 rename sex SEX
 gen sex = 0 if SEX == "F"
 replace sex = 1 if SEX == "M"
@@ -606,20 +602,30 @@ keep if country == "Netherlands"
 rename sex SEX
 gen sex = 0 if SEX == "F"
 replace sex = 1 if SEX == "M"
-set seed 934458
 rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_nondm alldeath_d_pop)
 texdoc stlog close
 texdoc stlog
 ta age_gp1
-foreach i in alldeath cvd can dmd inf flu res liv ckd azd {
+foreach i in alldeath azd can cvd res dmd inf flu ckd liv {
 di "`i'"
 ta age_gp1 if `i'_d_nondm ==.
 quietly replace `i'_d_nondm = runiformint(0,9) if `i'_d_nondm==.
 ta age_gp1 if `i'_d_dm ==.
 quietly replace `i'_d_dm = runiformint(0,9) if `i'_d_dm ==.
 }
-replace alldeath_d_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
-replace alldeath_d_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv_d_nondm + ckd_d_nondm + azd_d_nondm
+gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
+count if alldeathc_dm > alldeath_d_dm
+forval ii = 1/1000 {
+gen A = 1 if alldeathc_dm > alldeath_d_dm
+foreach i in azd can cvd res dmd inf flu ckd liv {
+quietly replace `i'_d_dm = runiformint(0,9) if A==1 & inrange(`i'_d_dm,0,9)
+}
+drop alldeathc_dm A
+gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
+count if alldeathc_dm > alldeath_d_dm
+}
+gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv_d_nondm + ckd_d_nondm + azd_d_nondm
+count if alldeathc_nondm > alldeath_d_nondm
 texdoc stlog close
 texdoc stlog, cmdlog nodo
 gen age_dm = substr(age_gp1,1,2)
@@ -666,7 +672,7 @@ rename sex SEX
 gen sex = 0 if SEX == "F"
 replace sex = 1 if SEX == "M"
 rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_nondm alldeath_d_pop)
-foreach i in alldeath cvd can dmd inf flu res liv ckd azd {
+foreach i in alldeath azd can cvd res dmd inf flu ckd liv {
 quietly replace `i'_d_nondm = `i'_d_pop-`i'_d_dm
 di "`i'"
 ta `i'_d_nondm if `i'_d_nondm <0
@@ -685,7 +691,7 @@ replace age_nondm = age_nondm+5
 replace age_nondm = age_nondm+2.5 if age_nondm == 85 & cal <= 2015
 replace pys_dm =. if age_dm==.
 replace pys_nondm =. if age_nondm==.
-foreach i in alldeath cvd can dmd inf flu res liv ckd azd {
+foreach i in alldeath azd can cvd res dmd inf flu ckd liv {
 replace `i'_d_dm = . if age_dm==.
 replace `i'_d_nondm = . if age_nondm==.
 }
@@ -744,7 +750,7 @@ Table~\ref{cleansumtab} shows a summary of the data included in this analysis.
 
 texdoc stlog, cmdlog nodo
 clear
-foreach c in Australia Canada Denmark Finland France Lithuania Scotland Skorea {
+foreach c in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 append using `c'
 }
 bysort country (cal) : egen lb = min(cal)
@@ -762,7 +768,7 @@ bysort country sex : gen DM = _n-1
 tostring sex pys_dm-DM, replace force format(%15.0fc)
 gen pys = pys_dm if DM == "1"
 replace pys = pys_nondm if DM == "0"
-foreach i in cvd can dmd inf flu res liv ckd azd other {
+foreach i in azd can cvd res dmd inf flu ckd liv other {
 gen `i' = `i'_d_dm if DM == "1"
 replace `i' = `i'_d_nondm if DM == "0"
 }
@@ -780,6 +786,7 @@ replace sex = "Female" if sex == "0"
 replace sex = "Male" if sex == "1"
 drop njm
 replace country = "South Korea" if country == "SKorea"
+replace country = "Canada (Alberta)" if country == "Canada"
 export delimited using T1.csv, delimiter(":") novarnames replace
 texdoc stlog close
 
@@ -846,7 +853,7 @@ CKD -- Renal disease; AZD -- Alzheimer's disease; OTH -- All other causes.
 ***/
 
 texdoc stlog, cmdlog nodo
-foreach c in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+foreach c in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 use `c', clear
 if "`c'" == "SKorea" {
 local co = "South Korea"
@@ -855,7 +862,7 @@ else {
 local co = "`c'"
 }
 collapse (sum) pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm, by(calendar sex)
-foreach i in cvd can dmd inf flu res liv ckd azd {
+foreach i in azd can cvd res dmd inf flu ckd liv {
 if "`i'" == "cvd" {
 local ii = "Cardiovascular disease"
 }
@@ -909,13 +916,11 @@ graph combine ///
 GPH/cr_`i'_dm_`c'.gph ///
 GPH/cr_`i'_nondm_`c'.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(10)
-*texdoc graph, label(cr_`i'_`c') figure(h!) ///
-*caption(Crude mortality rate by cause of death, sex, and diabetes status. `ii'. `co'.)
 }
 }
 texdoc stlog close
 texdoc stlog, nolog
-foreach c in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+foreach c in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 use `c', clear
 if "`c'" == "SKorea" {
 local co = "South Korea"
@@ -924,7 +929,7 @@ else {
 local co = "`c'"
 }
 collapse (sum) pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm, by(calendar sex)
-foreach i in cvd can dmd inf flu res liv ckd azd {
+foreach i in azd can cvd res dmd inf flu ckd liv {
 if "`i'" == "cvd" {
 local ii = "Cardiovascular disease"
 }
@@ -1006,6 +1011,7 @@ A few suspected coding changes to note:
 
 \subsection{Methods}
 
+The methods are largely derived from Magliano et al. \cite{MaglianoLDE2022}.
 To generate age- and period-specific rates, which will be used to generate age-standardised rates, 
 we will model mortality rates using age-period-cohort models \cite{CarstensenSTATMED2007}.
 Each model will be a Poisson model, parameterised using 
@@ -1028,8 +1034,8 @@ age-standardised rates in people with and without diabetes, using direct standar
 
 texdoc stlog, cmdlog nodo
 *mkdir MD
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
-foreach ii in cvd can dmd inf flu res liv ckd azd {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
+foreach ii in azd can cvd res dmd inf flu ckd liv {
 foreach iii in dm nondm {
 if "`ii'" == "dmd" & "`iii'" == "nondm" {
 }
@@ -1436,13 +1442,13 @@ the sex-stratified results to.
 ***/
 
 texdoc stlog, cmdlog
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 use `i', clear
 collapse (sum) pys_dm, by(age_dm)
 save `i'_pysdm, replace
 }
 clear
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 append using `i'_pysdm
 }
 collapse (sum) pys_dm, by(age_dm)
@@ -1487,13 +1493,13 @@ keep age_dm B
 replace age_dm = age-0.5
 rename age_dm age
 save refpop, replace
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 use `i', clear
 collapse (sum) pys_dm, by(sex age_dm)
 save `i'_pysdm_s, replace
 }
 clear
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 append using `i'_pysdm_s
 }
 collapse (sum) pys_dm, by(sex age_dm)
@@ -1567,8 +1573,8 @@ save refpops, replace
 texdoc stlog close
 texdoc stlog, cmdlog nodo
 quietly {
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
-foreach ii in cvd can dmd inf flu res liv ckd azd {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
+foreach ii in azd can cvd res dmd inf flu ckd liv {
 foreach iii in dm nondm {
 if "`ii'" == "dmd" & "`iii'" == "nondm" {
 }
@@ -1701,8 +1707,8 @@ save MD/STD_`i'_`ii'_`iii', replace
 texdoc stlog close
 texdoc stlog
 quietly {
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
-foreach ii in cvd can dmd inf flu res liv ckd azd {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
+foreach ii in azd can cvd res dmd inf flu ckd liv {
 foreach iii in dm nondm {
 if "`ii'" == "dmd" & "`iii'" == "nondm" {
 }
@@ -1887,7 +1893,7 @@ save MD/STD_Scotland_ckd_nondm_0, replace
 save MD/STD_Scotland_ckd_nondm_1, replace
 texdoc stlog close
 texdoc stlog, cmdlog nodo
-foreach ii in cvd can dmd inf flu res liv ckd azd {
+foreach ii in azd can cvd res dmd inf flu ckd liv {
 foreach iii in dm nondm {
 if "`ii'" == "dmd" & "`iii'" == "nondm" {
 }
@@ -1953,7 +1959,7 @@ if "`iii'" == "nondm" {
 local w = "without"
 }
 clear
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 append using MD/STD_`i'_`ii'_`iii'
 }
 local col1 = "0 0 255"
@@ -2015,7 +2021,7 @@ if `iiii' == 1 {
 local s = "males"
 }
 clear
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 append using MD/STD_`i'_`ii'_`iii'_`iiii'
 }
 local col1 = "0 0 255"
@@ -2075,7 +2081,7 @@ graph save GPH/STD_GPH_`ii'_`iii'_`iiii', replace
 }
 texdoc stlog close
 texdoc stlog, cmdlog 
-foreach ii in cvd can dmd inf flu res liv ckd azd {
+foreach ii in azd can cvd res dmd inf flu ckd liv {
 if "`ii'" == "cvd" {
 local oo = "Cardiovascular disease"
 }
@@ -2142,7 +2148,7 @@ I will then use this model to estimate the SMR for each country by calendar time
 ***/
 
 texdoc stlog, cmdlog nodo
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 use `i', clear
 expand 2
 bysort cal age_dm sex : gen dm = _n-1
@@ -2155,7 +2161,7 @@ drop if age==.
 save `i'_long, replace
 }
 quietly {
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 foreach ii in cvd can inf flu res liv ckd azd {
 use `i'_long, clear
 replace calendar = calendar-2009.5
@@ -2262,7 +2268,7 @@ replace cal = cal+2009.5
 save MD/SMR_`i'_`ii', replace
 }
 }
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 foreach ii in cvd can inf flu res liv ckd azd {
 forval iii = 0/1 {
 use `i'_long, clear
@@ -2456,7 +2462,7 @@ local yform = "%9.0f"
 local yrange = "0.3 1.5"
 }
 clear
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 append using MD/SMR_`i'_`ii'
 }
 local col1 = "0 0 255"
@@ -2518,7 +2524,7 @@ if `iii' == 1 {
 local s = "males"
 }
 clear
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 append using MD/SMR_`i'_`ii'_`iii'
 }
 local col1 = "0 0 255"
@@ -2639,8 +2645,8 @@ from the coefficient associated with this term in the model).
 
 texdoc stlog, cmdlog nodo
 quietly {
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
-foreach ii in cvd can dmd inf flu res liv ckd azd {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
+foreach ii in azd can cvd res dmd inf flu ckd liv {
 foreach iii in dm nondm {
 if "`ii'" == "dmd" & "`iii'" == "nondm" {
 }
@@ -2677,10 +2683,10 @@ matrix A_`i'_`ii'_`iii'_`iiii' = (r(table)[1,1], r(table)[5,1], r(table)[6,1], r
 }
 matrix A = (.,.,.,.,.,.,.,.)
 local a1 = 0
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 local a1 = `a1'+1
 local a2 = 0
-foreach ii in cvd can dmd inf flu res liv ckd azd {
+foreach ii in azd can cvd res dmd inf flu ckd liv {
 local a2 = `a2'+1
 local a3 = 0
 foreach iii in dm nondm {
@@ -2703,11 +2709,11 @@ drop if A1==.
 tostring A2-A3, replace format(%9.0f) force
 gen country=""
 local a1 = 0
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 local a1 = `a1'+1
 replace country = "`i'" if A1 == `a1'
 local a2 = 0
-foreach ii in cvd can dmd inf flu res liv ckd azd {
+foreach ii in azd can cvd res dmd inf flu ckd liv {
 local a2 = `a2'+1
 replace A2 = "`ii'" if A2 == "`a2'"
 local a3 = 0
@@ -2730,7 +2736,7 @@ replace `var' = . if country == "SKorea" & (A2 == "azd")
 }
 save APCs, replace
 quietly {
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 foreach ii in cvd can inf flu res liv ckd azd {
 use `i'_long, clear
 replace calendar = calendar-2009.5
@@ -2760,7 +2766,7 @@ matrix A_`i'_`ii'_`iii' = (r(table)[1,9], r(table)[5,9], r(table)[6,9], r(table)
 }
 matrix A = (.,.,.,.,.,.,.)
 local a1 = 0
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 local a1 = `a1'+1
 local a2 = 0
 foreach ii in cvd can inf flu res liv ckd azd {
@@ -2778,7 +2784,7 @@ drop if A1==.
 tostring A2, replace format(%9.0f) force
 gen country=""
 local a1 = 0
-foreach i in Australia Canada Denmark Finland France Lithuania Scotland SKorea {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 local a1 = `a1'+1
 replace country = "`i'" if A1 == `a1'
 local a2 = 0
@@ -2798,7 +2804,7 @@ replace `var' = . if country == "Scotland" & (A2 == "ckd")
 replace `var' = . if country == "SKorea" & (A2 == "azd")
 }
 save SMR_APCs, replace
-foreach i in cvd can dmd inf flu res liv ckd azd {
+foreach i in azd can cvd res dmd inf flu ckd liv {
 if "`i'" == "cvd" {
 local ii = "cardiovascular disease"
 local xlab = "-8(2)0"
@@ -2983,7 +2989,7 @@ graph save GPH/SAPCs_`i', replace
 }
 texdoc stlog close
 texdoc stlog, cmdlog 
-foreach ii in cvd can dmd inf flu res liv ckd azd {
+foreach ii in azd can cvd res dmd inf flu ckd liv {
 if "`ii'" == "cvd" {
 local oo = "Cardiovascular disease"
 }
