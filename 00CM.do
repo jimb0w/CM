@@ -1182,11 +1182,15 @@ gen A =.
 foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland SKorea {
 foreach ii in azd can cvd res dmd inf flu ckd liv {
 foreach iii in dm nondm {
+if "`ii'" == "dmd" & "`iii'" == "nondm" {
+}
+else {
 foreach iiii in 0 1 {
 local B = runiform()
 append using MD/RC_pred_`i'_`ii'_`iii'_`iiii'
 recode A .=`B'
 keep if A < 0.03
+}
 }
 }
 }
@@ -1198,11 +1202,15 @@ gen A =.
 foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland SKorea {
 foreach ii in azd can cvd res dmd inf flu ckd liv {
 foreach iii in dm nondm {
+if "`ii'" == "dmd" & "`iii'" == "nondm" {
+}
+else {
 foreach iiii in 0 1 {
 local B = runiform()
 append using MD/R_`i'_`ii'_`iii'_`iiii'
 recode A .=`B'
 keep if A < 0.03
+}
 }
 }
 }
@@ -1227,6 +1235,7 @@ texdoc stlog close
 
 
 texdoc stlog, cmdlog nodo
+/*
 forval i = 1/10 {
 if `i' == 1 {
 local c = "France"
@@ -1393,8 +1402,10 @@ xtitle("Cohort") ///
 title("`c', `oo', `ss' `dd' diabetes", col(black) placement(west) size(medium))
 graph save GPH/RCc_`c'_`o'_`d'_`s'_cohort, replace
 }
+*/
 texdoc stlog close
 texdoc stlog, cmdlog
+/*
 graph combine ///
 GPH/Rc_France_liv2_dm_1_age.gph ///
 GPH/Rc_France_ckd_nondm_0_age.gph ///
@@ -1469,7 +1480,8 @@ GPH/RCc_Sweden_cvd_dm_0_cohort.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(3)
 texdoc graph, label(MC5) figure(h!) cabove ///
 caption(Pearson residuals by cohort for 10 randomly selected ///
-country/cause of death/diabetes status/sex combinations.) 
+country/cause of death/diabetes status/sex combinations.)
+*/
 texdoc stlog close
 
 /***
@@ -2160,7 +2172,7 @@ texdoc stlog close
 
 To estimate the MRR, I will fit a model with spline effects of 
 age, a binary effect of sex, and an interaction between spline effects of calendar time and diabetes status. 
-I will then use this model to estimate the SMR for each country by calendar time. 
+I will then use this model to estimate the mortality rate ratio (MRR) for each country by calendar time. 
 
 \color{Blue4}
 ***/
@@ -2531,23 +2543,23 @@ GPH/SMR_`ii'_1.gph ///
 texdoc graph, label(STDMRF_`ii') figure(h!) cabove ///
 caption(Mortality rate ratio by cause of death and sex. `oo')
 }
-
 texdoc stlog close
 
 /***
 \color{black}
 
 \clearpage
-\section{Annual percent changes}
+\section{Average annual changes}
 
-Finally, we will estimate the APC in both mortality rates
-and SMRs. For mortality rates, the APC comes from a model
+Finally, we will estimate the average annual change (measured via APC) 
+in both mortality rates
+and MRRs. For mortality rates, the APC comes from a model
 with a linear effect of calendar time (the APC is derived
 from the coefficient associated with this term in the model)
 , spline effects of age, 
 a binary effect of sex, and the interaction between spline effects
 of age and binary effect of sex. 
-For SMRs, the APC comes from a model with spline effects of 
+For MRRs, the APC comes from a model with spline effects of 
 age, a binary effect of sex, a linear effect of calendar time, 
 a binary effect of diabetes status, and the interaction between
 calendar time and diabetes status (the APC is derived
@@ -2640,13 +2652,6 @@ replace A2 = "dmd" if A2 == "13"
 replace A5 = 100*(exp(A5)-1)
 replace A6 = 100*(exp(A6)-1)
 replace A7 = 100*(exp(A7)-1)
-foreach var of varlist A5-A7 {
-replace `var' = . if country == "Lithuania" & (A2 == "ckd")
-replace `var' = . if country == "Australia" & (A2 == "ckd")
-replace `var' = . if country == "Finland" & (A2 == "flu")
-replace `var' = . if country == "Scotland" & (A2 == "ckd")
-replace `var' = . if country == "SKorea" & (A2 == "azd")
-}
 save APCs, replace
 quietly {
 foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland SKorea {
@@ -2709,13 +2714,6 @@ replace A2 = "`ii'" if A2 == "`a2'"
 replace A4 = 100*(exp(A4)-1)
 replace A5 = 100*(exp(A5)-1)
 replace A6 = 100*(exp(A6)-1)
-foreach var of varlist A4-A6 {
-replace `var' = . if country == "Lithuania" & (A2 == "ckd")
-replace `var' = . if country == "Australia" & (A2 == "ckd")
-replace `var' = . if country == "Finland" & (A2 == "flu")
-replace `var' = . if country == "Scotland" & (A2 == "ckd")
-replace `var' = . if country == "SKorea" & (A2 == "azd")
-}
 save SMR_APCs, replace
 foreach i in azd can cvd res dmd inf flu ckd liv {
 if "`i'" == "cvd" {
@@ -2774,10 +2772,11 @@ local legp = 1
 use APCs, clear
 gen AA = -A1+0.15 if A3 == "dm"
 replace AA = -A1-0.15 if A3 == "nondm"
+replace country = "Canada (Alberta)" if country == "Canada"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
-forval c = 1/8 {
+forval c = 1/9 {
 local C`c' = country[`c']
 }
 restore
@@ -2798,6 +2797,7 @@ ylabel( ///
 -6 "`C6'" ///
 -7 "`C7'" ///
 -8 "`C8'" ///
+-9 "`C9'" ///
 , angle(0) nogrid) ytitle("") xline(0, lcol(black)) ///
 xlabel(`xlab', format(%9.0f)) ///
 title("Mortality rate, `ii'", placement(west) col(black) size(medium))
@@ -2806,10 +2806,11 @@ use APCs, clear
 gen AA = -A1-0.1 if A4 == 0
 replace AA = -A1-0.25 if A4 == 1
 replace AA = AA + 0.35 if A3=="nondm"
+replace country = "Canada (Alberta)" if country == "Canada"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
-forval c = 1/8 {
+forval c = 1/9 {
 local C`c' = country[`c']
 }
 restore
@@ -2836,6 +2837,7 @@ ylabel( ///
 -6 "`C6'" ///
 -7 "`C7'" ///
 -8 "`C8'" ///
+-9 "`C9'" ///
 , angle(0) nogrid) ytitle("") xline(0, lcol(black)) ///
 xlabel(`xlab', format(%9.0f)) ///
 title("Mortality rate, `ii'", placement(west) col(black) size(medium))
@@ -2843,10 +2845,11 @@ graph save GPH/APCs_`i', replace
 if "`i'" != "dmd" {
 use SMR_APCs, clear
 gen AA = -A1
+replace country = "Canada (Alberta)" if country == "Canada"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
-forval c = 1/8 {
+forval c = 1/9 {
 local C`c' = country[`c']
 }
 restore
@@ -2863,17 +2866,19 @@ ylabel( ///
 -6 "`C6'" ///
 -7 "`C7'" ///
 -8 "`C8'" ///
+-9 "`C9'" ///
 , angle(0) nogrid) ytitle("") xline(0, lcol(black)) ///
 xlabel(`xlabs', format(%9.0f)) ///
-title("SMR, `ii'", placement(west) col(black) size(medium))
+title("MRR, `ii'", placement(west) col(black) size(medium))
 graph save GPH/SAPCo_`i', replace
 use SMR_APCs, clear
 gen AA = -A1+0.15 if A3 == 0
 replace AA = -A1-0.15 if A3 == 1
+replace country = "Canada (Alberta)" if country == "Canada"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
-forval c = 1/8 {
+forval c = 1/9 {
 local C`c' = country[`c']
 }
 restore
@@ -2894,20 +2899,51 @@ ylabel( ///
 -6 "`C6'" ///
 -7 "`C7'" ///
 -8 "`C8'" ///
+-9 "`C9'" ///
 , angle(0) nogrid) ytitle("") xline(0, lcol(black)) ///
 xlabel(`xlabs', format(%9.0f)) ///
-title("SMR, `ii'", placement(west) col(black) size(medium))
+title("MRR, `ii'", placement(west) col(black) size(medium))
 graph save GPH/SAPCs_`i', replace
 }
+}
+foreach i in azd can cvd res dmd inf flu ckd liv {
+use SMR_APCs, clear
+keep if A2 == "`i'"
+tostring A4-A6, force replace format(%9.2f)
+gen AA = A4 + " (" + A5 + ", " + A6 + ")"
+keep A3 country AA
+rename A3 A4
+save MD/SMR_APC_`i', replace
+use APCs, clear
+keep if A2 == "`i'"
+tostring A5-A7, force replace format(%9.2f)
+gen A = A5 + " (" + A6 + ", " + A7 + ")"
+keep A3 A4 A country
+reshape wide A, i(country A4) j(A3) string
+merge 1:1 country A4 using MD/SMR_APC_`i'
+drop _merge
+bysort country (A4) : replace country = "" if _n!=1
+tostring A4, replace force
+replace A4 = "Females" if A4 == "0"
+replace A4 = "Males" if A4 == "1"
+replace A4 = "Overall" if A4 == "2"
+order country A4
+export delimited using APCt_`i'.csv, delimiter(":") novarnames replace
 }
 texdoc stlog close
 texdoc stlog, cmdlog 
 foreach ii in azd can cvd res dmd inf flu ckd liv {
-if "`ii'" == "cvd" {
-local oo = "Cardiovascular disease"
+if "`ii'" == "azd" {
+local oo = "Alzheimer's disease"
 }
 if "`ii'" == "can" {
 local oo = "Cancer"
+}
+if "`ii'" == "cvd" {
+local oo = "Cardiovascular disease"
+}
+if "`ii'" == "res" {
+local oo = "Chronic lower respiratory disease"
 }
 if "`ii'" == "dmd" {
 local oo = "Diabetes"
@@ -2918,17 +2954,11 @@ local oo = "Infectious diseases"
 if "`ii'" == "flu" {
 local oo = "Influenza and pneumonia"
 }
-if "`ii'" == "res" {
-local oo = "Chronic lower respiratory disease"
-}
-if "`ii'" == "liv" {
-local oo = "Liver disease"
-}
 if "`ii'" == "ckd" {
 local oo = "Kidney disease"
 }
-if "`ii'" == "azd" {
-local oo = "Alzheimer's disease"
+if "`ii'" == "liv" {
+local oo = "Liver disease"
 }
 if "`ii'" == "dmd" {
 local ii = "dmd"
@@ -2937,7 +2967,7 @@ GPH/APCo_`ii'.gph ///
 GPH/APCs_`ii'.gph ///
 , graphregion(color(white)) cols(1) altshrink xsize(3)
 texdoc graph, label(APC_`ii') figure(h!) cabove ///
-caption(Annual percent change in mortality rate by country. Overall (top) and by sex (bottom). `oo'.)
+caption(Average annual change in mortality rate by country. Overall (top) and by sex (bottom). `oo'.)
 }
 else {
 graph combine ///
@@ -2947,7 +2977,8 @@ GPH/APCs_`ii'.gph ///
 GPH/SAPCs_`ii'.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(6)
 texdoc graph, label(APC_`ii') figure(h!) cabove ///
-caption(Annual percent change in mortality rate and SMR by country. Overall (top) and by sex (bottom). `oo'.)
+caption(Average annual change in mortality rate and mortality rate ratio (MRR) by country. ///
+Overall (top) and by sex (bottom). `oo'.)
 }
 }
 texdoc stlog close
@@ -2955,7 +2986,283 @@ texdoc stlog close
 /***
 \color{black}
 
-pwd
+\clearpage
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average annual change in mortality rates and mortality rate ratios, 
+by country and sex. Alzheimer's disease.}
+	\hspace*{-1.5cm}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{APCt_azd.csv}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average annual change in mortality rates and mortality rate ratios, 
+by country and sex. Cancer.}
+	\hspace*{-1.5cm}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{APCt_can.csv}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average annual change in mortality rates and mortality rate ratios, 
+by country and sex. Cardiovascular disease.}
+	\hspace*{-1.5cm}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{APCt_cvd.csv}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average annual change in mortality rates and mortality rate ratios, 
+by country and sex. Chronic lower respiratory disease.}
+	\hspace*{-1.5cm}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{APCt_res.csv}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average annual change in mortality rates and mortality rate ratios, 
+by country and sex. Diabetes.}
+	\hspace*{-1.5cm}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{APCt_dmd.csv}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average annual change in mortality rates and mortality rate ratios, 
+by country and sex. Infectious diseases.}
+	\hspace*{-1.5cm}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{APCt_inf.csv}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average annual change in mortality rates and mortality rate ratios, 
+by country and sex. Influenza and pneumonia.}
+	\hspace*{-1.5cm}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{APCt_flu.csv}
+  \end{center}
+\end{table}
+
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average annual change in mortality rates and mortality rate ratios, 
+by country and sex. Kidney disease.}
+	\hspace*{-1.5cm}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{APCt_ckd.csv}
+  \end{center}
+\end{table}
+
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average annual change in mortality rates and mortality rate ratios, 
+by country and sex. Liver disease.}
+	\hspace*{-1.5cm}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{APCt_liv.csv}
+  \end{center}
+\end{table}
+
+
+
+
 \clearpage
 \section*{References}
 \addcontentsline{toc}{section}{References}
