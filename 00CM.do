@@ -195,11 +195,17 @@ replace agegp = 2 if age_gp3!=""
 replace agegp = 3 if age_gp4!=""
 collapse (sum) pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm, by(calendar agegp)
 foreach i in azd can cvd res dmd inf flu ckd liv {
-if "`i'" == "cvd" {
-local ii = "Cardiovascular disease"
+if "`i'" == "azd" {
+local ii = "Alzheimer's disease"
 }
 if "`i'" == "can" {
 local ii = "Cancer"
+}
+if "`i'" == "cvd" {
+local ii = "Cardiovascular disease"
+}
+if "`i'" == "res" {
+local ii = "Chronic lower respiratory disease"
 }
 if "`i'" == "dmd" {
 local ii = "Diabetes"
@@ -210,17 +216,11 @@ local ii = "Infectious diseases"
 if "`i'" == "flu" {
 local ii = "Influenza and pneumonia"
 }
-if "`i'" == "res" {
-local ii = "Chronic lower respiratory disease"
+if "`i'" == "ckd" {
+local ii = "Kidney disease"
 }
 if "`i'" == "liv" {
 local ii = "Liver disease"
-}
-if "`i'" == "ckd" {
-local ii = "Renal disease"
-}
-if "`i'" == "azd" {
-local ii = "Alzheimer's disease"
 }
 gen dm_`i' = 1000*`i'_d_dm/pys_dm
 twoway ///
@@ -253,7 +253,7 @@ GPH/dm_liv_chk1.gph ///
 GPH/dm_ckd_chk1.gph ///
 GPH/dm_azd_chk1.gph ///
 , graphregion(color(white)) cols(3) altshrink
-texdoc graph, label(chk1) figure(h!) ///
+texdoc graph, label(chk1) figure(h!) cabove ///
 caption(Crude mortality rate by age-grouping method, by cause of death. Australia. People with diabetes.)
 texdoc stlog close
 
@@ -351,6 +351,7 @@ I will re-randomise until this is fixed.
 ***/
 
 texdoc stlog
+quietly {
 forval ii = 1/10 {
 gen A = 1 if alldeathc_dm > alldeath_d_dm
 foreach i in azd can cvd res dmd inf flu ckd liv {
@@ -359,7 +360,12 @@ quietly replace `i'_d_dm = runiformint(1,max_`i') if A==1 & inrange(`i'_d_dm,1,9
 drop alldeathc_dm A
 gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
 count if alldeathc_dm > alldeath_d_dm
+if r(N) == 0  & `ii' == 10 {
+noisily di "Done"
 }
+}
+}
+texdoc stlog
 foreach i in alldeath azd can cvd res dmd inf flu ckd liv {
 di "`i'"
 count if `i'_d_dm > `i'_d_pop
@@ -615,6 +621,7 @@ quietly replace `i'_d_dm = runiformint(0,9) if `i'_d_dm ==.
 }
 gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
 count if alldeathc_dm > alldeath_d_dm
+quietly {
 forval ii = 1/1000 {
 gen A = 1 if alldeathc_dm > alldeath_d_dm
 foreach i in azd can cvd res dmd inf flu ckd liv {
@@ -623,6 +630,10 @@ quietly replace `i'_d_dm = runiformint(0,9) if A==1 & inrange(`i'_d_dm,0,9)
 drop alldeathc_dm A
 gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
 count if alldeathc_dm > alldeath_d_dm
+if r(N) == 0  & `ii' == 1000 {
+noisily di "Done"
+}
+}
 }
 gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv_d_nondm + ckd_d_nondm + azd_d_nondm
 count if alldeathc_nondm > alldeath_d_nondm
@@ -717,7 +728,7 @@ I will assume the mid-point of the age interval for people aged $<$40 is 35 and 
 
 texdoc stlog, cmdlog
 use uncleandbase, clear
-keep if substr(country,1,7)=="S.Korea"
+keep if country=="South Korea"
 rename sex SEX
 gen sex = 0 if SEX == "F"
 replace sex = 1 if SEX == "M"
@@ -798,7 +809,7 @@ texdoc stlog close
 \begin{table}[h!]
   \begin{center}
     \caption{Summary of data included in the analysis.}
-	\hspace*{-2.5cm}
+	\hspace*{-1.5cm}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
       multicolumn names,
@@ -819,15 +830,15 @@ texdoc stlog close
 {\multirow{2}{*}{##1}}}},
       display columns/3/.style={column name=Sex, column type={l}, text indicator="},
       display columns/4/.style={column name=Person-years of follow-up, column type={r}},
-      display columns/5/.style={column name=CVD, column type={r}},
+      display columns/5/.style={column name=AZD, column type={r}},
       display columns/6/.style={column name=CAN, column type={r}},
-      display columns/7/.style={column name=DMD, column type={r}},
-      display columns/8/.style={column name=INF, column type={r}},
-      display columns/9/.style={column name=FLU, column type={r}},
-      display columns/10/.style={column name=RES, column type={r}},
-      display columns/11/.style={column name=LIV, column type={r}},
+      display columns/7/.style={column name=CVD, column type={r}},
+      display columns/8/.style={column name=RES, column type={r}},
+      display columns/9/.style={column name=DMD, column type={r}},
+      display columns/10/.style={column name=INF, column type={r}},
+      display columns/11/.style={column name=FLU, column type={r}},
       display columns/12/.style={column name=CKD, column type={r}},
-      display columns/13/.style={column name=AZD, column type={r}},
+      display columns/13/.style={column name=LIV, column type={r}},
       display columns/14/.style={column name=OTH, column type={r}},
       every head row/.style={
         before row={\toprule
@@ -839,9 +850,10 @@ texdoc stlog close
         every last row/.style={after row=\bottomrule},
     ]{T1.csv}
   \end{center}
-Abbreviations: CVD -- Cardiovascular disease; CAN -- Cancer; DMD -- Diabetes; INF -- Infectious diseases; FLU --
-Influenza and pneumonia; RES -- Chronic lower respiratory disease; LIV -- Liver disease; 
-CKD -- Renal disease; AZD -- Alzheimer's disease; OTH -- All other causes.
+Abbreviations: AZD -- Alzheimer's disease; CAN -- Cancer; CVD -- Cardiovascular disease; 
+RES -- Chronic lower respiratory disease; DMD -- Diabetes; INF -- Infectious diseases; 
+FLU -- Influenza and pneumonia; CKD -- Kidney disease; LIV -- Liver disease;
+OTH -- All other causes.
 \end{table}
 \end{landscape}
 
@@ -855,7 +867,10 @@ CKD -- Renal disease; AZD -- Alzheimer's disease; OTH -- All other causes.
 texdoc stlog, cmdlog nodo
 foreach c in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 use `c', clear
-if "`c'" == "SKorea" {
+if "`c'" == "Canada" {
+local co = "Canada (Alberta)"
+}
+else if "`c'" == "SKorea" {
 local co = "South Korea"
 }
 else {
@@ -863,11 +878,17 @@ local co = "`c'"
 }
 collapse (sum) pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm, by(calendar sex)
 foreach i in azd can cvd res dmd inf flu ckd liv {
-if "`i'" == "cvd" {
-local ii = "Cardiovascular disease"
+if "`i'" == "azd" {
+local ii = "Alzheimer's disease"
 }
 if "`i'" == "can" {
 local ii = "Cancer"
+}
+if "`i'" == "cvd" {
+local ii = "Cardiovascular disease"
+}
+if "`i'" == "res" {
+local ii = "Chronic lower respiratory disease"
 }
 if "`i'" == "dmd" {
 local ii = "Diabetes"
@@ -878,17 +899,11 @@ local ii = "Infectious diseases"
 if "`i'" == "flu" {
 local ii = "Influenza and pneumonia"
 }
-if "`i'" == "res" {
-local ii = "Chronic lower respiratory disease"
+if "`i'" == "ckd" {
+local ii = "Kidney disease"
 }
 if "`i'" == "liv" {
 local ii = "Liver disease"
-}
-if "`i'" == "ckd" {
-local ii = "Renal disease"
-}
-if "`i'" == "azd" {
-local ii = "Alzheimer's disease"
 }
 foreach iii in dm nondm {
 if "`iii'" == "dm" {
@@ -922,7 +937,10 @@ texdoc stlog close
 texdoc stlog, nolog
 foreach c in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 use `c', clear
-if "`c'" == "SKorea" {
+if "`c'" == "Canada" {
+local co = "Canada (Alberta)"
+}
+else if "`c'" == "SKorea" {
 local co = "South Korea"
 }
 else {
@@ -930,11 +948,17 @@ local co = "`c'"
 }
 collapse (sum) pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm, by(calendar sex)
 foreach i in azd can cvd res dmd inf flu ckd liv {
-if "`i'" == "cvd" {
-local ii = "Cardiovascular disease"
+if "`i'" == "azd" {
+local ii = "Alzheimer's disease"
 }
 if "`i'" == "can" {
 local ii = "Cancer"
+}
+if "`i'" == "cvd" {
+local ii = "Cardiovascular disease"
+}
+if "`i'" == "res" {
+local ii = "Chronic lower respiratory disease"
 }
 if "`i'" == "dmd" {
 local ii = "Diabetes"
@@ -945,17 +969,11 @@ local ii = "Infectious diseases"
 if "`i'" == "flu" {
 local ii = "Influenza and pneumonia"
 }
-if "`i'" == "res" {
-local ii = "Chronic lower respiratory disease"
+if "`i'" == "ckd" {
+local ii = "Kidney disease"
 }
 if "`i'" == "liv" {
 local ii = "Liver disease"
-}
-if "`i'" == "ckd" {
-local ii = "Renal disease"
-}
-if "`i'" == "azd" {
-local ii = "Alzheimer's disease"
 }
 foreach iii in dm nondm {
 if "`iii'" == "dm" {
@@ -983,7 +1001,7 @@ graph combine ///
 GPH/cr_`i'_dm_`c'.gph ///
 GPH/cr_`i'_nondm_`c'.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(10)
-texdoc graph, label(cr_`i'_`c') figure(h!) ///
+texdoc graph, label(cr_`i'_`c') figure(h!) cabove ///
 caption(Crude mortality rate by cause of death, sex, and diabetes status. `ii'. `co'.)
 }
 texdoc stlog close
@@ -998,13 +1016,50 @@ texdoc stlog close
 \color{black}
 
 \clearpage
-A few suspected coding changes to note:
+A few potential coding changes to note:
 \begin{itemize}
-\item Figure~\ref{cr_ckd_Australia}, Australia, renal disease in 2013. 
-\item Figure~\ref{cr_cvd_Finland}, Finland, cardiovascular disease.
-\item Figure~\ref{cr_flu_Finland}, Finland, influenza and pneumonia from 2000-2005.
-\item Figure~\ref{cr_ckd_Scotland}, Scotland, renal disease in 2017.
+\item Figure~\ref{cr_ckd_Australia}, Australia, kidney disease in 2013 -- there is a big drop,
+suggesting a change in how kidney disease deaths were coded. Indeed, there were changes in coding 
+kidney disease deaths by the Australian Burea of Statistics with the implementation of new
+software, which were as follows: 
+\begin{itemize}
+\item ``N17-N19 Renal failure: 
+There has been an increase in the number of conditions that have a causal 
+relationship with renal failure. 
+As a result, fewer deaths have been 
+assigned to the code block N17-N19 as an 
+underlying cause of death. Of note, 
+E11 Non-insulin-dependent diabetes 
+mellitus now combines with renal failure to 
+form the code E11.2 Non-insulin- dependent diabetes mellitus with renal complications.''
+\item ``N18 Chronic kidney disease: 
+The title of code N18 has changed from Chronic renal failure to 
+Chronic kidney disease. With the title update a coding change 
+has occurred. Previously the term `Chronic kidney disease' was 
+coded to N03 Chronic nephritic syndrome. 
+It is now coded to N18 Chronic kidney disease. 
+Consequently, deaths assigned to N03 as an underlying cause have decreased.''
 \end{itemize}
+\item Figure~\ref{cr_flu_Finland}, Finland, influenza and pneumonia from 2000-2005 -- the continuous
+drop suggests a gradual change in how these deaths were coded.
+\item Figure~\ref{cr_can_Netherlands} and Figure~\ref{cr_cvd_Netherlands} and some others
+, Netherlands, Cancer and CVD in diabetes in 2007 -- the big jump from 2007-2008 across
+multiple causes of death suggests something specific to the definition of diabetes might have changed this year.
+Indeed, looking at diabetes deaths in people without diabetes, the rate dramatically drops over this period. 
+\item Figure~\ref{cr_ckd_Scotland}, Scotland, kidney disease in 2017 -- the big drop in 2017 for people
+with and without diabetes suggests a coding change. 
+\end{itemize}
+
+We will still analyse this data, but we should note that the sudden changes could be coding changes
+that will influences estimates of the rate of change.  
+
+\color{red}
+@Lei and @Dianna -- please confirm you are happy with this approach. 
+While keeping the data in won't have much impact on the figures, 
+they could have outsized impact on the APCs.
+We should also go back to Finland, Netherlands, and Scotland and ask them about this
+and see if they can find evidence for the change from their relevant coding bodies. 
+\color{black}
 
 \clearpage
 \section{Cause-specific mortality rates}
@@ -1186,7 +1241,7 @@ local dd = "with"
 if `i' == 2 {
 local c = "France"
 local o = "ckd"
-local oo = "renal disease"
+local oo = "kidney disease"
 local s = 0
 local ss = "females"
 local d = "nondm"
@@ -1353,7 +1408,7 @@ GPH/Rc_Canada_chd_dm_0_age.gph ///
 GPH/Rc_Australia_flu_nondm_1_age.gph ///
 GPH/Rc_Sweden_cvd_dm_0_age.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(3)
-texdoc graph, label(MC1) figure(h!) ///
+texdoc graph, label(MC1) figure(h!) cabove ///
 caption(Modelled and crude mortality rates by age for 10 randomly selected ///
 country/cause of death/diabetes status/sex combinations.)
 graph combine ///
@@ -1368,7 +1423,7 @@ GPH/Rc_Canada_chd_dm_0_period.gph ///
 GPH/Rc_Australia_flu_nondm_1_period.gph ///
 GPH/Rc_Sweden_cvd_dm_0_period.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(3)
-texdoc graph, label(MC2) figure(h!) ///
+texdoc graph, label(MC2) figure(h!) cabove ///
 caption(Modelled and crude mortality rates by year for 10 randomly selected ///
 country/cause of death/diabetes status/sex combinations.)
 graph combine ///
@@ -1383,7 +1438,7 @@ GPH/RCc_Canada_chd_dm_0_age.gph ///
 GPH/RCc_Australia_flu_nondm_1_age.gph ///
 GPH/RCc_Sweden_cvd_dm_0_age.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(3)
-texdoc graph, label(MC3) figure(h!) ///
+texdoc graph, label(MC3) figure(h!) cabove ///
 caption(Pearson residuals by age for 10 randomly selected ///
 country/cause of death/diabetes status/sex combinations.)
 graph combine ///
@@ -1398,7 +1453,7 @@ GPH/RCc_Canada_chd_dm_0_period.gph ///
 GPH/RCc_Australia_flu_nondm_1_period.gph ///
 GPH/RCc_Sweden_cvd_dm_0_period.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(3)
-texdoc graph, label(MC4) figure(h!) ///
+texdoc graph, label(MC4) figure(h!) cabove ///
 caption(Pearson residuals by period for 10 randomly selected ///
 country/cause of death/diabetes status/sex combinations.)
 graph combine ///
@@ -1413,7 +1468,7 @@ GPH/RCc_Canada_chd_dm_0_cohort.gph ///
 GPH/RCc_Australia_flu_nondm_1_cohort.gph ///
 GPH/RCc_Sweden_cvd_dm_0_cohort.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(3)
-texdoc graph, label(MC5) figure(h!) ///
+texdoc graph, label(MC5) figure(h!) cabove ///
 caption(Pearson residuals by cohort for 10 randomly selected ///
 country/cause of death/diabetes status/sex combinations.) 
 texdoc stlog close
@@ -1472,7 +1527,7 @@ cols(1)) ///
 graphregion(color(white)) ///
 ylabel(, format(%9.1f) angle(0)) ///
 ytitle("Population size (millions)") xtitle("Age")
-texdoc graph, label(SPN) figure(h!) caption(Pooled standard population)
+texdoc graph, label(SPN) figure(h!) cabove caption(Pooled standard population)
 restore
 su(pys_dm)
 gen age_dm_prop = pys_dm/r(sum)
@@ -1488,7 +1543,7 @@ cols(1)) ///
 ylabel(0(0.01)0.04, angle(0) format(%9.2f)) ///
 graphregion(color(white)) ///
 ytitle("Proportion") xtitle("Age")
-texdoc graph, label(SPP) figure(h!) caption(Pooled standard population proportion)
+texdoc graph, label(SPP) figure(h!) cabove caption(Pooled standard population proportion)
 keep age_dm B
 replace age_dm = age-0.5
 rename age_dm age
@@ -1530,7 +1585,7 @@ cols(1)) ///
 graphregion(color(white)) ///
 ylabel(, format(%9.1f) angle(0)) ///
 ytitle("Population size (millions)") xtitle("Age")
-texdoc graph, label(SPNs) figure(h!) caption(Pooled standard population by sex)
+texdoc graph, label(SPNs) figure(h!) cabove caption(Pooled standard population by sex)
 restore
 su(pys_dm)
 gen age_dm_prop = pys_dm/r(sum)
@@ -1565,7 +1620,7 @@ graph save stdprop_1, replace
 graph combine ///
 stdprop_0.gph stdprop_1.gph ///
 , graphregion(color(white)) altshrink cols(1) xsize(2.5)
-texdoc graph, label(SPPs) figure(h!) caption(Pooled standard population proportion by sex)
+texdoc graph, label(SPPs) figure(h!) cabove caption(Pooled standard population proportion by sex)
 keep sex age_dm B
 replace age_dm = age-0.5
 rename age_dm age
@@ -1941,7 +1996,7 @@ local yform = "%9.2f"
 local yrange = "0.02 2.1"
 }
 if "`ii'" == "ckd" {
-local oo = "Renal disease"
+local oo = "Kidney disease"
 local ylab = "0.01 0.02 0.05 0.1 0.2 0.5 1 2"
 local yform = "%9.2f"
 local yrange = "0.005 2"
@@ -2104,7 +2159,7 @@ if "`ii'" == "liv" {
 local oo = "Liver disease"
 }
 if "`ii'" == "ckd" {
-local oo = "Renal disease"
+local oo = "Kidney disease"
 }
 if "`ii'" == "azd" {
 local oo = "Alzheimer's disease"
@@ -2116,7 +2171,7 @@ GPH/STD_GPH_`ii'_dm.gph ///
 GPH/STD_GPH_`ii'_dm_0.gph ///
 GPH/STD_GPH_`ii'_dm_1.gph ///
 , graphregion(color(white)) cols(1) altshrink xsize(2)
-texdoc graph, label(STDMRF_`ii') figure(h!) optargs(width=0.6\textwidth) ///
+texdoc graph, label(STDMRF_`ii') figure(h!) cabove optargs(width=0.6\textwidth) ///
 caption(Age-standardised mortality rate by cause of death, people aged 40-89. `oo')
 }
 else {
@@ -2128,7 +2183,7 @@ GPH/STD_GPH_`ii'_nondm_0.gph ///
 GPH/STD_GPH_`ii'_dm_1.gph ///
 GPH/STD_GPH_`ii'_nondm_1.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(4)
-texdoc graph, label(STDMRF_`ii') figure(h!) ///
+texdoc graph, label(STDMRF_`ii') figure(h!) cabove ///
 caption(Age-standardised mortality rate by cause of death, people aged 40-89. `oo')
 }
 }
@@ -2450,7 +2505,7 @@ local yform = "%9.0f"
 local yrange = "1 10"
 }
 if "`ii'" == "ckd" {
-local oo = "Renal disease"
+local oo = "Kidney disease"
 local ylab = "0.5 1 2 5 10"
 local yform = "%9.0f"
 local yrange = "0.5 11"
@@ -2605,7 +2660,7 @@ if "`ii'" == "liv" {
 local oo = "Liver disease"
 }
 if "`ii'" == "ckd" {
-local oo = "Renal disease"
+local oo = "Kidney disease"
 }
 if "`ii'" == "azd" {
 local oo = "Alzheimer's disease"
@@ -2615,7 +2670,7 @@ GPH/SMR_`ii'.gph ///
 GPH/SMR_`ii'_0.gph ///
 GPH/SMR_`ii'_1.gph ///
 , graphregion(color(white)) cols(3) altshrink xsize(15)
-texdoc graph, label(STDMRF_`ii') figure(h!) ///
+texdoc graph, label(STDMRF_`ii') figure(h!) cabove ///
 caption(Standardised mortality ratio by cause of death and sex. `oo')
 }
 
@@ -2847,7 +2902,7 @@ local xlabs = "-10(5)5"
 local legp = 11
 }
 if "`i'" == "ckd" {
-local ii = "renal disease"
+local ii = "kidney disease"
 local xlab = "-10(5)10"
 local xlabs = "-10(5)5"
 local legp = 1
@@ -3012,7 +3067,7 @@ if "`ii'" == "liv" {
 local oo = "Liver disease"
 }
 if "`ii'" == "ckd" {
-local oo = "Renal disease"
+local oo = "Kidney disease"
 }
 if "`ii'" == "azd" {
 local oo = "Alzheimer's disease"
@@ -3023,7 +3078,7 @@ graph combine ///
 GPH/APCo_`ii'.gph ///
 GPH/APCs_`ii'.gph ///
 , graphregion(color(white)) cols(1) altshrink xsize(3)
-texdoc graph, label(APC_`ii') figure(h!) ///
+texdoc graph, label(APC_`ii') figure(h!) cabove ///
 caption(Annual percent change in mortality rate by country. Overall (top) and by sex (bottom). `oo'.)
 }
 else {
@@ -3033,7 +3088,7 @@ GPH/SAPCo_`ii'.gph ///
 GPH/APCs_`ii'.gph ///
 GPH/SAPCs_`ii'.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(6)
-texdoc graph, label(APC_`ii') figure(h!) ///
+texdoc graph, label(APC_`ii') figure(h!) cabove ///
 caption(Annual percent change in mortality rate and SMR by country. Overall (top) and by sex (bottom). `oo'.)
 }
 }
