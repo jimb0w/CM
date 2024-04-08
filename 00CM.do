@@ -1070,17 +1070,16 @@ The methods are largely derived from Magliano et al. \cite{MaglianoLDE2022}.
 To generate age- and period-specific rates, which will be used to generate age-standardised rates, 
 we will model mortality rates using age-period-cohort models \cite{CarstensenSTATMED2007}.
 Each model will be a Poisson model, parameterised using 
-spline effects of age, period, and cohort (period-age), with log 
+spline effects of age, period, and cohort (period $-$ age), with log 
 of person-years as the offset. 
 Age is defined as above (i.e., the midpoint of the interval in most cases) and models are
 fit separately for each cause of death and country in people with and without diabetes and by sex. 
-Because this will be \begin{math} 9 \times 7 \times 2 \times 2 = 252 \end{math} models, 
+Because this will be \begin{math} 9 \times 9 \times 2 \times 2 = 324 \end{math} models, 
 we won't check model fit for each model. Instead, 
 to check model fit we will select ten at random and check the modelled and crude rates as well as 
 the Pearson residuals. 
-
 These models will be used to estimate mortality rates for single year ages and calendar years.
-These modelled rates will first be plotted by age and period, then used to generate
+These modelled rates will be used to generate
 age-standardised rates in people with and without diabetes, using direct standardisation
 (using the total diabetes population formed by pooling the consortium data) by period. 
 
@@ -1180,8 +1179,8 @@ save MD/R_`i'_`ii'_`iii'_`iiii', replace
 set seed 1234
 clear
 gen A =.
-foreach i in Australia Canada Finland France Lithuania Scotland {
-foreach ii in cvd can inf flu res liv ckd azd {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
+foreach ii in azd can cvd res dmd inf flu ckd liv {
 foreach iii in dm nondm {
 foreach iiii in 0 1 {
 local B = runiform()
@@ -1196,8 +1195,8 @@ save RCc, replace
 set seed 1234
 clear
 gen A =.
-foreach i in Australia Canada Finland France Lithuania Scotland {
-foreach ii in cvd can inf flu res liv ckd azd {
+foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
+foreach ii in azd can cvd res dmd inf flu ckd liv {
 foreach iii in dm nondm {
 foreach iiii in 0 1 {
 local B = runiform()
@@ -1220,7 +1219,7 @@ texdoc stlog close
 
 
 *PICKUP NEEDS TO BE FIXED WHEN FINALISED
-
+*You should first pick countries and cods then only run models for those, rest is a waste. 
 
 
 
@@ -1899,13 +1898,9 @@ texdoc stlog close
 \color{black}
 
 \clearpage
-So, there are a few data issues, meaning some rates should probably
-not be presented on these plots. The standardisation
-confidence interval crosses 0 for CKD deaths among males from Lithuania, 
+The standardisation confidence interval crosses 0 for CKD deaths among males from Lithuania, 
 reflecting extremely low numbers. I simply won't plot these. 
 Similarly for Alzheimer's disease deaths among males from South Korea. 
-
-Additionally, the coding issues noticed above will be dealt with here. 
 
 \color{Blue4}
 ***/
@@ -1919,35 +1914,10 @@ clear
 set obs 1
 gen country = "SKorea"
 save MD/STD_SKorea_azd_dm_1, replace
-clear
-set obs 1
-gen country = "Australia"
-save MD/STD_Australia_ckd_dm, replace
-save MD/STD_Australia_ckd_nondm, replace
-save MD/STD_Australia_ckd_dm_0, replace
-save MD/STD_Australia_ckd_dm_1, replace
-save MD/STD_Australia_ckd_nondm_0, replace
-save MD/STD_Australia_ckd_nondm_1, replace
-clear
-set obs 1
-gen country = "Finland"
-save MD/STD_Finland_flu_dm, replace
-save MD/STD_Finland_flu_nondm, replace
-save MD/STD_Finland_flu_dm_0, replace
-save MD/STD_Finland_flu_dm_1, replace
-save MD/STD_Finland_flu_nondm_0, replace
-save MD/STD_Finland_flu_nondm_1, replace
-clear
-set obs 1
-gen country = "Scotland"
-save MD/STD_Scotland_ckd_dm, replace
-save MD/STD_Scotland_ckd_nondm, replace
-save MD/STD_Scotland_ckd_dm_0, replace
-save MD/STD_Scotland_ckd_dm_1, replace
-save MD/STD_Scotland_ckd_nondm_0, replace
-save MD/STD_Scotland_ckd_nondm_1, replace
 texdoc stlog close
 texdoc stlog, cmdlog nodo
+*ssc install palettes
+*ssc install colrspace
 foreach ii in azd can cvd res dmd inf flu ckd liv {
 foreach iii in dm nondm {
 if "`ii'" == "dmd" & "`iii'" == "nondm" {
@@ -2017,23 +1987,17 @@ clear
 foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland Skorea {
 append using MD/STD_`i'_`ii'_`iii'
 }
-local col1 = "0 0 255"
-local col2 = "75 0 130"
-local col3 = "255 0 255"
-local col4 = "255 0 0"
-local col5 = "255 125 0"
-local col6 = "0 125 0"
-local col7 = "0 175 255"
-local col8 = "0 0 0"
+colorpalette s1r, n(9) nograph
+replace country = "Canada (Alberta)" if country = "Canada"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort country : keep if _n == 1
-forval i = 1/8 {
+forval i = 1/9 {
 local C`i' = country[`i']
 }
 restore
 twoway ///
-(rarea ub lb calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(rarea ub lb calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
 (line stdrate calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
 (rarea ub lb calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
 (line stdrate calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
@@ -2049,6 +2013,8 @@ twoway ///
 (line stdrate calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
 (rarea ub lb calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
 (line stdrate calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
