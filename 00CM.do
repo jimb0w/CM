@@ -365,7 +365,6 @@ noisily di "Done"
 }
 }
 }
-texdoc stlog
 foreach i in alldeath azd can cvd res dmd inf flu ckd liv {
 di "`i'"
 count if `i'_d_dm > `i'_d_pop
@@ -2928,6 +2927,11 @@ replace A4 = "Females" if A4 == "0"
 replace A4 = "Males" if A4 == "1"
 replace A4 = "Overall" if A4 == "2"
 order country A4
+replace country = "Canada (Alberta)" if country == "Canada"
+replace country = "South Korea" if country == "SKorea"
+if "`i'" == "dmd" {
+drop AA
+}
 export delimited using APCt_`i'.csv, delimiter(":") novarnames replace
 }
 texdoc stlog close
@@ -2992,7 +2996,6 @@ texdoc stlog close
   \begin{center}
     \caption{Average annual change in mortality rates and mortality rate ratios, 
 by country and sex. Alzheimer's disease.}
-	\hspace*{-1.5cm}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
       multicolumn names,
@@ -3022,7 +3025,6 @@ by country and sex. Alzheimer's disease.}
   \begin{center}
     \caption{Average annual change in mortality rates and mortality rate ratios, 
 by country and sex. Cancer.}
-	\hspace*{-1.5cm}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
       multicolumn names,
@@ -3052,7 +3054,6 @@ by country and sex. Cancer.}
   \begin{center}
     \caption{Average annual change in mortality rates and mortality rate ratios, 
 by country and sex. Cardiovascular disease.}
-	\hspace*{-1.5cm}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
       multicolumn names,
@@ -3082,7 +3083,6 @@ by country and sex. Cardiovascular disease.}
   \begin{center}
     \caption{Average annual change in mortality rates and mortality rate ratios, 
 by country and sex. Chronic lower respiratory disease.}
-	\hspace*{-1.5cm}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
       multicolumn names,
@@ -3112,7 +3112,6 @@ by country and sex. Chronic lower respiratory disease.}
   \begin{center}
     \caption{Average annual change in mortality rates and mortality rate ratios, 
 by country and sex. Diabetes.}
-	\hspace*{-1.5cm}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
       multicolumn names,
@@ -3125,8 +3124,6 @@ by country and sex. Diabetes.}
 {\multirow{3}{*}{##1}}}},
       display columns/1/.style={column name=Sex, column type={l}, text indicator="},
       display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
-      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
-      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
       every head row/.style={
         before row={\toprule
 					},
@@ -3142,7 +3139,6 @@ by country and sex. Diabetes.}
   \begin{center}
     \caption{Average annual change in mortality rates and mortality rate ratios, 
 by country and sex. Infectious diseases.}
-	\hspace*{-1.5cm}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
       multicolumn names,
@@ -3172,7 +3168,6 @@ by country and sex. Infectious diseases.}
   \begin{center}
     \caption{Average annual change in mortality rates and mortality rate ratios, 
 by country and sex. Influenza and pneumonia.}
-	\hspace*{-1.5cm}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
       multicolumn names,
@@ -3203,7 +3198,6 @@ by country and sex. Influenza and pneumonia.}
   \begin{center}
     \caption{Average annual change in mortality rates and mortality rate ratios, 
 by country and sex. Kidney disease.}
-	\hspace*{-1.5cm}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
       multicolumn names,
@@ -3234,7 +3228,6 @@ by country and sex. Kidney disease.}
   \begin{center}
     \caption{Average annual change in mortality rates and mortality rate ratios, 
 by country and sex. Liver disease.}
-	\hspace*{-1.5cm}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
       multicolumn names,
