@@ -590,7 +590,7 @@ texdoc stlog close
 \clearpage
 \subsection{Netherlands}
 
-For Netherland, we have the following variables (by age, sex, and calendar year): 
+For Netherlands, we have the following variables (by age, sex, and calendar year): 
 Person-years and deaths in people with and without diabetes. I.e., no further
 variables need to be derived. 
 Nevertheless, Netherlands restricts counts between 0 and 9 for both people with and without
@@ -598,12 +598,16 @@ diabetes. I will fill them in randomly, where the number
 can be any number from 0 to 9 with equal probability. 
 I will assume the mid-point of the age interval for people aged $<$40 is 35 and for 90$+$ is 95.
 
+Additionally, because the definition of diabetes in the Netherlands relies on 2 years of follow-up from
+2006, we are dropping data from 2007. 
+
 \color{Blue4}
 ***/
 
 texdoc stlog, cmdlog
 use uncleandbase, clear
 keep if country == "Netherlands"
+drop if cal == 2007
 rename sex SEX
 gen sex = 0 if SEX == "F"
 replace sex = 1 if SEX == "M"
@@ -2346,7 +2350,7 @@ foreach ii in azd can cvd res inf flu ckd liv {
 if "`ii'" == "azd" {
 local oo = "Alzheimer's disease"
 local ylab = "0.5 1 1.5"
-local yform = "%9.0f"
+local yform = "%9.1f"
 local yrange = "0.3 1.5"
 }
 if "`ii'" == "can" {
