@@ -189,6 +189,7 @@ population counts.
 ***/
 
 texdoc stlog, cmdlog nodo
+/*
 preserve
 gen agegp = 1 if age_gp1!=""
 replace agegp = 2 if age_gp3!=""
@@ -255,6 +256,7 @@ GPH/dm_azd_chk1.gph ///
 , graphregion(color(white)) cols(3) altshrink
 texdoc graph, label(chk1) figure(h!) cabove ///
 caption(Crude mortality rate by age-grouping method, by cause of death. Australia. People with diabetes.)
+*/
 texdoc stlog close
 
 /***
@@ -515,20 +517,36 @@ texdoc stlog close
 For France, we have the following variables (by age, sex, and calendar year): 
 person-years and deaths in people with and without diabetes. I.e., no further
 variables need to be derived. 
+France has excluded counts between 1 and 4, which I will fill in randomly. 
 I will assume the mid-point of the age interval for people aged $<$40 is 35 and for 90$+$ is 95.
-
-France provided data for 2013-2017 and 2020, but because we are analysing trends, 
-we will exclude the data from 2020. 
 
 \color{Blue4}
 ***/
 
-texdoc stlog, cmdlog nodo
+texdoc stlog, cmdlog
 use uncleandbase, clear
 keep if substr(country,1,8)=="France_1"
 rename sex SEX
 gen sex = 0 if SEX == "F"
 replace sex = 1 if SEX == "M"
+rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_nondm alldeath_d_pop)
+recode dmd_d_nondm .=0
+texdoc stlog close
+texdoc stlog
+ta age_gp1
+foreach i in alldeath azd can cvd res dmd inf flu ckd liv {
+di "`i'"
+ta age_gp1 if `i'_d_nondm ==.
+quietly replace `i'_d_nondm = runiformint(1,4) if `i'_d_nondm==.
+ta age_gp1 if `i'_d_dm ==.
+quietly replace `i'_d_dm = runiformint(1,4) if `i'_d_dm ==.
+}
+gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
+count if alldeathc_dm > alldeath_d_dm
+gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv_d_nondm + ckd_d_nondm + azd_d_nondm
+count if alldeathc_nondm > alldeath_d_nondm
+texdoc stlog close
+texdoc stlog, cmdlog nodo
 replace country = substr(country,1,6)
 gen age_dm = substr(age_gp1,1,2)
 replace age_dm = "30" if age_dm == "0-"
@@ -538,7 +556,6 @@ gen age_nondm = substr(age_gp1,1,2)
 replace age_nondm = "15" if age_nondm == "0-"
 destring age_nondm, replace
 replace age_nondm = age_nondm+5
-rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_nondm alldeath_d_pop)
 keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
 save France, replace
 texdoc stlog close
@@ -625,7 +642,7 @@ quietly replace `i'_d_dm = runiformint(0,9) if `i'_d_dm ==.
 gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
 count if alldeathc_dm > alldeath_d_dm
 quietly {
-forval ii = 1/1000 {
+forval ii = 1/10000 {
 gen A = 1 if alldeathc_dm > alldeath_d_dm
 foreach i in azd can cvd res dmd inf flu ckd liv {
 quietly replace `i'_d_dm = runiformint(0,9) if A==1 & inrange(`i'_d_dm,0,9)
@@ -633,7 +650,7 @@ quietly replace `i'_d_dm = runiformint(0,9) if A==1 & inrange(`i'_d_dm,0,9)
 drop alldeathc_dm A
 gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
 count if alldeathc_dm > alldeath_d_dm
-if r(N) == 0  & `ii' == 1000 {
+if r(N) == 0  & `ii' == 10000 {
 noisily di "Done"
 }
 }
@@ -710,6 +727,7 @@ replace `i'_d_dm = . if age_dm==.
 replace `i'_d_nondm = . if age_nondm==.
 }
 keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
+drop if age_dm==. & age_nondm==.
 save Scotland, replace
 texdoc stlog close
 
@@ -762,6 +780,21 @@ Table~\ref{cleansumtab} shows a summary of the data included in this analysis.
 \color{Blue4}
 ***/
 
+texdoc stlog, nolog nodo
+*For DM
+clear
+foreach c in Australia Canada Denmark Finland France Lithuania Netherlands Scotland SKorea {
+append using `c'
+}
+replace country = "South Korea" if country == "SKorea"
+replace country = "Canada (Alberta)" if country == "Canada"
+recode dmd_d_nondm .=0
+gen other_d_dm = alldeath_d_dm - ///
+(cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm)
+gen other_d_nondm = alldeath_d_nondm - ///
+(cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv_d_nondm + ckd_d_nondm + azd_d_nondm)
+save DMCMdata, replace
+texdoc stlog close
 texdoc stlog, cmdlog nodo
 clear
 foreach c in Australia Canada Denmark Finland France Lithuania Netherlands Scotland SKorea {
