@@ -135,7 +135,7 @@ without diabetes is just person-years in the total population minus person-years
 Similarly, for deaths in people without diabetes, we can subtract the deaths in people with diabetes
 from the total deaths. 
 
-However, Australian data restrictions prohibit the use of any cell count $<$6 
+Australian data restrictions prohibit the use of any cell count $<$6 
 for the diabetes population; thus, 
 there are many blank values (see below). I will fill them in randomly, where the number
 can be any number from 0 to 5 with equal probability, unless the number of deaths in the
@@ -407,7 +407,7 @@ without diabetes is just person-years in the total population minus person-years
 Similarly, for deaths in people without diabetes, we can subtract the deaths in people with diabetes
 from the total deaths. 
 
-However, Canadian data restrictions prohibit the use of any cell count between 1 and 9
+Canadian data restrictions prohibit the use of any cell count between 1 and 9
 for people with diabetes and in the total population; thus, 
 there are many blank values (see below). I will fill them in randomly, where the number
 can be any number from 1 to 9 with equal probability, unless the number of deaths in the
@@ -446,11 +446,12 @@ foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
 di "`i'"
 count if `i'_d_dm > `i'_d_pop
 }
+gen alldeathc_pop = cvd_d_pop + can_d_pop + dmd_d_pop + inf_d_pop + flu_d_pop + res_d_pop + liv1_d_pop + ckd_d_pop + azd_d_pop
+count if alldeathc_pop > alldeath_d_pop
 gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm
 count if alldeathc_dm > alldeath_d_dm
-
 quietly {
-forval ii = 1/10 {
+forval ii = 1/3 {
 gen A = 1 if alldeathc_dm > alldeath_d_dm
 foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
 quietly replace `i'_d_dm = runiformint(1,max_`i') if A==1 & inrange(`i'_d_dm,1,9)
@@ -458,20 +459,35 @@ quietly replace `i'_d_dm = runiformint(1,max_`i') if A==1 & inrange(`i'_d_dm,1,9
 drop alldeathc_dm A
 gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm
 count if alldeathc_dm > alldeath_d_dm
-if r(N) == 0  & `ii' == 10 {
+if r(N) == 0 {
 noisily di "Done"
 }
 }
 }
-stop
-foreach i in alldeath can cvd res azd dmd inf flu ckd liv {
-di "`i'"
-count if `i'_d_dm > `i'_d_pop
-}
-foreach i in alldeath can cvd res azd dmd inf flu ckd liv {
+gen cvdcheck = chd_d_pop + cbd_d_pop + hfd_d_pop
+count if cvdcheck > cvd_d_pop
+drop cvdcheck
+gen cvdcheck = chd_d_dm + cbd_d_dm + hfd_d_dm
+count if cvdcheck > cvd_d_dm
+ta age_gp1 if cvdcheck > cvd_d_dm
+replace max_chd = min(cvd_d_dm,9)
+replace chd_d_dm = runiformint(1,max_chd) if cvdcheck > cvd_d_dm & inrange(chd_d_dm,1,9)
+replace max_cbd = min(cvd_d_dm-chd_d_dm,9)
+replace cbd_d_dm = runiformint(0,max_cbd) if cvdcheck > cvd_d_dm & inrange(cbd_d_dm,1,9)
+replace max_hfd = min(cvd_d_dm-chd_d_dm-cbd_d_dm,9)
+replace hfd_d_dm = runiformint(0,max_hfd) if cvdcheck > cvd_d_dm & inrange(hfd_d_dm,1,9)
+drop cvdcheck
+gen cvdcheck = chd_d_dm + cbd_d_dm + hfd_d_dm
+count if cvdcheck > cvd_d_dm
+count if liv1_d_dm < liv2_d_dm
+ta age_gp1 if liv1_d_dm < liv2_d_dm
+replace max_liv2 = min(liv1_d_dm,9)
+replace liv2_d_dm = runiformint(1,max_liv2) if liv1_d_dm < liv2_d_dm & inrange(liv2_d_dm,1,9)
+count if liv1_d_dm < liv2_d_dm
+foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
 quietly replace `i'_d_nondm = `i'_d_pop-`i'_d_dm
 }
-gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv_d_nondm + ckd_d_nondm + azd_d_nondm
+gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm
 count if alldeathc_nondm > alldeath_d_nondm
 texdoc stlog close
 texdoc stlog, cmdlog nodo
@@ -498,7 +514,7 @@ texdoc stlog close
 For Denmark, we have the following variables (by age, sex, and calendar year): 
 Person-years and deaths in people with and without diabetes. I.e., no further
 variables need to be derived. 
-Nevertheless, Denmark restricts counts between 1 and 3 for both people with and without
+Denmark restricts counts between 1 and 3 for both people with and without
 diabetes. I will fill them in randomly, where the number
 can be any number from 1 to 3 with equal probability. 
 I will assume the mid-point of the age interval for people aged $<$40 is 35 and for 90$+$ is 95.
@@ -516,24 +532,42 @@ rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_no
 texdoc stlog close
 texdoc stlog
 ta age_gp1
-foreach i in can cvd res azd dmd inf flu ckd liv {
+foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
 di "`i'"
 ta age_gp1 if `i'_d_nondm ==.
 quietly replace `i'_d_nondm = runiformint(1,3) if `i'_d_nondm==.
 ta age_gp1 if `i'_d_dm ==.
 quietly replace `i'_d_dm = runiformint(1,3) if `i'_d_dm ==.
 }
-gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
-count if alldeathc_dm > alldeath_d_dm
-gen A = 1 if alldeathc_dm > alldeath_d_dm
-foreach i in can cvd res azd dmd inf flu ckd liv {
-quietly replace `i'_d_dm = runiformint(1,3) if A==1 & inrange(`i'_d_dm,1,3)
-}
-drop alldeathc_dm A
-gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
-count if alldeathc_dm > alldeath_d_dm
-gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv_d_nondm + ckd_d_nondm + azd_d_nondm
+gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm
 count if alldeathc_nondm > alldeath_d_nondm
+gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm
+count if alldeathc_dm > alldeath_d_dm
+gen cvdcheck = chd_d_nondm + cbd_d_nondm + hfd_d_nondm
+count if cvdcheck > cvd_d_nondm
+drop cvdcheck
+gen cvdcheck = chd_d_dm + cbd_d_dm + hfd_d_dm
+count if cvdcheck > cvd_d_dm
+ta age_gp1 if cvdcheck > cvd_d_dm
+gen max_chd = min(cvd_d_dm,3)
+replace chd_d_dm = runiformint(1,max_chd) if cvdcheck > cvd_d_dm & inrange(chd_d_dm,1,3)
+gen max_cbd = min(cvd_d_dm-chd_d_dm,3)
+replace cbd_d_dm = runiformint(0,max_cbd) if cvdcheck > cvd_d_dm & inrange(cbd_d_dm,1,3)
+gen max_hfd = min(cvd_d_dm-chd_d_dm-cbd_d_dm,3)
+replace hfd_d_dm = runiformint(0,max_hfd) if cvdcheck > cvd_d_dm & inrange(hfd_d_dm,1,3)
+drop cvdcheck
+gen cvdcheck = chd_d_dm + cbd_d_dm + hfd_d_dm
+count if cvdcheck > cvd_d_dm
+count if liv1_d_nondm < liv2_d_nondm
+ta age_gp1 if liv1_d_nondm < liv2_d_nondm
+gen max_liv2 = min(liv1_d_nondm,3)
+replace liv2_d_nondm = runiformint(1,max_liv2) if liv1_d_nondm < liv2_d_nondm & inrange(liv2_d_nondm,1,3)
+count if liv1_d_nondm < liv2_d_nondm
+count if liv1_d_dm < liv2_d_dm
+ta age_gp1 if liv1_d_dm < liv2_d_dm
+replace max_liv2 = min(liv1_d_dm,3)
+replace liv2_d_dm = runiformint(1,max_liv2) if liv1_d_dm < liv2_d_dm & inrange(liv2_d_dm,1,3)
+count if liv1_d_dm < liv2_d_dm
 texdoc stlog close
 texdoc stlog, cmdlog nodo
 gen age_dm = substr(age_gp1,1,2)
@@ -552,17 +586,13 @@ texdoc stlog close
 /***
 \color{black}
 
-There's a considerable amount of missing data here,
-although again, it's always for small cell counts, so shouldn't
-have a major impact.
-
 \clearpage
 \subsection{Finland}
 
 For Finland, we have the following variables (by age, sex, and calendar year): 
 Person-years and deaths in people with and without diabetes. I.e., no further
 variables need to be derived. 
-Nevertheless, Finland restricts counts between 1 and 5 for both people with and without
+Finland restricts counts between 1 and 5 for both people with and without
 diabetes. I will fill them in randomly, where the number
 can be any number from 1 to 5 with equal probability. 
 I will assume the mid-point of the age interval for people aged $<$40 is 35 and for 90$+$ is 95.
@@ -580,17 +610,49 @@ rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_no
 texdoc stlog close
 texdoc stlog
 ta age_gp1
-foreach i in alldeath can cvd res azd dmd inf flu ckd liv {
+foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
 di "`i'"
 ta age_gp1 if `i'_d_nondm ==.
 quietly replace `i'_d_nondm = runiformint(1,5) if `i'_d_nondm==.
 ta age_gp1 if `i'_d_dm ==.
 quietly replace `i'_d_dm = runiformint(1,5) if `i'_d_dm ==.
 }
-gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
-count if alldeathc_dm > alldeath_d_dm
-gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv_d_nondm + ckd_d_nondm + azd_d_nondm
+gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm
 count if alldeathc_nondm > alldeath_d_nondm
+gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm
+count if alldeathc_dm > alldeath_d_dm
+
+gen cvdcheck = chd_d_nondm + cbd_d_nondm + hfd_d_nondm
+count if cvdcheck > cvd_d_nondm
+ta age_gp1 if cvdcheck > cvd_d_nondm
+texdoc stlog close
+
+/***
+\color{red}
+
+This isn't an error with random number generation;
+the data itself is faulty.
+
+\color{Blue4}
+***/
+
+
+*Not an error with random
+replace cvd_d_nondm = chd_d_nondm + cbd_d_nondm + hfd_d_nondm
+
+
+gen max_chd = min(cvd_d_nondm,5)
+replace chd_d_nondm = runiformint(1,max_chd) if cvdcheck > cvd_d_nondm & inrange(chd_d_nondm,1,5)
+gen max_cbd = min(cvd_d_nondm-chd_d_nondm,5)
+replace cbd_d_nondm = runiformint(0,max_cbd) if cvdcheck > cvd_d_nondm & inrange(cbd_d_nondm,1,5)
+gen max_hfd = min(cvd_d_nondm-chd_d_nondm-cbd_d_nondm,5)
+replace hfd_d_nondm = runiformint(0,max_hfd) if cvdcheck > cvd_d_nondm & inrange(hfd_d_nondm,1,5)
+drop cvdcheck
+gen cvdcheck = chd_d_nondm + cbd_d_nondm + hfd_d_nondm
+br if cvdcheck > cvd_d_nondm
+
+stop
+
 texdoc stlog close
 texdoc stlog, cmdlog nodo
 gen age_dm = substr(age_gp1,1,2)
@@ -892,7 +954,7 @@ rename (liv1_d_dm liv1_d_pop liv1_d_nondm) (liv_d_dm liv_d_pop liv_d_nondm)
 
 
 erase uncleandbase and all countries etc.
-
+also all the checksteps can be done in one line you tool, so make it A+B+C>D, not gen check, then check, then drop check
 
 
 /***
@@ -3443,7 +3505,8 @@ erase CM.tex
 
 
 ! git init .
-! git add CM.do CM.pdf
+! git add CM.do
+* CM.pdf
 ! git commit -m "0"
 ! git remote remove origin
 ! git remote add origin https://github.com/jimb0w/CM.git
