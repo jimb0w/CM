@@ -9,7 +9,7 @@ set linesize 100
 
 texdoc stlog, nolog nodo
 cd /home/jimb0w/Documents/CM
-*texdoc do CM.do
+texdoc do CM.do
 texdoc stlog close
 
 /***
@@ -153,7 +153,7 @@ confidence intervals for the younger ages.
 texdoc stlog, cmdlog
 cd /home/jimb0w/Documents/CM
 texdoc stlog close
-texdoc stlog, cmdlog nodo
+texdoc stlog, cmdlog
 import delimited "Consortium COD database v6.csv", clear
 save uncleandbase, replace
 texdoc stlog close
@@ -222,20 +222,16 @@ overall liver diease.
 ***/
 
 texdoc stlog
-gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm
-count if alldeathc_dm > alldeath_d_dm
-gen cvdcheck = chd_d_dm + cbd_d_dm + hfd_d_dm
-count if cvdcheck > cvd_d_dm
-ta age_gp1 if cvdcheck > cvd_d_dm
+count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
+count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
+ta age_gp1 if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
 replace max_chd = min(cvd_d_dm,5)
-replace chd_d_dm = runiformint(0,max_chd) if cvdcheck > cvd_d_dm
+replace chd_d_dm = runiformint(0,max_chd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
 replace max_cbd = min(cvd_d_dm-chd_d_dm,5)
-replace cbd_d_dm = runiformint(0,max_cbd) if cvdcheck > cvd_d_dm
+replace cbd_d_dm = runiformint(0,max_cbd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
 replace max_hfd = min(cvd_d_dm-chd_d_dm-cbd_d_dm,5)
-replace hfd_d_dm = runiformint(0,max_hfd) if cvdcheck > cvd_d_dm
-drop cvdcheck
-gen cvdcheck = chd_d_dm + cbd_d_dm + hfd_d_dm
-count if cvdcheck > cvd_d_dm
+replace hfd_d_dm = runiformint(0,max_hfd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
+count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
 count if liv1_d_dm < liv2_d_dm
 ta age_gp1 if liv1_d_dm < liv2_d_dm
 replace max_liv2 = min(liv1_d_dm,5)
@@ -244,20 +240,10 @@ count if liv1_d_dm < liv2_d_dm
 foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
 quietly replace `i'_d_nondm = `i'_d_pop-`i'_d_dm
 }
-gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm
-count if alldeathc_nondm > alldeath_d_nondm
+count if cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm > alldeath_d_nondm
 texdoc stlog close
 texdoc stlog, cmdlog nodo
 *mkdir GPH
-
-
-
-
-
-
-/*
-
-
 preserve
 gen agegp = 1 if age_gp1!=""
 replace agegp = 2 if age_gp4!=""
@@ -337,23 +323,6 @@ GPH/dm_liv2_chk1.gph ///
 , graphregion(color(white)) cols(4) altshrink
 texdoc graph, label(chk1) figure(h!) cabove ///
 caption(Crude mortality rate by age-grouping method, by cause of death. Australia. People with diabetes.)
-
-
-
-
-
-
-
-*/
-
-
-
-
-
-
-
-
-
 texdoc stlog close
 
 /***
@@ -446,39 +415,29 @@ foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
 di "`i'"
 count if `i'_d_dm > `i'_d_pop
 }
-gen alldeathc_pop = cvd_d_pop + can_d_pop + dmd_d_pop + inf_d_pop + flu_d_pop + res_d_pop + liv1_d_pop + ckd_d_pop + azd_d_pop
-count if alldeathc_pop > alldeath_d_pop
-gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm
-count if alldeathc_dm > alldeath_d_dm
+count if cvd_d_pop + can_d_pop + dmd_d_pop + inf_d_pop + flu_d_pop + res_d_pop + liv1_d_pop + ckd_d_pop + azd_d_pop > alldeath_d_pop
+count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
 quietly {
 forval ii = 1/3 {
-gen A = 1 if alldeathc_dm > alldeath_d_dm
 foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
-quietly replace `i'_d_dm = runiformint(1,max_`i') if A==1 & inrange(`i'_d_dm,1,9)
+quietly replace `i'_d_dm = runiformint(1,max_`i') if (cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm) & inrange(`i'_d_dm,1,9)
 }
-drop alldeathc_dm A
-gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm
-count if alldeathc_dm > alldeath_d_dm
+count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
 if r(N) == 0 {
 noisily di "Done"
 }
 }
 }
-gen cvdcheck = chd_d_pop + cbd_d_pop + hfd_d_pop
-count if cvdcheck > cvd_d_pop
-drop cvdcheck
-gen cvdcheck = chd_d_dm + cbd_d_dm + hfd_d_dm
-count if cvdcheck > cvd_d_dm
-ta age_gp1 if cvdcheck > cvd_d_dm
+count if chd_d_pop + cbd_d_pop + hfd_d_pop > cvd_d_pop
+count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
+ta age_gp1 if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
 replace max_chd = min(cvd_d_dm,9)
-replace chd_d_dm = runiformint(1,max_chd) if cvdcheck > cvd_d_dm & inrange(chd_d_dm,1,9)
+replace chd_d_dm = runiformint(1,max_chd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm & inrange(chd_d_dm,1,9)
 replace max_cbd = min(cvd_d_dm-chd_d_dm,9)
-replace cbd_d_dm = runiformint(0,max_cbd) if cvdcheck > cvd_d_dm & inrange(cbd_d_dm,1,9)
+replace cbd_d_dm = runiformint(0,max_cbd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm & inrange(cbd_d_dm,1,9)
 replace max_hfd = min(cvd_d_dm-chd_d_dm-cbd_d_dm,9)
-replace hfd_d_dm = runiformint(0,max_hfd) if cvdcheck > cvd_d_dm & inrange(hfd_d_dm,1,9)
-drop cvdcheck
-gen cvdcheck = chd_d_dm + cbd_d_dm + hfd_d_dm
-count if cvdcheck > cvd_d_dm
+replace hfd_d_dm = runiformint(0,max_hfd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm & inrange(hfd_d_dm,1,9)
+count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
 count if liv1_d_dm < liv2_d_dm
 ta age_gp1 if liv1_d_dm < liv2_d_dm
 replace max_liv2 = min(liv1_d_dm,9)
@@ -487,8 +446,7 @@ count if liv1_d_dm < liv2_d_dm
 foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
 quietly replace `i'_d_nondm = `i'_d_pop-`i'_d_dm
 }
-gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm
-count if alldeathc_nondm > alldeath_d_nondm
+count if cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm > alldeath_d_nondm
 texdoc stlog close
 texdoc stlog, cmdlog nodo
 keep if age_gp1!=""
@@ -539,25 +497,18 @@ quietly replace `i'_d_nondm = runiformint(1,3) if `i'_d_nondm==.
 ta age_gp1 if `i'_d_dm ==.
 quietly replace `i'_d_dm = runiformint(1,3) if `i'_d_dm ==.
 }
-gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm
-count if alldeathc_nondm > alldeath_d_nondm
-gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm
-count if alldeathc_dm > alldeath_d_dm
-gen cvdcheck = chd_d_nondm + cbd_d_nondm + hfd_d_nondm
-count if cvdcheck > cvd_d_nondm
-drop cvdcheck
-gen cvdcheck = chd_d_dm + cbd_d_dm + hfd_d_dm
-count if cvdcheck > cvd_d_dm
-ta age_gp1 if cvdcheck > cvd_d_dm
+count if cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm > alldeath_d_nondm
+count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
+count if chd_d_nondm + cbd_d_nondm + hfd_d_nondm > cvd_d_nondm
+count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
+ta age_gp1 if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
 gen max_chd = min(cvd_d_dm,3)
-replace chd_d_dm = runiformint(1,max_chd) if cvdcheck > cvd_d_dm & inrange(chd_d_dm,1,3)
+replace chd_d_dm = runiformint(1,max_chd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm & inrange(chd_d_dm,1,3)
 gen max_cbd = min(cvd_d_dm-chd_d_dm,3)
-replace cbd_d_dm = runiformint(0,max_cbd) if cvdcheck > cvd_d_dm & inrange(cbd_d_dm,1,3)
+replace cbd_d_dm = runiformint(0,max_cbd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm & inrange(cbd_d_dm,1,3)
 gen max_hfd = min(cvd_d_dm-chd_d_dm-cbd_d_dm,3)
-replace hfd_d_dm = runiformint(0,max_hfd) if cvdcheck > cvd_d_dm & inrange(hfd_d_dm,1,3)
-drop cvdcheck
-gen cvdcheck = chd_d_dm + cbd_d_dm + hfd_d_dm
-count if cvdcheck > cvd_d_dm
+replace hfd_d_dm = runiformint(0,max_hfd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm & inrange(hfd_d_dm,1,3)
+count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
 count if liv1_d_nondm < liv2_d_nondm
 ta age_gp1 if liv1_d_nondm < liv2_d_nondm
 gen max_liv2 = min(liv1_d_nondm,3)
@@ -617,23 +568,18 @@ quietly replace `i'_d_nondm = runiformint(1,5) if `i'_d_nondm==.
 ta age_gp1 if `i'_d_dm ==.
 quietly replace `i'_d_dm = runiformint(1,5) if `i'_d_dm ==.
 }
-gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm
-count if alldeathc_nondm > alldeath_d_nondm
-gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm
-count if alldeathc_dm > alldeath_d_dm
+count if cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm > alldeath_d_nondm
+count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
 
-gen cvdcheck = chd_d_nondm + cbd_d_nondm + hfd_d_nondm
-count if cvdcheck > cvd_d_nondm
-ta age_gp1 if cvdcheck > cvd_d_nondm
+count if chd_d_nondm + cbd_d_nondm + hfd_d_nondm > cvd_d_nondm
+ta age_gp1 if chd_d_nondm + cbd_d_nondm + hfd_d_nondm > cvd_d_nondm
 gen max_chd = min(cvd_d_nondm,5)
-replace chd_d_nondm = runiformint(1,max_chd) if cvdcheck > cvd_d_nondm & inrange(chd_d_nondm,1,5)
+replace chd_d_nondm = runiformint(1,max_chd) if chd_d_nondm + cbd_d_nondm + hfd_d_nondm > cvd_d_nondm & inrange(chd_d_nondm,1,5)
 gen max_cbd = min(cvd_d_nondm-chd_d_nondm,5)
-replace cbd_d_nondm = runiformint(0,max_cbd) if cvdcheck > cvd_d_nondm & inrange(cbd_d_nondm,1,5)
+replace cbd_d_nondm = runiformint(0,max_cbd) if chd_d_nondm + cbd_d_nondm + hfd_d_nondm > cvd_d_nondm & inrange(cbd_d_nondm,1,5)
 gen max_hfd = min(cvd_d_nondm-chd_d_nondm-cbd_d_nondm,5)
-replace hfd_d_nondm = runiformint(0,max_hfd) if cvdcheck > cvd_d_nondm & inrange(hfd_d_nondm,1,5)
-drop cvdcheck
-gen cvdcheck = chd_d_nondm + cbd_d_nondm + hfd_d_nondm
-count if cvdcheck > cvd_d_nondm
+replace hfd_d_nondm = runiformint(0,max_hfd) if chd_d_nondm + cbd_d_nondm + hfd_d_nondm > cvd_d_nondm & inrange(hfd_d_nondm,1,5)
+count if chd_d_nondm + cbd_d_nondm + hfd_d_nondm > cvd_d_nondm
 texdoc stlog close
 
 /***
@@ -703,15 +649,10 @@ quietly replace `i'_d_nondm = runiformint(1,4) if `i'_d_nondm==.
 ta age_gp1 if `i'_d_dm ==.
 quietly replace `i'_d_dm = runiformint(1,4) if `i'_d_dm ==.
 }
-gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm
-count if alldeathc_nondm > alldeath_d_nondm
-gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm
-count if alldeathc_dm > alldeath_d_dm
-gen cvdcheck = chd_d_nondm + cbd_d_nondm + hfd_d_nondm
-count if cvdcheck > cvd_d_nondm
-drop cvdcheck
-gen cvdcheck = chd_d_dm + cbd_d_dm + hfd_d_dm
-count if cvdcheck > cvd_d_dm
+count if cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm > alldeath_d_nondm
+count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
+count if chd_d_nondm + cbd_d_nondm + hfd_d_nondm > cvd_d_nondm
+count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
 count if liv1_d_nondm < liv2_d_nondm
 count if liv1_d_dm < liv2_d_dm
 ta age_gp1 if liv1_d_dm < liv2_d_dm
@@ -770,19 +711,14 @@ destring age_nondm, replace
 replace age_nondm = age_nondm+5
 recode dmd_d_nondm .=0
 rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_nondm alldeath_d_pop)
-keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
-gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm
-count if alldeathc_nondm > alldeath_d_nondm
-gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm
-count if alldeathc_dm > alldeath_d_dm
-gen cvdcheck = chd_d_nondm + cbd_d_nondm + hfd_d_nondm
-count if cvdcheck > cvd_d_nondm
-drop cvdcheck
-gen cvdcheck = chd_d_dm + cbd_d_dm + hfd_d_dm
-count if cvdcheck > cvd_d_dm
+count if cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm > alldeath_d_nondm
+count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
+count if chd_d_nondm + cbd_d_nondm + hfd_d_nondm > cvd_d_nondm
+count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
 count if liv1_d_nondm < liv2_d_nondm
 count if liv1_d_dm < liv2_d_dm
 count if liv1_d_dm < liv2_d_dm
+keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
 save Lithuania, replace
 texdoc stlog close
 
@@ -806,7 +742,7 @@ Additionally, because the definition of diabetes in the Netherlands relies on 2 
 \color{Blue4}
 ***/
 
-texdoc stlog, cmdlog
+texdoc stlog
 use uncleandbase, clear
 keep if country == "Netherlands"
 rename sex SEX
@@ -816,31 +752,46 @@ rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_no
 texdoc stlog close
 texdoc stlog
 ta age_gp1
-foreach i in alldeath can cvd res azd dmd inf flu ckd liv {
+foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
 di "`i'"
 ta age_gp1 if `i'_d_nondm ==.
 quietly replace `i'_d_nondm = runiformint(0,9) if `i'_d_nondm==.
 ta age_gp1 if `i'_d_dm ==.
 quietly replace `i'_d_dm = runiformint(0,9) if `i'_d_dm ==.
 }
-gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
-count if alldeathc_dm > alldeath_d_dm
+count if cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm > alldeath_d_nondm
+count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
 quietly {
-forval ii = 1/1000 {
-gen A = 1 if alldeathc_dm > alldeath_d_dm
-foreach i in can cvd res azd dmd inf flu ckd liv {
-quietly replace `i'_d_dm = runiformint(0,9) if A==1 & inrange(`i'_d_dm,0,9)
+forval ii = 1/197 {
+foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
+quietly replace `i'_d_dm = runiformint(0,9) if (cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm) & inrange(`i'_d_dm,0,9)
 }
-drop alldeathc_dm A
-gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
-count if alldeathc_dm > alldeath_d_dm
-if r(N) == 0  & `ii' == 1000 {
+count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
+if r(N) == 0 {
 noisily di "Done"
 }
 }
 }
-gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv_d_nondm + ckd_d_nondm + azd_d_nondm
-count if alldeathc_nondm > alldeath_d_nondm
+count if chd_d_pop + cbd_d_pop + hfd_d_pop > cvd_d_pop
+count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
+ta age_gp1 if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
+gen max_chd = min(cvd_d_dm,9)
+replace chd_d_dm = runiformint(0,max_chd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm & inrange(chd_d_dm,0,9)
+gen max_cbd = min(cvd_d_dm-chd_d_dm,9)
+replace cbd_d_dm = runiformint(0,max_cbd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm & inrange(cbd_d_dm,0,9)
+gen max_hfd = min(cvd_d_dm-chd_d_dm-cbd_d_dm,9)
+replace hfd_d_dm = runiformint(0,max_hfd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm & inrange(hfd_d_dm,0,9)
+count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
+count if liv1_d_nondm < liv2_d_nondm
+ta age_gp1 if liv1_d_nondm < liv2_d_nondm
+gen max_liv2 = min(liv1_d_nondm,9)
+replace liv2_d_nondm = runiformint(0,max_liv2) if liv1_d_nondm < liv2_d_nondm & inrange(liv2_d_nondm,0,9)
+count if liv1_d_nondm < liv2_d_nondm
+count if liv1_d_dm < liv2_d_dm
+ta age_gp1 if liv1_d_dm < liv2_d_dm
+replace max_liv2 = min(liv1_d_dm,9)
+replace liv2_d_dm = runiformint(0,max_liv2) if liv1_d_dm < liv2_d_dm & inrange(liv2_d_dm,0,9)
+count if liv1_d_dm < liv2_d_dm
 texdoc stlog close
 texdoc stlog, cmdlog nodo
 gen age_dm = substr(age_gp1,1,2)
@@ -855,16 +806,6 @@ keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm
 save Netherlands, replace
 texdoc stlog close
 
-use Netherlands, clear
-collapse (sum) pys_dm pys_nondm, by(cal)
-gen prev = 100*pys_dm/(pys_dm+pys_nondm)
-
-use Australia, clear
-collapse (sum) pys_dm pys_nondm, by(cal)
-gen prev = 100*pys_dm/(pys_dm+pys_nondm)
-
-
-
 /***
 \color{black}
 
@@ -876,8 +817,8 @@ total population size, person-years in people with diabetes,
 deaths in people with diabetes, and deaths in the total population.
 We can calculate person-years in the total population by assuming that the person-years
 of follow-up in a given calendar year are equal to the population size in the current year
-plus the population size in the next year, divided by two (this has been performed before
-I got the dataset). I then calculate person-years in people without diabetes by substracting
+plus the population size in the next year, divided by two [this has been performed before
+I got the dataset -- JM]. I then calculate person-years in people without diabetes by substracting
 the person-years in people with diabetes from person-years in the total population; similarly
 for deaths in people without diabetes. There were a few age groups in whom the number of deaths
 from diabetes in people with diabetes was slightly greater than the total population deaths; 
@@ -890,14 +831,14 @@ groupings for Scotland for total population deaths -- from 2006-2015: 0-39, 40-4
 \color{Blue4}
 ***/
 
-texdoc stlog, cmdlog nodo
+texdoc stlog
 use uncleandbase, clear
 keep if country == "Scotland"
 rename sex SEX
 gen sex = 0 if SEX == "F"
 replace sex = 1 if SEX == "M"
 rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_nondm alldeath_d_pop)
-foreach i in alldeath can cvd res azd dmd inf flu ckd liv {
+foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
 quietly replace `i'_d_nondm = `i'_d_pop-`i'_d_dm
 di "`i'"
 ta `i'_d_nondm if `i'_d_nondm <0
@@ -916,12 +857,20 @@ replace age_nondm = age_nondm+5
 replace age_nondm = age_nondm+2.5 if age_nondm == 85 & cal <= 2015
 replace pys_dm =. if age_dm==.
 replace pys_nondm =. if age_nondm==.
-foreach i in alldeath can cvd res azd dmd inf flu ckd liv {
+foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
 replace `i'_d_dm = . if age_dm==.
 replace `i'_d_nondm = . if age_nondm==.
 }
-keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
 drop if age_dm==. & age_nondm==.
+count if cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm > alldeath_d_nondm
+count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
+count if chd_d_nondm + cbd_d_nondm + hfd_d_nondm > cvd_d_nondm
+count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
+count if liv1_d_nondm < liv2_d_nondm
+count if liv1_d_dm < liv2_d_dm
+texdoc stlog close
+texdoc stlog, cmdlog nodo
+keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
 save Scotland, replace
 texdoc stlog close
 
@@ -941,7 +890,7 @@ I will assume the mid-point of the age interval for people aged $<$40 is 35 and 
 \color{Blue4}
 ***/
 
-texdoc stlog, cmdlog
+texdoc stlog, cmdlog nodo
 use uncleandbase, clear
 keep if country=="South Korea"
 rename sex SEX
@@ -959,29 +908,20 @@ replace age_nondm = "15" if age_nondm == "0-"
 destring age_nondm, replace
 replace age_nondm = age_nondm+5
 replace country = "SKorea"
+texdoc stlog close
+texdoc stlog
+count if cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm > alldeath_d_nondm
+count if cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm > alldeath_d_nondm
+count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
+count if chd_d_nondm + cbd_d_nondm + hfd_d_nondm > cvd_d_nondm
+count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
+count if liv1_d_nondm < liv2_d_nondm
+count if liv1_d_dm < liv2_d_dm
+texdoc stlog close
+texdoc stlog, cmdlog nodo
 keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
 save SKorea, replace
 texdoc stlog close
-
-
-
-
-
-
-
-
-
-**MAKE A FULL DATASET AND THEN  DROP UNNEEDED CODs
-
-foreach i in chd cbd hfd liv2 {
-drop `i'_d_dm `i'_d_pop `i'_d_nondm
-}
-rename (liv1_d_dm liv1_d_pop liv1_d_nondm) (liv_d_dm liv_d_pop liv_d_nondm)
-
-
-erase uncleandbase and all countries etc.
-also all the checksteps can be done in one line you tool, so make it A+B+C>D, not gen check, then check, then drop check
-
 
 /***
 \color{black}
@@ -994,35 +934,53 @@ Table~\ref{cleansumtab} shows a summary of the data included in this analysis.
 \color{Blue4}
 ***/
 
-texdoc stlog, nolog nodo
-*For DM
-clear
-foreach c in Australia Canada Denmark Finland France Lithuania Netherlands Scotland SKorea Sweden {
-append using `c'
-}
-replace country = "South Korea" if country == "SKorea"
-replace country = "Canada (Alberta)" if country == "Canada"
-recode dmd_d_nondm .=0
-gen other_d_dm = alldeath_d_dm - ///
-(cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm)
-gen other_d_nondm = alldeath_d_nondm - ///
-(cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv_d_nondm + ckd_d_nondm + azd_d_nondm)
-save DMCMdata, replace
-texdoc stlog close
 texdoc stlog, cmdlog nodo
+*mkdir CSV
 clear
 foreach c in Australia Canada Denmark Finland France Lithuania Netherlands Scotland SKorea {
 append using `c'
 }
+gen other_d_dm = alldeath_d_dm - ///
+(cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm)
+gen other_d_nondm = alldeath_d_nondm - ///
+(cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm)
+save cleandbase, replace
+use cleandbase, clear
+foreach i in chd cbd hfd liv2 {
+drop `i'_d_dm `i'_d_nondm
+}
+rename (liv1_d_dm liv1_d_nondm) (liv_d_dm liv_d_nondm)
+save CMdata, replace
+use cleandbase, clear
+foreach i in alldeath can res azd dmd inf flu ckd liv1 liv2 {
+drop `i'_d_dm `i'_d_nondm
+}
+save CMdataCVD, replace
+use cleandbase, clear
+foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd {
+drop `i'_d_dm `i'_d_nondm
+}
+save CMdataLIV, replace
+use cleandbase, clear
+foreach i in alldeath can cvd chd cbd hfd res dmd inf flu ckd liv1 liv2 {
+drop `i'_d_dm `i'_d_nondm
+}
+save CMdataDEM, replace
+foreach c in Australia Canada Denmark Finland France Lithuania Netherlands Scotland SKorea {
+use `c', clear
+foreach i in chd cbd hfd liv2 {
+drop `i'_d_dm `i'_d_nondm
+}
+rename (liv1_d_dm liv1_d_nondm) (liv_d_dm liv_d_nondm)
+save `c', replace
+}
+erase uncleandbase.dta
+use CMdata, clear
 bysort country (cal) : egen lb = min(cal)
 bysort country (cal) : egen ub = max(cal)
 tostring lb ub, replace
 gen rang = lb+ "-" + ub
 recode dmd_d_nondm .=0
-gen other_d_dm = alldeath_d_dm - ///
-(cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm)
-gen other_d_nondm = alldeath_d_nondm - ///
-(cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv_d_nondm + ckd_d_nondm + azd_d_nondm)
 collapse (sum) pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm other_d_dm other_d_nondm, by(country sex rang)
 expand 2
 bysort country sex : gen DM = _n-1
@@ -1048,7 +1006,7 @@ replace sex = "Male" if sex == "1"
 drop njm
 replace country = "South Korea" if country == "SKorea"
 replace country = "Canada (Alberta)" if country == "Canada"
-export delimited using T1.csv, delimiter(":") novarnames replace
+export delimited using CSV/T1.csv, delimiter(":") novarnames replace
 texdoc stlog close
 
 /***
@@ -1098,7 +1056,7 @@ texdoc stlog close
             },
         every nth row={4}{before row=\midrule},
         every last row/.style={after row=\bottomrule},
-    ]{T1.csv}
+    ]{CSV/T1.csv}
   \end{center}
 Abbreviations: DEM -- Dementia; CAN -- Cancer; CVD -- Cardiovascular disease; 
 RES -- Chronic lower respiratory disease; DMD -- Diabetes; INF -- Infectious diseases; 
@@ -1239,11 +1197,11 @@ twoway ///
 , graphregion(color(white)) ///
 ytitle(Mortality rate (per 1,000 person-years), margin(a+2)) ///
 xtitle(Calendar year) ///
-legend(order( ///
+xlabel(,nogrid) legend(order( ///
 1 "Females" ///
 2 "Males" ///
 ) cols(1) position(3) region(lcolor(none) color(none))) ///
-ylabel(,angle(0) format(%9.2f)) ///
+ylabel(,angle(0) format(%9.2f) glpattern(solid) glcolor(gs10%20)) ///
 title("People `dd' diabetes", placement(west) size(medium) col(black))
 graph save GPH/cr_`i'_`iii'_`c', replace
 }
@@ -1303,13 +1261,6 @@ with and without diabetes suggests a coding change.
 We will still analyse this data, but we should note that the sudden changes could be coding changes
 that will influences estimates of the rate of change.  
 
-\color{red}
-@Lei and @Dianna -- please confirm you are happy with this approach. 
-While keeping the data in won't have much impact on the figures, 
-they could have outsized impact on the APCs.
-We should also go back to Finland, Netherlands, and Scotland and ask them about this
-and see if they can find evidence for the change from their relevant coding bodies. 
-\color{black}
 
 \clearpage
 \section{Cause-specific mortality rates}
@@ -1326,12 +1277,12 @@ Age is defined as above (i.e., the midpoint of the interval in most cases) and m
 fit separately for each cause of death and country in people with and without diabetes and by sex. 
 Because this will be \begin{math} 9 \times 9 \times 2 \times 2 = 324 \end{math} models, 
 we won't check model fit for each model. Instead, 
-to check model fit we will select ten at random and check the modelled and crude rates as well as 
+to check model fit we will select a few at random and check the modelled and crude rates as well as 
 the Pearson residuals. 
 These models will be used to estimate mortality rates for single year ages and calendar years.
 These modelled rates will be used to generate
-age-standardised rates in people with and without diabetes, using direct standardisation
-(using the total diabetes population formed by pooling the consortium data) by period. 
+age-standardised rates in people with and without diabetes by period, using direct standardisation
+(using the total diabetes population formed by pooling the consortium data).
 
 \color{Blue4}
 ***/
@@ -1426,7 +1377,7 @@ save MD/R_`i'_`ii'_`iii'_`iiii', replace
 }
 }
 }
-set seed 1234
+set seed 1312
 clear
 gen A =.
 foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland SKorea {
@@ -1439,14 +1390,15 @@ foreach iiii in 0 1 {
 local B = runiform()
 append using MD/RC_pred_`i'_`ii'_`iii'_`iiii'
 recode A .=`B'
-keep if A < 0.03
+keep if A > 0.985
 }
 }
 }
 }
 }
+br
 save RCc, replace
-set seed 1234
+set seed 1312
 clear
 gen A =.
 foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland SKorea {
@@ -1459,7 +1411,7 @@ foreach iiii in 0 1 {
 local B = runiform()
 append using MD/R_`i'_`ii'_`iii'_`iiii'
 recode A .=`B'
-keep if A < 0.03
+keep if A > 0.985
 }
 }
 }
@@ -1468,114 +1420,56 @@ keep if A < 0.03
 save Rc, replace
 texdoc stlog close
 texdoc stlog
-use RCc, clear
+use Rc, clear
 bysort A : keep if _n == 1
 list country OC DM sex
 texdoc stlog close
-
-
-
-
-*PICKUP NEEDS TO BE FIXED WHEN FINALISED
-*You should first pick countries and cods then only run models for those, rest is a waste. 
-
-
-
-
-
-
 texdoc stlog, cmdlog nodo
-/*
 forval i = 1/10 {
-if `i' == 1 {
-local c = "France"
-local o = "liv2"
-local oo = "liver disease (excluding alcoholic liver disease)"
-local s = 1
-local ss = "males"
-local d = "dm"
+use Rc, clear
+bysort A : keep if _n == 1
+local c=country[`i']
+local o=OC[`i']
+local d=DM[`i']
+local s=sex[`i']
+if "`o'" == "can" {
+local oo = "Cancer"
+}
+if "`o'" == "cvd" {
+local oo = "Cardiovascular disease"
+}
+if "`o'" == "res" {
+local oo = "Chronic lower respiratory disease"
+}
+if "`o'" == "azd" {
+local oo = "Dementia"
+}
+if "`o'" == "dmd" {
+local oo = "Diabetes"
+}
+if "`o'" == "inf" {
+local oo = "Infectious diseases"
+}
+if "`o'" == "flu" {
+local oo = "Influenza and pneumonia"
+}
+if "`o'" == "ckd" {
+local oo = "Kidney disease"
+}
+if "`o'" == "liv" {
+local oo = "Liver disease"
+}
+if "`d'" == "dm" {
 local dd = "with"
 }
-if `i' == 2 {
-local c = "France"
-local o = "ckd"
-local oo = "kidney disease"
-local s = 0
-local ss = "females"
-local d = "nondm"
+if "`d'" == "nondm" {
 local dd = "without"
 }
-if `i' == 3 {
-local c = "Scotland"
-local o = "liv1"
-local oo = "liver disease"
-local s = 1
-local ss = "males"
-local d = "dm"
-local dd = "with"
+if `s' == 0 {
+local ss = "Females"
 }
-if `i' == 4 {
-local c = "Canada"
-local o = "res"
-local oo = "chronic lower respiratory disease"
-local s = 0
-local ss = "females"
-local d = "dm"
-local dd = "with"
-}
-if `i' == 5 {
-local c = "Canada"
-local o = "res"
-local oo = "chronic lower respiratory disease"
-local s = 0
-local ss = "females"
-local d = "nondm"
-local dd = "without"
-}
-if `i' == 6 {
-local c = "Sweden"
-local o = "can"
-local oo = "cancer"
-local s = 1
-local ss = "males"
-local d = "nondm"
-local dd = "without"
-}
-if `i' == 7 {
-local c = "Australia"
-local o = "res"
-local oo = "chronic lower respiratory disease"
-local s = 1
-local ss = "males"
-local d = "nondm"
-local dd = "without"
-}
-if `i' == 8 {
-local c = "Canada"
-local o = "chd"
-local oo = "ischaemic heart disease"
-local s = 0
-local ss = "females"
-local d = "dm"
-local dd = "with"
-}
-if `i' == 9 {
-local c = "Australia"
-local o = "flu"
-local oo = "influenza and pneumonia"
-local s = 1
-local ss = "males"
-local d = "nondm"
-local dd = "without"
-}
-if `i' == 10 {
-local c = "Sweden"
-local o = "cvd"
-local oo = "cardiovascular disease"
-local s = 0
-local ss = "females"
-local d = "dm"
-local dd = "with"
+if `s' == 1 {
+local ss = "Males"
 }
 use Rc, clear
 keep if country == "`c'" & OC == "`o'" & sex == `s' & DM == "`d'"
@@ -1590,10 +1484,9 @@ twoway ///
 (rarea ub lb age_`d' if cale == `cmu', color(black%30) fintensity(inten80) lwidth(none)) ///
 (line _Rate age_`d' if cale == `cmu', color(black)) ///
 (scatter rate age_`d' if cale == `cmu' & rate !=0, col(black)) ///
-, graphregion(color(white)) ylabel( ///
-0.01 "0.01" 0.1 "0.1" 1 10 100, angle(0)) ///
-xlabel(30(10)100) ytitle("Mortality rate (per 1000 person-years)") ///
-xtitle(Age) yscale(log) legend(order( ///
+, graphregion(color(white)) ylabel(, angle(0) glpattern(solid) glcolor(gs10%20)) ///
+xlabel(30(10)100, nogrid) ytitle("Mortality rate (per 1000 person-years)") ///
+xtitle(Age) yscale(nolog) legend(order( ///
 2 "Modelled" ///
 3 "Crude" ///
 ) ring(0) cols(1) position(11) region(lcolor(none) col(none))) ///
@@ -1609,8 +1502,7 @@ twoway ///
 (rarea ub lb cale if age_`d' == 85, color(gs10%30) fintensity(inten80) lwidth(none)) ///
 (line _Rate cale if age_`d' == 85, color(gs10)) ///
 (scatter rate cale if age_`d' == 85 & rate !=0, col(gs10)) ///
-, graphregion(color(white)) ylabel( ///
-0.01 "0.01" 0.1 "0.1" 1 10 100, angle(0)) ///
+, graphregion(color(white)) ylabel(, angle(0) glpattern(solid) glcolor(gs10%20)) ///
 ytitle("Mortality rate (per 1000 person-years)") ///
 xtitle(Year) yscale(log) legend(order( ///
 2 "Modelled" ///
@@ -1628,7 +1520,7 @@ twoway ///
 (scatter res age_`d', col(black)) ///
 , legend(off) ///
 graphregion(color(white)) ///
-ylabel(, format(%9.0f) grid angle(0)) ///
+ylabel(, format(%9.0f) grid angle(0) glpattern(solid) glcolor(gs10%20)) ///
 ytitle("Pearson residuals", margin(a+2)) ///
 xtitle("Age (years)") ///
 title("`c', `oo', `ss' `dd' diabetes", col(black) placement(west) size(medium))
@@ -1637,7 +1529,7 @@ twoway ///
 (scatter res cale, col(black)) ///
 , legend(off) ///
 graphregion(color(white)) ///
-ylabel(, format(%9.0f) grid angle(0)) ///
+ylabel(, format(%9.0f) grid angle(0) glpattern(solid) glcolor(gs10%20)) ///
 ytitle("Pearson residuals", margin(a+2)) ///
 xtitle("Period") ///
 title("`c', `oo', `ss' `dd' diabetes", col(black) placement(west) size(medium))
@@ -1646,99 +1538,90 @@ twoway ///
 (scatter res coh, col(black)) ///
 , legend(off) ///
 graphregion(color(white)) ///
-ylabel(, format(%9.0f) grid angle(0)) ///
+ylabel(, format(%9.0f) grid angle(0) glpattern(solid) glcolor(gs10%20)) ///
 ytitle("Pearson residuals", margin(a+2)) ///
 xtitle("Cohort") ///
 title("`c', `oo', `ss' `dd' diabetes", col(black) placement(west) size(medium))
 graph save GPH/RCc_`c'_`o'_`d'_`s'_cohort, replace
 }
-*/
+
 texdoc stlog close
 texdoc stlog, cmdlog
-/*
+use Rc, clear
+bysort A : keep if _n == 1
+forval i = 1/10 {
+local c`i'=country[`i']
+local o`i'=OC[`i']
+local d`i'=DM[`i']
+local s`i'=sex[`i']
+}
 graph combine ///
-GPH/Rc_France_liv2_dm_1_age.gph ///
-GPH/Rc_France_ckd_nondm_0_age.gph ///
-GPH/Rc_Scotland_liv1_dm_1_age.gph ///
-GPH/Rc_Canada_res_dm_0_age.gph ///
-GPH/Rc_Canada_res_nondm_0_age.gph ///
-GPH/Rc_Sweden_can_nondm_1_age.gph ///
-GPH/Rc_Australia_res_nondm_1_age.gph ///
-GPH/Rc_Canada_chd_dm_0_age.gph ///
-GPH/Rc_Australia_flu_nondm_1_age.gph ///
-GPH/Rc_Sweden_cvd_dm_0_age.gph ///
+GPH/Rc_`c1'_`o1'_`d1'_`s1'_age.gph ///
+GPH/Rc_`c2'_`o2'_`d2'_`s2'_age.gph ///
+GPH/Rc_`c3'_`o3'_`d3'_`s3'_age.gph ///
+GPH/Rc_`c4'_`o4'_`d4'_`s4'_age.gph ///
+GPH/Rc_`c5'_`o5'_`d5'_`s5'_age.gph ///
+GPH/Rc_`c6'_`o6'_`d6'_`s6'_age.gph ///
+GPH/Rc_`c7'_`o7'_`d7'_`s7'_age.gph ///
+GPH/Rc_`c8'_`o8'_`d8'_`s8'_age.gph ///
+GPH/Rc_`c9'_`o9'_`d9'_`s9'_age.gph ///
+GPH/Rc_`c10'_`o10'_`d10'_`s10'_age.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(3)
 texdoc graph, label(MC1) figure(h!) cabove ///
 caption(Modelled and crude mortality rates by age for 10 randomly selected ///
 country/cause of death/diabetes status/sex combinations.)
 graph combine ///
-GPH/Rc_France_liv2_dm_1_period.gph ///
-GPH/Rc_France_ckd_nondm_0_period.gph ///
-GPH/Rc_Scotland_liv1_dm_1_period.gph ///
-GPH/Rc_Canada_res_dm_0_period.gph ///
-GPH/Rc_Canada_res_nondm_0_period.gph ///
-GPH/Rc_Sweden_can_nondm_1_period.gph ///
-GPH/Rc_Australia_res_nondm_1_period.gph ///
-GPH/Rc_Canada_chd_dm_0_period.gph ///
-GPH/Rc_Australia_flu_nondm_1_period.gph ///
-GPH/Rc_Sweden_cvd_dm_0_period.gph ///
+GPH/Rc_`c1'_`o1'_`d1'_`s1'_period.gph ///
+GPH/Rc_`c2'_`o2'_`d2'_`s2'_period.gph ///
+GPH/Rc_`c3'_`o3'_`d3'_`s3'_period.gph ///
+GPH/Rc_`c4'_`o4'_`d4'_`s4'_period.gph ///
+GPH/Rc_`c5'_`o5'_`d5'_`s5'_period.gph ///
+GPH/Rc_`c6'_`o6'_`d6'_`s6'_period.gph ///
+GPH/Rc_`c7'_`o7'_`d7'_`s7'_period.gph ///
+GPH/Rc_`c8'_`o8'_`d8'_`s8'_period.gph ///
+GPH/Rc_`c9'_`o9'_`d9'_`s9'_period.gph ///
+GPH/Rc_`c10'_`o10'_`d10'_`s10'_period.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(3)
 texdoc graph, label(MC2) figure(h!) cabove ///
 caption(Modelled and crude mortality rates by year for 10 randomly selected ///
 country/cause of death/diabetes status/sex combinations.)
 graph combine ///
-GPH/RCc_France_liv2_dm_1_age.gph ///
-GPH/RCc_France_ckd_nondm_0_age.gph ///
-GPH/RCc_Scotland_liv1_dm_1_age.gph ///
-GPH/RCc_Canada_res_dm_0_age.gph ///
-GPH/RCc_Canada_res_nondm_0_age.gph ///
-GPH/RCc_Sweden_can_nondm_1_age.gph ///
-GPH/RCc_Australia_res_nondm_1_age.gph ///
-GPH/RCc_Canada_chd_dm_0_age.gph ///
-GPH/RCc_Australia_flu_nondm_1_age.gph ///
-GPH/RCc_Sweden_cvd_dm_0_age.gph ///
+GPH/RCc_`c1'_`o1'_`d1'_`s1'_age.gph ///
+GPH/RCc_`c2'_`o2'_`d2'_`s2'_age.gph ///
+GPH/RCc_`c3'_`o3'_`d3'_`s3'_age.gph ///
+GPH/RCc_`c4'_`o4'_`d4'_`s4'_age.gph ///
+GPH/RCc_`c5'_`o5'_`d5'_`s5'_age.gph ///
+GPH/RCc_`c6'_`o6'_`d6'_`s6'_age.gph ///
+GPH/RCc_`c7'_`o7'_`d7'_`s7'_age.gph ///
+GPH/RCc_`c8'_`o8'_`d8'_`s8'_age.gph ///
+GPH/RCc_`c9'_`o9'_`d9'_`s9'_age.gph ///
+GPH/RCc_`c10'_`o10'_`d10'_`s10'_age.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(3)
 texdoc graph, label(MC3) figure(h!) cabove ///
 caption(Pearson residuals by age for 10 randomly selected ///
 country/cause of death/diabetes status/sex combinations.)
 graph combine ///
-GPH/RCc_France_liv2_dm_1_period.gph ///
-GPH/RCc_France_ckd_nondm_0_period.gph ///
-GPH/RCc_Scotland_liv1_dm_1_period.gph ///
-GPH/RCc_Canada_res_dm_0_period.gph ///
-GPH/RCc_Canada_res_nondm_0_period.gph ///
-GPH/RCc_Sweden_can_nondm_1_period.gph ///
-GPH/RCc_Australia_res_nondm_1_period.gph ///
-GPH/RCc_Canada_chd_dm_0_period.gph ///
-GPH/RCc_Australia_flu_nondm_1_period.gph ///
-GPH/RCc_Sweden_cvd_dm_0_period.gph ///
+GPH/RCc_`c1'_`o1'_`d1'_`s1'_period.gph ///
+GPH/RCc_`c2'_`o2'_`d2'_`s2'_period.gph ///
+GPH/RCc_`c3'_`o3'_`d3'_`s3'_period.gph ///
+GPH/RCc_`c4'_`o4'_`d4'_`s4'_period.gph ///
+GPH/RCc_`c5'_`o5'_`d5'_`s5'_period.gph ///
+GPH/RCc_`c6'_`o6'_`d6'_`s6'_period.gph ///
+GPH/RCc_`c7'_`o7'_`d7'_`s7'_period.gph ///
+GPH/RCc_`c8'_`o8'_`d8'_`s8'_period.gph ///
+GPH/RCc_`c9'_`o9'_`d9'_`s9'_period.gph ///
+GPH/RCc_`c10'_`o10'_`d10'_`s10'_period.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(3)
 texdoc graph, label(MC4) figure(h!) cabove ///
 caption(Pearson residuals by period for 10 randomly selected ///
 country/cause of death/diabetes status/sex combinations.)
-graph combine ///
-GPH/RCc_France_liv2_dm_1_cohort.gph ///
-GPH/RCc_France_ckd_nondm_0_cohort.gph ///
-GPH/RCc_Scotland_liv1_dm_1_cohort.gph ///
-GPH/RCc_Canada_res_dm_0_cohort.gph ///
-GPH/RCc_Canada_res_nondm_0_cohort.gph ///
-GPH/RCc_Sweden_can_nondm_1_cohort.gph ///
-GPH/RCc_Australia_res_nondm_1_cohort.gph ///
-GPH/RCc_Canada_chd_dm_0_cohort.gph ///
-GPH/RCc_Australia_flu_nondm_1_cohort.gph ///
-GPH/RCc_Sweden_cvd_dm_0_cohort.gph ///
-, graphregion(color(white)) cols(2) altshrink xsize(3)
-texdoc graph, label(MC5) figure(h!) cabove ///
-caption(Pearson residuals by cohort for 10 randomly selected ///
-country/cause of death/diabetes status/sex combinations.)
-*/
 texdoc stlog close
 
 /***
 \color{black}
 
 \clearpage
-We see that the models fit the data reasonably well (Figures~\ref{MC1}-~\ref{MC5}). 
+We see that the models fit the data reasonably well (Figures~\ref{MC1}-~\ref{MC4}). 
 
 \clearpage
 \subsection{Age- and sex-standardised rates}
@@ -1786,8 +1669,8 @@ order(1 "Crude" ///
 2 "Modelled") ///
 cols(1)) ///
 graphregion(color(white)) ///
-ylabel(, format(%9.1f) angle(0)) ///
-ytitle("Population size (millions)") xtitle("Age")
+ylabel(, format(%9.1f) angle(0) nogrid) ///
+ytitle("Population size (millions)") xtitle("Age") xlabel(, nogrid)
 texdoc graph, label(SPN) figure(h!) cabove caption(Pooled standard population)
 restore
 su(pys_dm)
@@ -1801,9 +1684,9 @@ twoway ///
 order(1 "Crude" ///
 2 "Modelled") ///
 cols(1)) /// 
-ylabel(0(0.01)0.04, angle(0) format(%9.2f)) ///
+ylabel(0(0.01)0.04, angle(0) format(%9.2f) nogrid) ///
 graphregion(color(white)) ///
-ytitle("Proportion") xtitle("Age")
+ytitle("Proportion") xtitle("Age") xlabel(, nogrid)
 texdoc graph, label(SPP) figure(h!) cabove caption(Pooled standard population proportion)
 keep age_dm B
 replace age_dm = age-0.5
@@ -1844,7 +1727,7 @@ order(1 "Crude, females" ///
 4 "Modelled, males") ///
 cols(1)) ///
 graphregion(color(white)) ///
-ylabel(, format(%9.1f) angle(0)) ///
+ylabel(, format(%9.1f) angle(0) nogrid) xlabel(, nogrid) ///
 ytitle("Population size (millions)") xtitle("Age")
 texdoc graph, label(SPNs) figure(h!) cabove caption(Pooled standard population by sex)
 restore
@@ -1861,7 +1744,7 @@ twoway ///
 order(1 "Crude" ///
 2 "Modelled") ///
 cols(1)) /// 
-ylabel(0(0.01)0.02, angle(0) format(%9.2f)) ///
+ylabel(0(0.01)0.02, angle(0) format(%9.2f) nogrid) xlabel(, nogrid) ///
 graphregion(color(white)) ///
 ytitle("Proportion") xtitle("Age") ///
 title("Females", col(black) placement(west) size(medium))
@@ -1873,7 +1756,7 @@ twoway ///
 order(1 "Crude" ///
 2 "Modelled") ///
 cols(1)) /// 
-ylabel(0(0.01)0.02, angle(0) format(%9.2f)) ///
+ylabel(0(0.01)0.02, angle(0) format(%9.2f) nogrid) xlabel(, nogrid) ///
 graphregion(color(white)) ///
 ytitle("Proportion") xtitle("Age") ///
 title("Males", col(black) placement(west) size(medium))
@@ -2289,7 +2172,7 @@ order(2 "`C1'" ///
 18 "`C9'") ///
 cols(1)) ///
 graphregion(color(white)) ///
-ylabel(`ylab', format(`yform') grid angle(0)) ///
+ylabel(`ylab', format(`yform') grid glpattern(solid) glcolor(gs10%20) angle(0)) ///
 yscale(log range(`yrange')) ///
 xscale(range(2000 2020)) ///
 xlabel(2000(5)2020, nogrid) ///
@@ -2348,7 +2231,7 @@ order(2 "`C1'" ///
 18 "`C9'") ///
 cols(1)) ///
 graphregion(color(white)) ///
-ylabel(`ylab', format(`yform') grid angle(0)) ///
+ylabel(`ylab', format(`yform') grid  glpattern(solid) glcolor(gs10%20) angle(0)) ///
 yscale(log range(`yrange')) ///
 xscale(range(2000 2020)) ///
 xlabel(2000(5)2020, nogrid) ///
@@ -2413,6 +2296,20 @@ caption(Age-standardised mortality rate by cause of death, people aged 40-89. `o
 }
 }
 texdoc stlog close
+
+/***
+\color{black}
+\clearpage
+\section*{References}
+\addcontentsline{toc}{section}{References}
+\bibliography{/Users/jed/Documents/Library.bib}
+\end{document}
+***/
+
+
+
+/*
+
 
 /***
 \color{black}
@@ -3514,25 +3411,27 @@ by country and sex. Liver disease.}
 \end{document}
 ***/
 
+
+*/
+
 texdoc close
 
 
 
 ! pdflatex CM
 ! pdflatex CM
+! bibtex CM
+! pdflatex CM
+! bibtex CM
 ! pdflatex CM
 
 erase CM.aux
 erase CM.log
 erase CM.out
 erase CM.toc
-erase CM.tex
-
-
 
 ! git init .
-! git add CM.do
-* CM.pdf
+! git add CM.do CM.pdf
 ! git commit -m "0"
 ! git remote remove origin
 ! git remote add origin https://github.com/jimb0w/CM.git
