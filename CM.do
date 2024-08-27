@@ -625,6 +625,15 @@ count if alldeathc_dm > alldeath_d_dm
 gen cvdcheck = chd_d_nondm + cbd_d_nondm + hfd_d_nondm
 count if cvdcheck > cvd_d_nondm
 ta age_gp1 if cvdcheck > cvd_d_nondm
+gen max_chd = min(cvd_d_nondm,5)
+replace chd_d_nondm = runiformint(1,max_chd) if cvdcheck > cvd_d_nondm & inrange(chd_d_nondm,1,5)
+gen max_cbd = min(cvd_d_nondm-chd_d_nondm,5)
+replace cbd_d_nondm = runiformint(0,max_cbd) if cvdcheck > cvd_d_nondm & inrange(cbd_d_nondm,1,5)
+gen max_hfd = min(cvd_d_nondm-chd_d_nondm-cbd_d_nondm,5)
+replace hfd_d_nondm = runiformint(0,max_hfd) if cvdcheck > cvd_d_nondm & inrange(hfd_d_nondm,1,5)
+drop cvdcheck
+gen cvdcheck = chd_d_nondm + cbd_d_nondm + hfd_d_nondm
+count if cvdcheck > cvd_d_nondm
 texdoc stlog close
 
 /***
@@ -636,23 +645,17 @@ the data itself is faulty.
 \color{Blue4}
 ***/
 
-
-*Not an error with random
-replace cvd_d_nondm = chd_d_nondm + cbd_d_nondm + hfd_d_nondm
-
-
-gen max_chd = min(cvd_d_nondm,5)
-replace chd_d_nondm = runiformint(1,max_chd) if cvdcheck > cvd_d_nondm & inrange(chd_d_nondm,1,5)
-gen max_cbd = min(cvd_d_nondm-chd_d_nondm,5)
-replace cbd_d_nondm = runiformint(0,max_cbd) if cvdcheck > cvd_d_nondm & inrange(cbd_d_nondm,1,5)
-gen max_hfd = min(cvd_d_nondm-chd_d_nondm-cbd_d_nondm,5)
-replace hfd_d_nondm = runiformint(0,max_hfd) if cvdcheck > cvd_d_nondm & inrange(hfd_d_nondm,1,5)
-drop cvdcheck
-gen cvdcheck = chd_d_nondm + cbd_d_nondm + hfd_d_nondm
-br if cvdcheck > cvd_d_nondm
-
-stop
-
+texdoc stlog
+count if liv1_d_nondm < liv2_d_nondm
+ta age_gp1 if liv1_d_nondm < liv2_d_nondm
+gen max_liv2 = min(liv1_d_nondm,5)
+replace liv2_d_nondm = runiformint(1,max_liv2) if liv1_d_nondm < liv2_d_nondm & inrange(liv2_d_nondm,1,5)
+count if liv1_d_nondm < liv2_d_nondm
+count if liv1_d_dm < liv2_d_dm
+ta age_gp1 if liv1_d_dm < liv2_d_dm
+replace max_liv2 = min(liv1_d_dm,5)
+replace liv2_d_dm = runiformint(1,max_liv2) if liv1_d_dm < liv2_d_dm & inrange(liv2_d_dm,1,5)
+count if liv1_d_dm < liv2_d_dm
 texdoc stlog close
 texdoc stlog, cmdlog nodo
 gen age_dm = substr(age_gp1,1,2)
@@ -693,17 +696,28 @@ recode dmd_d_nondm .=0
 texdoc stlog close
 texdoc stlog
 ta age_gp1
-foreach i in alldeath can cvd res azd dmd inf flu ckd liv {
+foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
 di "`i'"
 ta age_gp1 if `i'_d_nondm ==.
 quietly replace `i'_d_nondm = runiformint(1,4) if `i'_d_nondm==.
 ta age_gp1 if `i'_d_dm ==.
 quietly replace `i'_d_dm = runiformint(1,4) if `i'_d_dm ==.
 }
-gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm
-count if alldeathc_dm > alldeath_d_dm
-gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv_d_nondm + ckd_d_nondm + azd_d_nondm
+gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm
 count if alldeathc_nondm > alldeath_d_nondm
+gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm
+count if alldeathc_dm > alldeath_d_dm
+gen cvdcheck = chd_d_nondm + cbd_d_nondm + hfd_d_nondm
+count if cvdcheck > cvd_d_nondm
+drop cvdcheck
+gen cvdcheck = chd_d_dm + cbd_d_dm + hfd_d_dm
+count if cvdcheck > cvd_d_dm
+count if liv1_d_nondm < liv2_d_nondm
+count if liv1_d_dm < liv2_d_dm
+ta age_gp1 if liv1_d_dm < liv2_d_dm
+gen max_liv2 = min(liv1_d_dm,4)
+replace liv2_d_dm = runiformint(1,max_liv2) if liv1_d_dm < liv2_d_dm & inrange(liv2_d_dm,1,4)
+count if liv1_d_dm < liv2_d_dm
 texdoc stlog close
 texdoc stlog, cmdlog nodo
 replace country = substr(country,1,6)
@@ -730,12 +744,12 @@ total population size, prevalence of diabetes, incidence of diabetes,
 deaths in people with diabetes, and deaths in people without diabetes. 
 We can calculate person-years in the total population by assuming that the person-years
 of follow-up in a given calendar year are equal to the population size in the current year
-plus the population size in the next year, divided by two [this has been performed before
-I got the dataset--JM]. We can calculate person-years in people with diabetes, in a given calendar year, 
+plus the population size in the next year, divided by two. We can calculate person-years in people with diabetes, in a given calendar year, 
 by adding the number of people with prevalent diabetes to half the number of people with 
-incident diabetes and subtracting half the number of all-cause deaths (again, performed before I got the dataset). 
+incident diabetes and subtracting half the number of all-cause deaths. 
 From there, person-years in people
 without diabetes is just person-years in the total population minus person-years in people with diabetes.
+[All of this has been performed before I got the dataset--JM.]
 
 \color{Blue4}
 ***/
@@ -757,6 +771,18 @@ replace age_nondm = age_nondm+5
 recode dmd_d_nondm .=0
 rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_nondm alldeath_d_pop)
 keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
+gen alldeathc_nondm = cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm
+count if alldeathc_nondm > alldeath_d_nondm
+gen alldeathc_dm = cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm
+count if alldeathc_dm > alldeath_d_dm
+gen cvdcheck = chd_d_nondm + cbd_d_nondm + hfd_d_nondm
+count if cvdcheck > cvd_d_nondm
+drop cvdcheck
+gen cvdcheck = chd_d_dm + cbd_d_dm + hfd_d_dm
+count if cvdcheck > cvd_d_dm
+count if liv1_d_nondm < liv2_d_nondm
+count if liv1_d_dm < liv2_d_dm
+count if liv1_d_dm < liv2_d_dm
 save Lithuania, replace
 texdoc stlog close
 
@@ -769,7 +795,7 @@ texdoc stlog close
 For Netherlands, we have the following variables (by age, sex, and calendar year): 
 Person-years and deaths in people with and without diabetes. I.e., no further
 variables need to be derived. 
-Nevertheless, Netherlands restricts counts between 0 and 9 for both people with and without
+Netherlands restricts counts between 0 and 9 for both people with and without
 diabetes. I will fill them in randomly, where the number
 can be any number from 0 to 9 with equal probability. 
 I will assume the mid-point of the age interval for people aged $<$40 is 35 and for 90$+$ is 95.
