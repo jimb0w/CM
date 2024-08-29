@@ -7,6 +7,11 @@ set linesize 100
 *net install sjlatex
 *copy "http://www.stata-journal.com/production/sjlatex/stata.sty" stata.sty
 
+! rm -r "/home/jimb0w/Documents/CM/Library"
+cd /home/jimb0w/Documents/CM
+! git clone https://github.com/jimb0w/Library.git
+
+
 texdoc stlog, nolog nodo
 cd /home/jimb0w/Documents/CM
 texdoc do CM.do
@@ -59,7 +64,7 @@ https://github.com/jimb0w/CM \\
         \Large
 
 \noindent
-Correspondence to:
+Correspondence to: \\
 \noindent
 Jedidiah Morton \\
 \color{blue}
@@ -99,22 +104,23 @@ The COD are shown in Table~\ref{CODtab}.
 \begin{table}[h!]
     \caption{Causes of death in the present analysis}
     \label{CODtab}
-	\begin{tabular}{llll}
+	\begin{tabular}{p{3cm}p{3cm}p{3cm}p3cm}
 \hline
 Causes of death & Abbreviation & ICD-10 & ICD-9 \\ 
+\hline
 Cardiovascular diseases & CVD & I00-I99 & 390-434, 436-459 \\ 
 Ischaemic heart diseases & CHD & I20-I25 & 410-414, 429.2 \\ 
 Cerebrovascular diseases & CBD & I60-I69 & 430-434, 436-438 \\ 
 Heart failure & HFD & I50 & 428 \\ 
 Cancer & CAN & C00-C97 & 140-208 \\ 
 Diabetes & DMD & E10-E14 & 250 \\ 
-Infectious diseasesb & INF & A00-B99 & 001–033, 034.1–134, 136–139, 771.3 \\ 
+Infectious diseases & INF & A00-B99 & 001–033, 034.1–134, 136–139, 771.3 \\ 
 Influenza and pneumonia & FLU & J09-J18 & 480-487 \\ 
 Chronic lower respiratory diseases & RES & J40-J47 & 490-494, 496 \\ 
 Liver diseases & LIV1 & K70-K76 & 570-572, 573.0, 573.3-573.9 \\ 
 Liver diseases (exclude alcoholic liver disease) & LIV2 & K71-K76 & 570, 571.4-571.9, 572, 573.0, 573.3-573.9 \\ 
 Renal diseases & CKD & N00-N08, N17-N19, N25-N27 & 580-589 \\ 
-Alzheimer's diseasec & AZD & F00, F01, F03, G30 & 290.0-290.2, 290.4, 331.0 \\ 
+Dementia & AZD & F00, F01, F03, G30 & 290.0-290.2, 290.4, 331.0 \\ 
 \hline
 \end{tabular}
 
@@ -139,9 +145,9 @@ Australian data restrictions prohibit the use of any cell count $<$6
 for the diabetes population; thus, 
 there are many blank values (see below). I will fill them in randomly, where the number
 can be any number from 0 to 5 with equal probability, unless the number of deaths in the
-total population for the age/sex group is <5, in which case the upper bound will be the 
+total population for the age/sex group is $<$5, in which case the upper bound will be the 
 number of deaths in the total population. 
-Further, because of this, data has been provided in both 10 and 20-year age groups, as well as
+Further, because of this, data has been provided in both 10-year age groups and
 overall (i.e., the actual counts). My intuition is that the small cell counts
 won't drive any overall results anyway, which I check below (Figure~\ref{chk1}), 
 and that the uncertainty associated with such low numbers will be reflected in very wide
@@ -320,7 +326,7 @@ GPH/dm_flu_chk1.gph ///
 GPH/dm_ckd_chk1.gph ///
 GPH/dm_liv1_chk1.gph ///
 GPH/dm_liv2_chk1.gph ///
-, graphregion(color(white)) cols(4) altshrink
+, graphregion(color(white)) cols(3) altshrink xsize(3.5)
 texdoc graph, label(chk1) figure(h!) cabove ///
 caption(Crude mortality rate by age-grouping method, by cause of death. Australia. People with diabetes.)
 texdoc stlog close
@@ -329,7 +335,7 @@ texdoc stlog close
 \color{black}
 
 So, from Figure~\ref{chk1} we see that there doesn't appear to be any systematic
-issue introduced using random numbers. I will proceed using the most granular age groupings. 
+issue introduced using random numbers.
 I will assume the mid-point of the age interval for people with diabetes aged $<$40 is 35, 
 for people without diabetes aged $<$40 is 20, and for both people with and without diabetes
 aged 90$+$ is 95.
@@ -417,16 +423,11 @@ count if `i'_d_dm > `i'_d_pop
 }
 count if cvd_d_pop + can_d_pop + dmd_d_pop + inf_d_pop + flu_d_pop + res_d_pop + liv1_d_pop + ckd_d_pop + azd_d_pop > alldeath_d_pop
 count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
-quietly {
 forval ii = 1/3 {
 foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
 quietly replace `i'_d_dm = runiformint(1,max_`i') if (cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm) & inrange(`i'_d_dm,1,9)
 }
 count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
-if r(N) == 0 {
-noisily di "Done"
-}
-}
 }
 count if chd_d_pop + cbd_d_pop + hfd_d_pop > cvd_d_pop
 count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
@@ -493,12 +494,18 @@ ta age_gp1
 foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
 di "`i'"
 ta age_gp1 if `i'_d_nondm ==.
-quietly replace `i'_d_nondm = runiformint(1,3) if `i'_d_nondm==.
+replace `i'_d_nondm = runiformint(1,3) if `i'_d_nondm==.
 ta age_gp1 if `i'_d_dm ==.
-quietly replace `i'_d_dm = runiformint(1,3) if `i'_d_dm ==.
+replace `i'_d_dm = runiformint(1,3) if `i'_d_dm ==.
 }
 count if cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm > alldeath_d_nondm
 count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
+forval ii = 1/2 {
+foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
+quietly replace `i'_d_dm = runiformint(1,3) if (cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm) & inrange(`i'_d_dm,1,3)
+}
+count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
+}
 count if chd_d_nondm + cbd_d_nondm + hfd_d_nondm > cvd_d_nondm
 count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
 ta age_gp1 if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
@@ -695,7 +702,7 @@ without diabetes is just person-years in the total population minus person-years
 \color{Blue4}
 ***/
 
-texdoc stlog, cmdlog nodo
+texdoc stlog, cmdlog
 use uncleandbase, clear
 keep if country == "Lithuania"
 rename sex SEX
@@ -711,6 +718,8 @@ destring age_nondm, replace
 replace age_nondm = age_nondm+5
 recode dmd_d_nondm .=0
 rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_nondm alldeath_d_pop)
+texdoc stlog close
+texdoc stlog
 count if cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm > alldeath_d_nondm
 count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
 count if chd_d_nondm + cbd_d_nondm + hfd_d_nondm > cvd_d_nondm
@@ -718,6 +727,8 @@ count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
 count if liv1_d_nondm < liv2_d_nondm
 count if liv1_d_dm < liv2_d_dm
 count if liv1_d_dm < liv2_d_dm
+texdoc stlog close
+texdoc stlog, cmdlog nodo
 keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
 save Lithuania, replace
 texdoc stlog close
@@ -761,15 +772,13 @@ quietly replace `i'_d_dm = runiformint(0,9) if `i'_d_dm ==.
 }
 count if cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm > alldeath_d_nondm
 count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
-quietly {
 forval ii = 1/197 {
 foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
 quietly replace `i'_d_dm = runiformint(0,9) if (cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm) & inrange(`i'_d_dm,0,9)
 }
-count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
+quietly count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
 if r(N) == 0 {
 noisily di "Done"
-}
 }
 }
 count if chd_d_pop + cbd_d_pop + hfd_d_pop > cvd_d_pop
@@ -843,6 +852,14 @@ quietly replace `i'_d_nondm = `i'_d_pop-`i'_d_dm
 di "`i'"
 ta `i'_d_nondm if `i'_d_nondm <0
 }
+count if cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm > alldeath_d_nondm
+count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
+count if chd_d_nondm + cbd_d_nondm + hfd_d_nondm > cvd_d_nondm
+count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
+count if liv1_d_nondm < liv2_d_nondm
+count if liv1_d_dm < liv2_d_dm
+texdoc stlog close
+texdoc stlog, cmdlog nodo
 replace dmd_d_nondm = 0 if dmd_d_nondm <0
 replace pys_nondm = pys_totpop-pys_dm
 gen age_dm = substr(age_gp1,1,2)
@@ -862,14 +879,6 @@ replace `i'_d_dm = . if age_dm==.
 replace `i'_d_nondm = . if age_nondm==.
 }
 drop if age_dm==. & age_nondm==.
-count if cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm > alldeath_d_nondm
-count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
-count if chd_d_nondm + cbd_d_nondm + hfd_d_nondm > cvd_d_nondm
-count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
-count if liv1_d_nondm < liv2_d_nondm
-count if liv1_d_dm < liv2_d_dm
-texdoc stlog close
-texdoc stlog, cmdlog nodo
 keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
 save Scotland, replace
 texdoc stlog close
@@ -1013,6 +1022,7 @@ texdoc stlog close
 \color{black}
 
 \begin{landscape}
+\thispagestyle{empty}
 
 \begin{table}[h!]
   \begin{center}
@@ -1258,8 +1268,7 @@ Indeed, looking at diabetes deaths in people without diabetes, the rate dramatic
 with and without diabetes suggests a coding change. 
 \end{itemize}
 
-We will still analyse this data, but we should note that the sudden changes could be coding changes
-that will influences estimates of the rate of change.  
+We will not present this data.  
 
 
 \clearpage
@@ -1620,7 +1629,6 @@ texdoc stlog close
 /***
 \color{black}
 
-\clearpage
 We see that the models fit the data reasonably well (Figures~\ref{MC1}-~\ref{MC4}). 
 
 \clearpage
@@ -1770,6 +1778,11 @@ replace age_dm = age-0.5
 rename age_dm age
 save refpops, replace
 texdoc stlog close
+
+/***
+\clearpage
+***/
+
 texdoc stlog, cmdlog nodo
 quietly {
 foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland SKorea {
@@ -2051,6 +2064,27 @@ Similarly for Dementia deaths among males from South Korea.
 ***/
 
 texdoc stlog, cmdlog
+clear
+set obs 1
+gen country = "Australia"
+save MD/STD_Australia_ckd_nondm_0, replace
+save MD/STD_Australia_ckd_nondm_1, replace
+save MD/STD_Australia_ckd_dm_0, replace
+save MD/STD_Australia_ckd_dm_1, replace
+clear
+set obs 1
+gen country = "Finland"
+save MD/STD_Finland_flu_nondm_0, replace
+save MD/STD_Finland_flu_nondm_1, replace
+save MD/STD_Finland_flu_dm_0, replace
+save MD/STD_Finland_flu_dm_1, replace
+clear
+set obs 1
+gen country = "Scotland"
+save MD/STD_Scotland_ckd_nondm_0, replace
+save MD/STD_Scotland_ckd_nondm_1, replace
+save MD/STD_Scotland_ckd_dm_0, replace
+save MD/STD_Scotland_ckd_dm_1, replace
 clear
 set obs 1
 gen country = "Lithuania"
