@@ -156,22 +156,6 @@ confidence intervals for the younger ages.
 \color{Blue4}
 ***/
 
-
-
-/***
-\color{black}
-\clearpage
-\section*{References}
-\addcontentsline{toc}{section}{References}
-\bibliography{/Users/jed/Documents/Library.bib}
-\end{document}
-***/
-
-
-texdoc close
-
-/*
-
 texdoc stlog, cmdlog
 cd /home/jimb0w/Documents/CM
 texdoc stlog close
@@ -3505,7 +3489,7 @@ by country and sex. Liver disease.}
 
 
 texdoc close
-*/
+
 
 
 ! pdflatex CM
