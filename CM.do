@@ -104,7 +104,7 @@ The COD are shown in Table~\ref{CODtab}.
 \begin{table}[h!]
     \caption{Causes of death in the present analysis}
     \label{CODtab}
-	\begin{tabular}{p{3cm}p{3cm}p{3cm}p3cm}
+	\begin{tabular}{p{3cm}p{3cm}p{3cm}p{3cm}}
 \hline
 Causes of death & Abbreviation & ICD-10 & ICD-9 \\ 
 \hline
@@ -155,6 +155,22 @@ confidence intervals for the younger ages.
 
 \color{Blue4}
 ***/
+
+
+
+/***
+\color{black}
+\clearpage
+\section*{References}
+\addcontentsline{toc}{section}{References}
+\bibliography{/Users/jed/Documents/Library.bib}
+\end{document}
+***/
+
+
+texdoc close
+
+/*
 
 texdoc stlog, cmdlog
 cd /home/jimb0w/Documents/CM
@@ -2067,6 +2083,8 @@ texdoc stlog, cmdlog
 clear
 set obs 1
 gen country = "Australia"
+save MD/STD_Australia_ckd_nondm, replace
+save MD/STD_Australia_ckd_dm, replace
 save MD/STD_Australia_ckd_nondm_0, replace
 save MD/STD_Australia_ckd_nondm_1, replace
 save MD/STD_Australia_ckd_dm_0, replace
@@ -2074,6 +2092,8 @@ save MD/STD_Australia_ckd_dm_1, replace
 clear
 set obs 1
 gen country = "Finland"
+save MD/STD_Finland_flu_dm, replace
+save MD/STD_Finland_flu_nondm, replace
 save MD/STD_Finland_flu_nondm_0, replace
 save MD/STD_Finland_flu_nondm_1, replace
 save MD/STD_Finland_flu_dm_0, replace
@@ -2081,6 +2101,8 @@ save MD/STD_Finland_flu_dm_1, replace
 clear
 set obs 1
 gen country = "Scotland"
+save MD/STD_Scotland_ckd_nondm, replace
+save MD/STD_Scotland_ckd_dm, replace
 save MD/STD_Scotland_ckd_nondm_0, replace
 save MD/STD_Scotland_ckd_nondm_1, replace
 save MD/STD_Scotland_ckd_dm_0, replace
@@ -2331,19 +2353,6 @@ caption(Age-standardised mortality rate by cause of death, people aged 40-89. `o
 }
 texdoc stlog close
 
-/***
-\color{black}
-\clearpage
-\section*{References}
-\addcontentsline{toc}{section}{References}
-\bibliography{/Users/jed/Documents/Library.bib}
-\end{document}
-***/
-
-
-
-/*
-
 
 /***
 \color{black}
@@ -2351,9 +2360,8 @@ texdoc stlog close
 \clearpage
 \section{Cause-specific mortality rate ratios}
 
-To estimate the MRR, I will fit a model with spline effects of 
+To estimate the mortality rate ratios (MRRs) by calendar time, I will fit a model with spline effects of 
 age, a binary effect of sex, and an interaction between spline effects of calendar time and diabetes status. 
-I will then use this model to estimate the mortality rate ratio (MRR) for each country by calendar time. 
 
 \color{Blue4}
 ***/
@@ -2524,6 +2532,32 @@ restore
 }
 }
 }
+clear
+set obs 1
+gen country = "Australia"
+save MD/SMR_Australia_ckd, replace
+save MD/SMR_Australia_ckd_0, replace
+save MD/SMR_Australia_ckd_1, replace
+clear
+set obs 1
+gen country = "Finland"
+save MD/SMR_Finland_flu, replace
+save MD/SMR_Finland_flu_0, replace
+save MD/SMR_Finland_flu_1, replace
+clear
+set obs 1
+gen country = "Scotland"
+save MD/SMR_Scotland_ckd, replace
+save MD/SMR_Scotland_ckd_0, replace
+save MD/SMR_Scotland_ckd_1, replace
+clear
+set obs 1
+gen country = "Lithuania"
+save MD/SMR_Lithuania_ckd_1, replace
+clear
+set obs 1
+gen country = "SKorea"
+save MD/SMR_SKorea_azd_1, replace
 foreach ii in can cvd res azd inf flu ckd liv {
 if "`ii'" == "can" {
 local oo = "Cancer"
@@ -2833,6 +2867,13 @@ replace A2 = "dmd" if A2 == "13"
 replace A5 = 100*(exp(A5)-1)
 replace A6 = 100*(exp(A6)-1)
 replace A7 = 100*(exp(A7)-1)
+forval i = 5/8 {
+replace A`i' = . if country == "Australia" & A2 == "ckd"
+replace A`i' = . if country == "Finland" & A2 == "flu"
+replace A`i' = . if country == "Scotland" & A2 == "ckd"
+replace A`i' = . if country == "Lithuania" & A2 == "ckd" & A3 == "dm" & A4 == 1
+replace A`i' = . if country == "SKorea" & A2 == "ckd" & A3 == "dm" & A4 == 1
+}
 save APCs, replace
 quietly {
 foreach i in Australia Canada Denmark Finland France Lithuania Netherlands Scotland SKorea {
@@ -2895,6 +2936,13 @@ replace A2 = "`ii'" if A2 == "`a2'"
 replace A4 = 100*(exp(A4)-1)
 replace A5 = 100*(exp(A5)-1)
 replace A6 = 100*(exp(A6)-1)
+forval i = 4/7 {
+replace A`i' = . if country == "Australia" & A2 == "ckd"
+replace A`i' = . if country == "Finland" & A2 == "flu"
+replace A`i' = . if country == "Scotland" & A2 == "ckd"
+replace A`i' = . if country == "Lithuania" & A2 == "ckd" & A3 == 1
+replace A`i' = . if country == "SKorea" & A2 == "ckd" & A3 == 1
+}
 save SMR_APCs, replace
 foreach i in can cvd res azd dmd inf flu ckd liv {
 if "`i'" == "cvd" {
@@ -3114,7 +3162,7 @@ replace country = "South Korea" if country == "SKorea"
 if "`i'" == "dmd" {
 drop AA
 }
-export delimited using APCt_`i'.csv, delimiter(":") novarnames replace
+export delimited using CSV/APCt_`i'.csv, delimiter(":") novarnames replace
 }
 texdoc stlog close
 texdoc stlog, cmdlog 
@@ -3199,7 +3247,7 @@ by country and sex. Cancer.}
             },
         every nth row={3}{before row=\midrule},
         every last row/.style={after row=\bottomrule},
-    ]{APCt_can.csv}
+    ]{CSV/APCt_can.csv}
   \end{center}
 \end{table}
 
@@ -3228,7 +3276,7 @@ by country and sex. Cardiovascular disease.}
             },
         every nth row={3}{before row=\midrule},
         every last row/.style={after row=\bottomrule},
-    ]{APCt_cvd.csv}
+    ]{CSV/APCt_cvd.csv}
   \end{center}
 \end{table}
 
@@ -3257,7 +3305,7 @@ by country and sex. Chronic lower respiratory disease.}
             },
         every nth row={3}{before row=\midrule},
         every last row/.style={after row=\bottomrule},
-    ]{APCt_res.csv}
+    ]{CSV/APCt_res.csv}
   \end{center}
 \end{table}
 
@@ -3286,7 +3334,7 @@ by country and sex. Dementia.}
             },
         every nth row={3}{before row=\midrule},
         every last row/.style={after row=\bottomrule},
-    ]{APCt_azd.csv}
+    ]{CSV/APCt_azd.csv}
   \end{center}
 \end{table}
 
@@ -3313,7 +3361,7 @@ by country and sex. Diabetes.}
             },
         every nth row={3}{before row=\midrule},
         every last row/.style={after row=\bottomrule},
-    ]{APCt_dmd.csv}
+    ]{CSV/APCt_dmd.csv}
   \end{center}
 \end{table}
 
@@ -3342,7 +3390,7 @@ by country and sex. Infectious diseases.}
             },
         every nth row={3}{before row=\midrule},
         every last row/.style={after row=\bottomrule},
-    ]{APCt_inf.csv}
+    ]{CSV/APCt_inf.csv}
   \end{center}
 \end{table}
 
@@ -3371,7 +3419,7 @@ by country and sex. Influenza and pneumonia.}
             },
         every nth row={3}{before row=\midrule},
         every last row/.style={after row=\bottomrule},
-    ]{APCt_flu.csv}
+    ]{CSV/APCt_flu.csv}
   \end{center}
 \end{table}
 
@@ -3401,7 +3449,7 @@ by country and sex. Kidney disease.}
             },
         every nth row={3}{before row=\midrule},
         every last row/.style={after row=\bottomrule},
-    ]{APCt_ckd.csv}
+    ]{CSV/APCt_ckd.csv}
   \end{center}
 \end{table}
 
@@ -3431,11 +3479,9 @@ by country and sex. Liver disease.}
             },
         every nth row={3}{before row=\midrule},
         every last row/.style={after row=\bottomrule},
-    ]{APCt_liv.csv}
+    ]{CSV/APCt_liv.csv}
   \end{center}
 \end{table}
-
-
 
 
 \clearpage
@@ -3446,10 +3492,20 @@ by country and sex. Liver disease.}
 ***/
 
 
-*/
+
+
+/***
+\color{black}
+\clearpage
+\section*{References}
+\addcontentsline{toc}{section}{References}
+\bibliography{/Users/jed/Documents/Library.bib}
+\end{document}
+***/
+
 
 texdoc close
-
+*/
 
 
 ! pdflatex CM
