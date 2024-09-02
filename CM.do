@@ -3132,6 +3132,7 @@ use APCs, clear
 keep if A2 == "`i'"
 tostring A5-A7, force replace format(%9.2f)
 gen A = A5 + " (" + A6 + ", " + A7 + ")"
+replace A = "" if A == ". (., .)"
 keep A3 A4 A country
 reshape wide A, i(country A4) j(A3) string
 merge 1:1 country A4 using MD/SMR_APC_`i'
