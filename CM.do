@@ -104,7 +104,7 @@ The COD are shown in Table~\ref{CODtab}.
 \begin{table}[h!]
     \caption{Causes of death in the present analysis}
     \label{CODtab}
-	\begin{tabular}{p{3cm}p{3cm}p{3cm}p{3cm}}
+	\begin{tabular}{p{6cm}p{2.5cm}p{3cm}p{3cm}}
 \hline
 Causes of death & Abbreviation & ICD-10 & ICD-9 \\ 
 \hline
@@ -2738,7 +2738,7 @@ graph combine ///
 GPH/SMR_`ii'.gph ///
 GPH/SMR_`ii'_0.gph ///
 GPH/SMR_`ii'_1.gph ///
-, graphregion(color(white)) cols(3) altshrink xsize(15)
+, graphregion(color(white)) cols(1) altshrink xsize(2.5)
 texdoc graph, label(STDMRF_`ii') figure(h!) cabove ///
 caption(Mortality rate ratio by cause of death and sex. `oo'.)
 }
@@ -3124,6 +3124,7 @@ use SMR_APCs, clear
 keep if A2 == "`i'"
 tostring A4-A6, force replace format(%9.2f)
 gen AA = A4 + " (" + A5 + ", " + A6 + ")"
+replace AA = "" if AA == ". (., .)"
 keep A3 country AA
 rename A3 A4
 save MD/SMR_APC_`i', replace
