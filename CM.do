@@ -3506,12 +3506,6 @@ by country and sex. Liver disease.}
   \end{center}
 \end{table}
 
-
-\clearpage
-\section*{References}
-\addcontentsline{toc}{section}{References}
-\bibliography{/Users/jed/Documents/Library.bib}
-\end{document}
 ***/
 
 
@@ -3522,7 +3516,7 @@ by country and sex. Liver disease.}
 \clearpage
 \section*{References}
 \addcontentsline{toc}{section}{References}
-\bibliography{/Users/jed/Documents/Library.bib}
+\bibliography{/home/jimb0w/Documents/CM/Library/Library.bib}
 \end{document}
 ***/
 
