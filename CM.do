@@ -1512,7 +1512,7 @@ twoway ///
 (scatter rate age_`d' if cale == `cmu' & rate !=0, col(black)) ///
 , graphregion(color(white)) ylabel(, angle(0) glpattern(solid) glcolor(gs10%20)) ///
 xlabel(30(10)100, nogrid) ytitle("Mortality rate (per 1000 person-years)") ///
-xtitle(Age) yscale(nolog) legend(order( ///
+xtitle(Age) yscale(nolog) ylabel(, format(%9.1f)) legend(order( ///
 2 "Modelled" ///
 3 "Crude" ///
 ) ring(0) cols(1) position(11) region(lcolor(none) col(none))) ///
@@ -1530,12 +1530,12 @@ twoway ///
 (scatter rate cale if age_`d' == 85 & rate !=0, col(gs10)) ///
 , graphregion(color(white)) ylabel(, angle(0) glpattern(solid) glcolor(gs10%20)) ///
 ytitle("Mortality rate (per 1000 person-years)") ///
-xtitle(Year) yscale(log) legend(order( ///
+xtitle(Year) yscale(nolog) ylabel(, format(%9.1f)) legend(order( ///
 2 "Modelled" ///
 2 "45" 5 "65" 8 "85" ///
 3 "Crude" ///
 3 "40-49" 6 "60-69" 9 "80-89" ///
-) ring(0) cols(4) position(11) region(lcolor(none) col(none))) ///
+) cols(4) position(12) region(lcolor(none) col(none))) ///
 title("`c', `oo', `ss' `dd' diabetes", col(black) placement(west) size(medium))
 graph save GPH/Rc_`c'_`o'_`d'_`s'_period, replace
 use RCc, clear
@@ -1560,15 +1560,6 @@ ytitle("Pearson residuals", margin(a+2)) ///
 xtitle("Period") ///
 title("`c', `oo', `ss' `dd' diabetes", col(black) placement(west) size(medium))
 graph save GPH/RCc_`c'_`o'_`d'_`s'_period, replace
-twoway ///
-(scatter res coh, col(black)) ///
-, legend(off) ///
-graphregion(color(white)) ///
-ylabel(, format(%9.0f) grid angle(0) glpattern(solid) glcolor(gs10%20)) ///
-ytitle("Pearson residuals", margin(a+2)) ///
-xtitle("Cohort") ///
-title("`c', `oo', `ss' `dd' diabetes", col(black) placement(west) size(medium))
-graph save GPH/RCc_`c'_`o'_`d'_`s'_cohort, replace
 }
 texdoc stlog close
 texdoc stlog, cmdlog
@@ -2217,8 +2208,6 @@ twoway ///
 (line stdrate calendar if country == "`C8'", color("`r(p8)'") lpattern(solid)) ///
 (rarea ub lb calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
 (line stdrate calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C10'", color("`r(p10)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C10'", color("`r(p10)'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -2228,8 +2217,7 @@ order(2 "`C1'" ///
 12 "`C6'" ///
 14 "`C7'" ///
 16 "`C8'" ///
-18 "`C9'" ///
-20 "`C10'") ///
+18 "`C9'") ///
 cols(1)) ///
 graphregion(color(white)) ///
 ylabel(`ylab', format(`yform') grid glpattern(solid) glcolor(gs10%20) angle(0)) ///
@@ -2280,8 +2268,6 @@ twoway ///
 (line stdrate calendar if country == "`C8'", color("`r(p8)'") lpattern(solid)) ///
 (rarea ub lb calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
 (line stdrate calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C10'", color("`r(p10)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C10'", color("`r(p10)'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -2291,8 +2277,7 @@ order(2 "`C1'" ///
 12 "`C6'" ///
 14 "`C7'" ///
 16 "`C8'" ///
-18 "`C9'" ///
-20 "`C10'") ///
+18 "`C9'") ///
 cols(1)) ///
 graphregion(color(white)) ///
 ylabel(`ylab', format(`yform') grid  glpattern(solid) glcolor(gs10%20) angle(0)) ///
@@ -2648,8 +2633,6 @@ twoway ///
 (line A1 calendar if country == "`C8'", color("`r(p8)'") lpattern(solid)) ///
 (rarea A3 A2 calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
 (line A1 calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C10'", color("`r(p10)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C10'", color("`r(p10)'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -2659,8 +2642,7 @@ order(2 "`C1'" ///
 12 "`C6'" ///
 14 "`C7'" ///
 16 "`C8'" ///
-18 "`C9'" ///
-20 "`C10'") ///
+18 "`C9'") ///
 cols(1)) ///
 graphregion(color(white)) ///
 ylabel(`ylab', grid format(`yform') angle(0)) ///
@@ -2711,8 +2693,6 @@ twoway ///
 (line A1 calendar if country == "`C8'", color("`r(p8)'") lpattern(solid)) ///
 (rarea A3 A2 calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
 (line A1 calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C10'", color("`r(p10)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C10'", color("`r(p10)'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -2722,8 +2702,7 @@ order(2 "`C1'" ///
 12 "`C6'" ///
 14 "`C7'" ///
 16 "`C8'" ///
-18 "`C9'" ///
-20 "`C10'") ///
+18 "`C9'") ///
 cols(1)) ///
 graphregion(color(white)) ///
 ylabel(`ylab', format(`yform') grid angle(0)) ///
