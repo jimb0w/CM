@@ -445,8 +445,8 @@ replace liv2_d_pop = runiformint(1,max_liv2) if liv1_d_pop < liv2_d_pop & inrang
 count if liv1_d_pop < liv2_d_pop
 count if liv1_d_dm < liv2_d_dm
 ta age_gp1 if liv1_d_dm < liv2_d_dm
-replace max_liv2 = min(liv1_d_dm,9)
-replace liv2_d_dm = runiformint(1,max_liv2) if liv1_d_dm < liv2_d_dm & inrange(liv2_d_dm,1,9)
+replace max_liv2 = min(liv1_d_dm,liv2_d_pop,9)
+replace liv2_d_dm = runiformint(1,max_liv2) if ((liv1_d_dm < liv2_d_dm) | liv2_d_dm > liv2_d_pop & liv2_d_dm!=.) & inrange(liv2_d_dm,1,9)
 count if liv1_d_dm < liv2_d_dm
 foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
 quietly replace `i'_d_nondm = `i'_d_pop-`i'_d_dm
@@ -848,89 +848,6 @@ texdoc stlog close
 \color{black}
 
 \clearpage
-\subsection{Netherlands}
-
-For Netherlands, we have the following variables (by age, sex, and calendar year): 
-Person-years and deaths in people with and without diabetes. I.e., no further
-variables need to be derived. 
-Netherlands restricts counts between 0 and 9 for both people with and without
-diabetes. I will fill them in randomly, where the number
-can be any number from 0 to 9 with equal probability. 
-I will assume the mid-point of the age interval for people aged $<$40 is 35 and for 90$+$ is 95.
-
-Additionally, because the definition of diabetes in the Netherlands relies on 2 years of follow-up from
-2006, we are dropping data from 2007. 
-
-\color{Blue4}
-***/
-
-texdoc stlog
-set seed 397558
-use uncleandbase, clear
-keep if country == "Netherlands"
-rename sex SEX
-gen sex = 0 if SEX == "F"
-replace sex = 1 if SEX == "M"
-rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_nondm alldeath_d_pop)
-texdoc stlog close
-texdoc stlog
-ta age_gp1
-foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
-di "`i'"
-ta age_gp1 if `i'_d_nondm ==.
-quietly replace `i'_d_nondm = runiformint(0,9) if `i'_d_nondm==.
-ta age_gp1 if `i'_d_dm ==.
-quietly replace `i'_d_dm = runiformint(0,9) if `i'_d_dm ==.
-}
-count if cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm > alldeath_d_nondm
-count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
-forval ii = 1/73 {
-foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
-quietly replace `i'_d_dm = runiformint(0,9) if (cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm) & inrange(`i'_d_dm,0,9)
-}
-quietly count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
-if r(N) == 0 {
-noisily di "Done"
-}
-}
-count if chd_d_pop + cbd_d_pop + hfd_d_pop > cvd_d_pop
-count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
-ta age_gp1 if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
-gen max_chd = min(cvd_d_dm,9)
-replace chd_d_dm = runiformint(0,max_chd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm & inrange(chd_d_dm,0,9)
-gen max_cbd = min(cvd_d_dm-chd_d_dm,9)
-replace cbd_d_dm = runiformint(0,max_cbd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm & inrange(cbd_d_dm,0,9)
-gen max_hfd = min(cvd_d_dm-chd_d_dm-cbd_d_dm,9)
-replace hfd_d_dm = runiformint(0,max_hfd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm & inrange(hfd_d_dm,0,9)
-count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
-count if liv1_d_nondm < liv2_d_nondm
-ta age_gp1 if liv1_d_nondm < liv2_d_nondm
-gen max_liv2 = min(liv1_d_nondm,9)
-replace liv2_d_nondm = runiformint(0,max_liv2) if liv1_d_nondm < liv2_d_nondm & inrange(liv2_d_nondm,0,9)
-count if liv1_d_nondm < liv2_d_nondm
-count if liv1_d_dm < liv2_d_dm
-ta age_gp1 if liv1_d_dm < liv2_d_dm
-replace max_liv2 = min(liv1_d_dm,9)
-replace liv2_d_dm = runiformint(0,max_liv2) if liv1_d_dm < liv2_d_dm & inrange(liv2_d_dm,0,9)
-count if liv1_d_dm < liv2_d_dm
-texdoc stlog close
-texdoc stlog, cmdlog nodo
-gen age_dm = substr(age_gp1,1,2)
-replace age_dm = "30" if age_dm == "0-"
-destring age_dm, replace
-replace age_dm = age_dm+5
-gen age_nondm = substr(age_gp1,1,2)
-replace age_nondm = "15" if age_nondm == "0-"
-destring age_nondm, replace
-replace age_nondm = age_nondm+5
-keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
-save Netherlands, replace
-texdoc stlog close
-
-/***
-\color{black}
-
-\clearpage
 \subsection{Scotland}
 
 For Scotland, we have the following variables (by age, sex, and calendar year): 
@@ -1058,7 +975,7 @@ Table~\ref{cleansumtab} shows a summary of the data included in this analysis.
 texdoc stlog, cmdlog nodo
 *mkdir CSV
 clear
-foreach c in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach c in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 append using `c'
 }
 gen other_d_dm = alldeath_d_dm - ///
@@ -1087,7 +1004,7 @@ foreach i in alldeath can cvd chd cbd hfd res dmd inf flu ckd liv1 liv2 {
 drop `i'_d_dm `i'_d_nondm
 }
 save CMdataDEM, replace
-foreach c in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach c in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 use `c', clear
 foreach i in chd cbd hfd liv2 {
 drop `i'_d_dm `i'_d_nondm
@@ -1196,7 +1113,7 @@ OTH -- All other causes.
 ***/
 
 texdoc stlog, cmdlog nodo
-foreach c in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach c in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 use `c', clear
 if "`c'" == "Canada1" {
 local co = "Canada (Alberta)"
@@ -1269,7 +1186,7 @@ GPH/cr_`i'_nondm_`c'.gph ///
 }
 texdoc stlog close
 texdoc stlog, nolog
-foreach c in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach c in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 use `c', clear
 if "`c'" == "Canada1" {
 local co = "Canada (Alberta)"
@@ -1379,10 +1296,6 @@ Consequently, deaths assigned to N03 as an underlying cause have decreased.''
 \end{itemize}
 \item Figure~\ref{cr_flu_Finland}, Finland, influenza and pneumonia from 2000-2005 -- the continuous
 drop suggests a gradual change in how these deaths were coded.
-\item Figure~\ref{cr_can_Netherlands} and Figure~\ref{cr_cvd_Netherlands} and some others
-, Netherlands, Cancer and CVD in diabetes in 2007 -- the big jump from 2007-2008 across
-multiple causes of death suggests something specific to the definition of diabetes might have changed this year.
-Indeed, looking at diabetes deaths in people without diabetes, the rate dramatically drops over this period. 
 \item Figure~\ref{cr_ckd_Scotland}, Scotland, kidney disease in 2017 -- the big drop in 2017 for people
 with and without diabetes suggests a coding change. 
 \end{itemize}
@@ -1417,7 +1330,7 @@ age-standardised rates in people with and without diabetes by period, using dire
 
 texdoc stlog, cmdlog nodo
 *mkdir MD
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 foreach ii in can cvd res azd dmd inf flu ckd liv {
 foreach iii in dm nondm {
 if "`ii'" == "dmd" & "`iii'" == "nondm" {
@@ -1508,7 +1421,7 @@ save MD/R_`i'_`ii'_`iii'_`iiii', replace
 set seed 1312
 clear
 gen A =.
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 foreach ii in can cvd res azd dmd inf flu ckd liv {
 foreach iii in dm nondm {
 if "`ii'" == "dmd" & "`iii'" == "nondm" {
@@ -1528,7 +1441,7 @@ save RCc, replace
 set seed 1312
 clear
 gen A =.
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 foreach ii in can cvd res azd dmd inf flu ckd liv {
 foreach iii in dm nondm {
 if "`ii'" == "dmd" & "`iii'" == "nondm" {
@@ -1671,7 +1584,6 @@ xtitle("Cohort") ///
 title("`c', `oo', `ss' `dd' diabetes", col(black) placement(west) size(medium))
 graph save GPH/RCc_`c'_`o'_`d'_`s'_cohort, replace
 }
-
 texdoc stlog close
 texdoc stlog, cmdlog
 use Rc, clear
@@ -1767,13 +1679,13 @@ the sex-stratified results to.
 ***/
 
 texdoc stlog, cmdlog
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 use `i', clear
 collapse (sum) pys_dm, by(age_dm)
 save `i'_pysdm, replace
 }
 clear
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 append using `i'_pysdm
 }
 collapse (sum) pys_dm, by(age_dm)
@@ -1818,13 +1730,13 @@ keep age_dm B
 replace age_dm = age-0.5
 rename age_dm age
 save refpop, replace
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 use `i', clear
 collapse (sum) pys_dm, by(sex age_dm)
 save `i'_pysdm_s, replace
 }
 clear
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 append using `i'_pysdm_s
 }
 collapse (sum) pys_dm, by(sex age_dm)
@@ -1903,7 +1815,7 @@ texdoc stlog close
 
 texdoc stlog, cmdlog nodo
 quietly {
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 foreach ii in can cvd res azd dmd inf flu ckd liv {
 foreach iii in dm nondm {
 if "`ii'" == "dmd" & "`iii'" == "nondm" {
@@ -2037,7 +1949,7 @@ save MD/STD_`i'_`ii'_`iii', replace
 texdoc stlog close
 texdoc stlog
 quietly {
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 foreach ii in can cvd res azd dmd inf flu ckd liv {
 foreach iii in dm nondm {
 if "`ii'" == "dmd" & "`iii'" == "nondm" {
@@ -2287,7 +2199,7 @@ if "`iii'" == "nondm" {
 local w = "without"
 }
 clear
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 append using MD/STD_`i'_`ii'_`iii'
 }
 replace country = "Canada (Alberta)" if country == "Canada1"
@@ -2295,11 +2207,11 @@ replace country = "Canada (Ontario)" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort country : keep if _n == 1
-forval i = 1/10 {
+forval i = 1/9 {
 local C`i' = country[`i']
 }
 restore
-colorpalette hue, n(10) luminance(50) nograph
+colorpalette hue, n(9) luminance(50) nograph
 twoway ///
 (rarea ub lb calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
 (line stdrate calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
@@ -2350,7 +2262,7 @@ if `iiii' == 1 {
 local s = "males"
 }
 clear
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 append using MD/STD_`i'_`ii'_`iii'_`iiii'
 }
 replace country = "Canada (Alberta)" if country == "Canada1"
@@ -2358,11 +2270,11 @@ replace country = "Canada (Ontario)" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort country : keep if _n == 1
-forval i = 1/10 {
+forval i = 1/9 {
 local C`i' = country[`i']
 }
 restore
-colorpalette hue, n(10) luminance(50) nograph
+colorpalette hue, n(9) luminance(50) nograph
 twoway ///
 (rarea ub lb calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
 (line stdrate calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
@@ -2477,7 +2389,7 @@ age, a binary effect of sex, and an interaction between spline effects of calend
 ***/
 
 texdoc stlog, cmdlog nodo
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 use `i', clear
 expand 2
 bysort cal age_dm sex : gen dm = _n-1
@@ -2490,7 +2402,7 @@ drop if age==.
 save `i'_long, replace
 }
 quietly {
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 foreach ii in can cvd res azd inf flu ckd liv {
 use `i'_long, clear
 replace calendar = calendar-2009.5
@@ -2718,7 +2630,7 @@ local yform = "%9.0f"
 local yrange = "1 10"
 }
 clear
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 append using MD/SMR_`i'_`ii'
 }
 replace country = "Canada (Alberta)" if country == "Canada1"
@@ -2726,11 +2638,11 @@ replace country = "Canada (Ontario)" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort country : keep if _n == 1
-forval i = 1/10 {
+forval i = 1/9 {
 local C`i' = country[`i']
 }
 restore
-colorpalette hue, n(10) luminance(50) nograph
+colorpalette hue, n(9) luminance(50) nograph
 twoway ///
 (rarea A3 A2 calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
 (line A1 calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
@@ -2781,7 +2693,7 @@ if `iii' == 1 {
 local s = "males"
 }
 clear
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 append using MD/SMR_`i'_`ii'_`iii'
 }
 replace country = "Canada (Alberta)" if country == "Canada1"
@@ -2789,11 +2701,11 @@ replace country = "Canada (Ontario)" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort country : keep if _n == 1
-forval i = 1/10 {
+forval i = 1/9 {
 local C`i' = country[`i']
 }
 restore
-colorpalette hue, n(10) luminance(50) nograph
+colorpalette hue, n(9) luminance(50) nograph
 twoway ///
 (rarea A3 A2 calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
 (line A1 calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
@@ -2903,7 +2815,7 @@ from the coefficient associated with this term in the model).
 
 texdoc stlog, cmdlog nodo
 quietly {
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 foreach ii in can cvd res azd dmd inf flu ckd liv {
 foreach iii in dm nondm {
 if "`ii'" == "dmd" & "`iii'" == "nondm" {
@@ -2941,7 +2853,7 @@ matrix A_`i'_`ii'_`iii'_`iiii' = (r(table)[1,1], r(table)[5,1], r(table)[6,1], r
 }
 matrix A = (.,.,.,.,.,.,.,.)
 local a1 = 0
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 local a1 = `a1'+1
 local a2 = 0
 foreach ii in can cvd res azd dmd inf flu ckd liv {
@@ -2967,7 +2879,7 @@ drop if A1==.
 tostring A2-A3, replace format(%9.0f) force
 gen country=""
 local a1 = 0
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 local a1 = `a1'+1
 replace country = "`i'" if A1 == `a1'
 local a2 = 0
@@ -2994,7 +2906,7 @@ replace A`i' = . if country == "SKorea" & A2 == "ckd" & A3 == "dm" & A4 == 1
 }
 save APCs, replace
 quietly {
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 foreach ii in can cvd res azd inf flu ckd liv {
 use `i'_long, clear
 replace calendar = calendar-2009.5
@@ -3024,7 +2936,7 @@ matrix A_`i'_`ii'_`iii' = (r(table)[1,9], r(table)[5,9], r(table)[6,9], r(table)
 }
 matrix A = (.,.,.,.,.,.,.)
 local a1 = 0
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 local a1 = `a1'+1
 local a2 = 0
 foreach ii in can cvd res azd inf flu ckd liv {
@@ -3042,7 +2954,7 @@ drop if A1==.
 tostring A2, replace format(%9.0f) force
 gen country=""
 local a1 = 0
-foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 local a1 = `a1'+1
 replace country = "`i'" if A1 == `a1'
 local a2 = 0
@@ -3124,7 +3036,7 @@ replace country = "Canada (Ontario)" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
-forval c = 1/10 {
+forval c = 1/9 {
 local C`c' = country[`c']
 }
 restore
@@ -3160,7 +3072,7 @@ replace country = "Canada (Ontario)" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
-forval c = 1/10 {
+forval c = 1/9 {
 local C`c' = country[`c']
 }
 restore
@@ -3201,7 +3113,7 @@ replace country = "Canada (Ontario)" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
-forval c = 1/10 {
+forval c = 1/9 {
 local C`c' = country[`c']
 }
 restore
@@ -3232,7 +3144,7 @@ replace country = "Canada (Ontario)" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
-forval c = 1/10 {
+forval c = 1/9 {
 local C`c' = country[`c']
 }
 restore
