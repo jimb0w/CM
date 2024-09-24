@@ -504,6 +504,7 @@ texdoc stlog, cmdlog
 set seed 46792303
 use uncleandbase, clear
 keep if substr(country,1,9)=="Canada (O"
+drop if cal < 2013
 rename sex SEX
 gen sex = 0 if SEX == "F"
 replace sex = 1 if SEX == "M"
@@ -539,19 +540,6 @@ replace cbd_d_dm = runiformint(0,max_cbd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cv
 replace max_hfd = min(cvd_d_dm-chd_d_dm-cbd_d_dm,5)
 replace hfd_d_dm = runiformint(0,max_hfd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm & inrange(hfd_d_dm,1,5)
 count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
-list chd_d_dm cbd_d_dm hfd_d_dm cvd_d_dm if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
-texdoc stlog close
-
-/***
-\color{red}
-
-This isn't an error with random number generation;
-the data itself is faulty.
-
-\color{Blue4}
-***/
-
-texdoc stlog
 count if liv1_d_pop < liv2_d_pop
 ta age_gp1 if liv1_d_pop < liv2_d_pop
 replace max_liv2 = min(liv1_d_pop,9)
@@ -581,8 +569,6 @@ replace age_nondm = age_nondm+5
 keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
 save Canada2, replace
 texdoc stlog close
-
-
 
 /***
 \color{black}
@@ -3058,7 +3044,6 @@ ylabel( ///
 -7 "`C7'" ///
 -8 "`C8'" ///
 -9 "`C9'" ///
--10 "`C10'" ///
 , angle(0) nogrid) ytitle("") xline(0, lcol(black)) ///
 xlabel(`xlab', format(%9.0f)) ///
 title("Mortality rate, `ii'", placement(west) col(black) size(medium))
@@ -3100,7 +3085,6 @@ ylabel( ///
 -7 "`C7'" ///
 -8 "`C8'" ///
 -9 "`C9'" ///
--10 "`C10'" ///
 , angle(0) nogrid) ytitle("") xline(0, lcol(black)) ///
 xlabel(`xlab', format(%9.0f)) ///
 title("Mortality rate, `ii'", placement(west) col(black) size(medium))
@@ -3131,7 +3115,6 @@ ylabel( ///
 -7 "`C7'" ///
 -8 "`C8'" ///
 -9 "`C9'" ///
--10 "`C10'" ///
 , angle(0) nogrid) ytitle("") xline(0, lcol(black)) ///
 xlabel(`xlabs', format(%9.0f)) ///
 title("MRR, `ii'", placement(west) col(black) size(medium))
@@ -3166,7 +3149,6 @@ ylabel( ///
 -7 "`C7'" ///
 -8 "`C8'" ///
 -9 "`C9'" ///
--10 "`C10'" ///
 , angle(0) nogrid) ytitle("") xline(0, lcol(black)) ///
 xlabel(`xlabs', format(%9.0f)) ///
 title("MRR, `ii'", placement(west) col(black) size(medium))
