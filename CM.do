@@ -830,6 +830,96 @@ keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm
 save Lithuania, replace
 texdoc stlog close
 
+
+
+/***
+\color{black}
+
+\clearpage
+\subsection{Netherlands}
+
+This data will only be used for an analysis of proportional mortality as there are issues
+with recruitment to the datasets over follow up that make the rates unreliable. 
+
+For Netherlands, we have the following variables (by age, sex, and calendar year): 
+Person-years and deaths in people with and without diabetes. I.e., no further
+variables need to be derived. 
+Netherlands restricts counts between 0 and 9 for both people with and without
+diabetes. I will fill them in randomly. 
+I will assume the mid-point of the age interval for people aged $<$40 is 35 and for 90$+$ is 95.
+
+Additionally, because the definition of diabetes in the Netherlands relies on 2 years of follow-up from
+2006, we are dropping data from 2007 [done before I got the dataset -- JM]. 
+
+\color{Blue4}
+***/
+
+texdoc stlog, cmdlog
+set seed 1836590237
+use uncleandbase, clear
+keep if country == "Netherlands"
+rename sex SEX
+gen sex = 0 if SEX == "F"
+replace sex = 1 if SEX == "M"
+rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_nondm alldeath_d_pop)
+texdoc stlog close
+texdoc stlog
+ta age_gp1
+foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
+di "`i'"
+ta age_gp1 if `i'_d_nondm ==.
+quietly replace `i'_d_nondm = runiformint(0,9) if `i'_d_nondm==.
+ta age_gp1 if `i'_d_dm ==.
+quietly replace `i'_d_dm = runiformint(0,9) if `i'_d_dm ==.
+}
+count if cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm > alldeath_d_nondm
+count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
+forval ii = 1/60 {
+foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
+quietly replace `i'_d_dm = runiformint(0,9) if (cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm) & inrange(`i'_d_dm,0,9)
+}
+count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
+}
+count if chd_d_nondm + cbd_d_nondm + hfd_d_nondm > cvd_d_nondm
+count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
+ta age_gp1 if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
+gen max_chd = min(cvd_d_dm,9)
+replace chd_d_dm = runiformint(0,max_chd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
+gen max_cbd = min(cvd_d_dm-chd_d_dm,9)
+replace cbd_d_dm = runiformint(0,max_cbd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
+gen max_hfd = min(cvd_d_dm-chd_d_dm-cbd_d_dm,9)
+replace hfd_d_dm = runiformint(0,max_hfd) if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
+count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
+count if liv1_d_nondm < liv2_d_nondm
+ta age_gp1 if liv1_d_nondm < liv2_d_nondm
+gen max_liv2 = min(liv1_d_nondm,9)
+replace liv2_d_nondm = runiformint(0,max_liv2) if liv1_d_nondm < liv2_d_nondm & inrange(liv2_d_nondm,0,9)
+count if liv1_d_nondm < liv2_d_nondm
+count if liv1_d_dm < liv2_d_dm
+ta age_gp1 if liv1_d_dm < liv2_d_dm
+replace max_liv2 = min(liv1_d_dm,9)
+replace liv2_d_dm = runiformint(0,max_liv2) if liv1_d_dm < liv2_d_dm & inrange(liv2_d_dm,0,9)
+count if liv1_d_dm < liv2_d_dm
+texdoc stlog close
+texdoc stlog, cmdlog nodo
+gen age_dm = substr(age_gp1,1,2)
+replace age_dm = "30" if age_dm == "0-"
+destring age_dm, replace
+replace age_dm = age_dm+5
+gen age_nondm = substr(age_gp1,1,2)
+replace age_nondm = "15" if age_nondm == "0-"
+destring age_nondm, replace
+replace age_nondm = age_nondm+5
+keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
+save Netherlands, replace
+texdoc stlog close
+
+
+
+
+
+
+
 /***
 \color{black}
 
