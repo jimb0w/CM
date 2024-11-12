@@ -1041,6 +1041,63 @@ texdoc stlog close
 \color{black}
 
 \clearpage
+\subsection{Sweden}
+
+This data will only be used for an analysis of proportional mortality as there are issues
+with recruitment to the datasets over follow up that make the rates unreliable. 
+
+For Sweden, we have the following variables (by age, sex, and calendar year): 
+total population size, person-years in people with diabetes,
+deaths in people with diabetes, and deaths in the total population.
+We can calculate person-years in the total population by assuming that the person-years
+of follow-up in a given calendar year are equal to the population size in the current year
+plus the population size in the next year, divided by two (this has been performed before
+I got the dataset). I then calculate person-years in people without diabetes by substracting
+the person-years in people with diabetes from person-years in the total population; similarly
+for deaths in people without diabetes. 
+
+The age groups are slightly different for Sweden -- the youngest age group is 18-39, not 0-39 like other
+ages; for people with diabetes, the mean age is still probably 35, but for people without diabetes I will assume
+it is 29. 
+
+\color{Blue4}
+***/
+
+texdoc stlog
+use uncleandbase, clear
+keep if country == "Sweden"
+rename sex SEX
+gen sex = 0 if SEX == "F"
+replace sex = 1 if SEX == "M"
+rename (alldeath_dm alldeath_nondm alldeath_totpop) (alldeath_d_dm alldeath_d_nondm alldeath_d_pop)
+foreach i in alldeath can cvd chd cbd hfd res azd dmd inf flu ckd liv1 liv2 {
+quietly replace `i'_d_nondm = `i'_d_pop-`i'_d_dm
+}
+count if cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm > alldeath_d_nondm
+count if cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm > alldeath_d_dm
+count if chd_d_nondm + cbd_d_nondm + hfd_d_nondm > cvd_d_nondm
+count if chd_d_dm + cbd_d_dm + hfd_d_dm > cvd_d_dm
+count if liv1_d_nondm < liv2_d_nondm
+count if liv1_d_dm < liv2_d_dm
+texdoc stlog close
+texdoc stlog, cmdlog nodo
+replace pys_nondm = pys_totpop-pys_dm
+gen age_dm = substr(age_gp1,1,2)
+replace age_dm = "30" if age_dm == "18"
+destring age_dm, replace
+replace age_dm = age_dm+5
+gen age_nondm = substr(age_gp1,1,2)
+replace age_nondm = "24" if age_nondm == "18"
+destring age_nondm, replace
+replace age_nondm = age_nondm+5
+keep country calendar sex alldeath_d_dm alldeath_d_nondm age_dm age_nondm pys_dm pys_nondm cvd_d_dm-azd_d_dm cvd_d_nondm-azd_d_nondm
+save Sweden, replace
+texdoc stlog close
+
+/***
+\color{black}
+
+\clearpage
 \subsection{Summary}
 
 Table~\ref{cleansumtab} shows a summary of the data included in this analysis. 
@@ -1065,6 +1122,19 @@ drop `i'_d_dm `i'_d_nondm
 }
 rename (liv1_d_dm liv1_d_nondm) (liv_d_dm liv_d_nondm)
 save CMdata, replace
+clear
+foreach c in Australia Canada1 Canada2 Denmark Finland France Lithuania Netherlands Scotland SKorea Sweden {
+append using `c'
+}
+gen other_d_dm = alldeath_d_dm - ///
+(cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv1_d_dm + ckd_d_dm + azd_d_dm)
+gen other_d_nondm = alldeath_d_nondm - ///
+(cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv1_d_nondm + ckd_d_nondm + azd_d_nondm)
+foreach i in chd cbd hfd liv2 {
+drop `i'_d_dm `i'_d_nondm
+}
+rename (liv1_d_dm liv1_d_nondm) (liv_d_dm liv_d_nondm)
+save CMdata_prop, replace
 use cleandbase, clear
 foreach i in alldeath can res azd dmd inf flu ckd liv1 liv2 {
 drop `i'_d_dm `i'_d_nondm
@@ -2849,20 +2919,20 @@ texdoc stlog close
 \color{black}
 
 \clearpage
-\section{Average annual changes}
+\section{Average 5-year percent changes}
 
-Finally, we will estimate the average annual change (measured via APC) 
+Finally, we will estimate the average 5-year percent change (A5PC)
 in both mortality rates
-and MRRs. For mortality rates, the APC comes from a model
-with a linear effect of calendar time (the APC is derived
+and MRRs. For mortality rates, the A5PC comes from a model
+with a linear effect of calendar time (the A5PC is derived
 from the coefficient associated with this term in the model)
 , spline effects of age, 
 a binary effect of sex, and the interaction between spline effects
 of age and binary effect of sex. 
-For MRRs, the APC comes from a model with spline effects of 
+For MRRs, the A5PC comes from a model with spline effects of 
 age, a binary effect of sex, a linear effect of calendar time, 
 a binary effect of diabetes status, and the interaction between
-calendar time and diabetes status (the APC is derived
+calendar time and diabetes status (the A5PC is derived
 from the coefficient associated with this term in the model). 
 
 \color{Blue4}
@@ -2877,7 +2947,7 @@ if "`ii'" == "dmd" & "`iii'" == "nondm" {
 }
 else {
 use `i', clear
-replace calendar = calendar-2009.5
+replace calendar = (calendar-2009.5)/5
 gen coh = calendar-age_`iii'
 centile(age_`iii'), centile(5 35 65 95)
 local A1 = r(c_1)
@@ -2890,7 +2960,7 @@ matrix A_`i'_`ii'_`iii' = (r(table)[1,1], r(table)[5,1], r(table)[6,1], r(table)
 foreach iiii in 0 1 {
 use `i', clear
 keep if sex == `iiii'
-replace calendar = calendar-2009.5
+replace calendar = (calendar-2009.5)/5
 gen coh = calendar-age_`iii'
 centile(age_`iii'), centile(5 35 65 95)
 local A1 = r(c_1)
@@ -2964,7 +3034,7 @@ quietly {
 foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 foreach ii in can cvd res azd inf flu ckd liv {
 use `i'_long, clear
-replace calendar = calendar-2009.5
+replace calendar = (calendar-2009.5)/5
 centile(age), centile(5 35 65 95)
 local A1 = r(c_1)
 local A2 = r(c_2)
@@ -2976,7 +3046,7 @@ matrix A_`i'_`ii' = (r(table)[1,9], r(table)[5,9], r(table)[6,9], r(table)[4,9])
 foreach iii in 0 1 {
 use `i'_long, clear
 keep if sex == `iii'
-replace calendar = calendar-2009.5
+replace calendar = (calendar-2009.5)/5
 centile(age), centile(5 35 65 95)
 local A1 = r(c_1)
 local A2 = r(c_2)
@@ -3030,58 +3100,32 @@ replace A`i' = . if country == "SKorea" & A2 == "ckd" & A3 == 1
 }
 save SMR_APCs, replace
 foreach i in can cvd res azd dmd inf flu ckd liv {
-if "`i'" == "cvd" {
-local ii = "cardiovascular disease"
-local xlab = "-8(2)0"
-local xlabs = "-4(1)1"
-local legp = 11
-}
 if "`i'" == "can" {
 local ii = "cancer"
-local xlab = "-6(2)4"
-local xlabs = "-2(1)3"
-local legp = 1
+}
+if "`i'" == "cvd" {
+local ii = "cardiovascular disease"
 }
 if "`i'" == "res" {
 local ii = "chronic lower respiratory disease"
-local xlab = "-15(5)10"
-local xlabs = "-10(5)10"
-local legp = 11
 }
 if "`i'" == "azd" {
 local ii = "dementia"
-local xlab = "-5(5)30"
-local xlabs = "-10(5)20"
-local legp = 1
 }
 if "`i'" == "dmd" {
 local ii = "diabetes"
-local xlab = "-20(10)20"
-local legp = 11
 }
 if "`i'" == "inf" {
 local ii = "infectious diseases"
-local xlab = "-15(5)10"
-local xlabs = "-10(5)10"
-local legp = 11
 }
 if "`i'" == "flu" {
 local ii = "influenza and pneumonia"
-local xlab = "-10(5)15"
-local xlabs = "-10(5)10"
-local legp = 1
 }
 if "`i'" == "liv" {
 local ii = "liver disease"
-local xlab = "-10(5)5"
-local xlabs = "-10(5)5"
-local legp = 11
 }
 if "`i'" == "ckd" {
 local ii = "kidney disease"
-local xlab = "-10(5)10"
-local xlabs = "-10(5)5"
-local legp = 1
 }
 use APCs, clear
 gen AA = -A1+0.15 if A3 == "dm"
@@ -3102,7 +3146,7 @@ twoway ///
 (scatter AA A5 if A2 == "`i'" & A3 == "nondm" & A4 == 2, col(green)) ///
 , graphregion(color(white)) legend(order( ///
 2 "Diabetes" 4 "No diabetes") cols(1) ///
-ring(0) region(lcolor(none) color(none)) position(`legp')) ///
+region(lcolor(none) color(none)) position(3)) ///
 ylabel( ///
 -1 "`C1'" ///
 -2 "`C2'" ///
@@ -3114,7 +3158,7 @@ ylabel( ///
 -8 "`C8'" ///
 -9 "`C9'" ///
 , angle(0) nogrid) ytitle("") xline(0, lcol(black)) ///
-xlabel(`xlab', format(%9.0f)) ///
+xlabel(, format(%9.0f)) xtitle(5-year percent change) ///
 title("Mortality rate, `ii'", placement(west) col(black) size(medium))
 graph save GPH/APCo_`i', replace
 use APCs, clear
@@ -3143,7 +3187,7 @@ twoway ///
 2 "Females without diabetes" 4 "Males without diabetes" ///
 6 "Females with diabetes" 8 "Males with diabetes" ///
 ) cols(1) ///
-ring(0) region(lcolor(none) color(none)) position(`legp')) ///
+region(lcolor(none) color(none)) position(3)) ///
 ylabel( ///
 -1 "`C1'" ///
 -2 "`C2'" ///
@@ -3155,7 +3199,7 @@ ylabel( ///
 -8 "`C8'" ///
 -9 "`C9'" ///
 , angle(0) nogrid) ytitle("") xline(0, lcol(black)) ///
-xlabel(`xlab', format(%9.0f)) ///
+xlabel(, format(%9.0f)) xtitle(5-year percent change) ///
 title("Mortality rate, `ii'", placement(west) col(black) size(medium))
 graph save GPH/APCs_`i', replace
 if "`i'" != "dmd" {
@@ -3173,7 +3217,9 @@ restore
 twoway ///
 (rcap A6 A5 AA if A2 == "`i'" & A3 == 2, horizontal col(black)) ///
 (scatter AA A4 if A2 == "`i'" & A3 == 2, col(black)) ///
-, graphregion(color(white)) legend(off) ///
+, graphregion(color(white)) legend(order( ///
+2 "Overall") cols(1) ///
+region(lcolor(none) color(none)) position(3)) ///
 ylabel( ///
 -1 "`C1'" ///
 -2 "`C2'" ///
@@ -3185,7 +3231,7 @@ ylabel( ///
 -8 "`C8'" ///
 -9 "`C9'" ///
 , angle(0) nogrid) ytitle("") xline(0, lcol(black)) ///
-xlabel(`xlabs', format(%9.0f)) ///
+xlabel(, format(%9.0f)) xtitle(5-year percent change) ///
 title("MRR, `ii'", placement(west) col(black) size(medium))
 graph save GPH/SAPCo_`i', replace
 use SMR_APCs, clear
@@ -3207,7 +3253,7 @@ twoway ///
 (scatter AA A4 if A2 == "`i'" & A3 == 1, col(blue)) ///
 , graphregion(color(white)) legend(order( ///
 2 "Females" 4 "Males") cols(1) ///
-ring(0) region(lcolor(none) color(none)) position(`legp')) ///
+region(lcolor(none) color(none)) position(3)) ///
 ylabel( ///
 -1 "`C1'" ///
 -2 "`C2'" ///
@@ -3219,7 +3265,7 @@ ylabel( ///
 -8 "`C8'" ///
 -9 "`C9'" ///
 , angle(0) nogrid) ytitle("") xline(0, lcol(black)) ///
-xlabel(`xlabs', format(%9.0f)) ///
+xlabel(, format(%9.0f)) xtitle(5-year percent change) ///
 title("MRR, `ii'", placement(west) col(black) size(medium))
 graph save GPH/SAPCs_`i', replace
 }
@@ -3293,7 +3339,7 @@ GPH/APCo_`ii'.gph ///
 GPH/APCs_`ii'.gph ///
 , graphregion(color(white)) cols(1) altshrink xsize(3)
 texdoc graph, label(APC_`ii') figure(h!) cabove ///
-caption(Average annual change in mortality rate by country. Overall (top) and by sex (bottom). `oo'.)
+caption(Average 5-year percent change in mortality rate by country. Overall (top) and by sex (bottom). `oo'.)
 }
 else {
 graph combine ///
@@ -3303,7 +3349,7 @@ GPH/APCs_`ii'.gph ///
 GPH/SAPCs_`ii'.gph ///
 , graphregion(color(white)) cols(2) altshrink xsize(6)
 texdoc graph, label(APC_`ii') figure(h!) cabove ///
-caption(Average annual change in mortality rate and mortality rate ratio (MRR) by country. ///
+caption(Average 5-year percent change in mortality rate and mortality rate ratio (MRR) by country. ///
 Overall (top) and by sex (bottom). `oo'.)
 }
 }
@@ -3316,7 +3362,7 @@ texdoc stlog close
 
 \begin{table}[h!]
   \begin{center}
-    \caption{Average annual change in mortality rates and mortality rate ratios, 
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
 by country and sex. Cancer.}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
@@ -3345,7 +3391,7 @@ by country and sex. Cancer.}
 
 \begin{table}[h!]
   \begin{center}
-    \caption{Average annual change in mortality rates and mortality rate ratios, 
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
 by country and sex. Cardiovascular disease.}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
@@ -3374,7 +3420,7 @@ by country and sex. Cardiovascular disease.}
 
 \begin{table}[h!]
   \begin{center}
-    \caption{Average annual change in mortality rates and mortality rate ratios, 
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
 by country and sex. Chronic lower respiratory disease.}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
@@ -3403,7 +3449,7 @@ by country and sex. Chronic lower respiratory disease.}
 
 \begin{table}[h!]
   \begin{center}
-    \caption{Average annual change in mortality rates and mortality rate ratios, 
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
 by country and sex. Dementia.}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
@@ -3432,7 +3478,7 @@ by country and sex. Dementia.}
 
 \begin{table}[h!]
   \begin{center}
-    \caption{Average annual change in mortality rates and mortality rate ratios, 
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
 by country and sex. Diabetes.}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
@@ -3459,7 +3505,7 @@ by country and sex. Diabetes.}
 
 \begin{table}[h!]
   \begin{center}
-    \caption{Average annual change in mortality rates and mortality rate ratios, 
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
 by country and sex. Infectious diseases.}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
@@ -3488,7 +3534,7 @@ by country and sex. Infectious diseases.}
 
 \begin{table}[h!]
   \begin{center}
-    \caption{Average annual change in mortality rates and mortality rate ratios, 
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
 by country and sex. Influenza and pneumonia.}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
@@ -3518,7 +3564,7 @@ by country and sex. Influenza and pneumonia.}
 
 \begin{table}[h!]
   \begin{center}
-    \caption{Average annual change in mortality rates and mortality rate ratios, 
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
 by country and sex. Kidney disease.}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
@@ -3548,7 +3594,7 @@ by country and sex. Kidney disease.}
 
 \begin{table}[h!]
   \begin{center}
-    \caption{Average annual change in mortality rates and mortality rate ratios, 
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
 by country and sex. Liver disease.}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
