@@ -2504,6 +2504,20 @@ texdoc graph, label(STDMRF_`ii') figure(h!) cabove ///
 caption(Age-standardised mortality rate by cause of death, people aged 40-89. `oo'.)
 }
 }
+graph combine ///
+GPH/STD_GPH_can_dm.gph ///
+GPH/STD_GPH_cvd_dm.gph ///
+GPH/STD_GPH_res_dm.gph ///
+GPH/STD_GPH_azd_dm.gph ///
+GPH/STD_GPH_dmd_dm.gph ///
+GPH/STD_GPH_inf_dm.gph ///
+GPH/STD_GPH_flu_dm.gph ///
+GPH/STD_GPH_ckd_dm.gph ///
+GPH/STD_GPH_liv_dm.gph ///
+, graphregion(color(white)) cols(3) altshrink xsize(7)
+texdoc graph, label(STDMRF_sum) figure(h!) cabove ///
+caption(Age-standardised mortality rate by cause of death, people aged 40-89.)
+graph export "/home/jimb0w/Documents/CM/Figure_1.pdf", as(pdf) name("Graph") replace
 texdoc stlog close
 
 
@@ -3353,6 +3367,33 @@ caption(Average 5-year percent change in mortality rate and mortality rate ratio
 Overall (top) and by sex (bottom). `oo'.)
 }
 }
+graph combine ///
+GPH/APCo_can.gph ///
+GPH/APCo_cvd.gph ///
+GPH/APCo_res.gph ///
+GPH/APCo_azd.gph ///
+GPH/APCo_dmd.gph ///
+GPH/APCo_inf.gph ///
+GPH/APCo_flu.gph ///
+GPH/APCo_ckd.gph ///
+GPH/APCo_liv.gph ///
+, graphregion(color(white)) cols(3) altshrink xsize(7)
+texdoc graph, label(APC_sum) figure(h!) cabove ///
+caption(Average 5-year percent change in mortality rate by country.)
+graph export "/home/jimb0w/Documents/CM/Figure_2.pdf", as(pdf) name("Graph") replace
+graph combine ///
+GPH/SAPCo_can.gph ///
+GPH/SAPCo_cvd.gph ///
+GPH/SAPCo_res.gph ///
+GPH/SAPCo_azd.gph ///
+GPH/SAPCo_inf.gph ///
+GPH/SAPCo_flu.gph ///
+GPH/SAPCo_ckd.gph ///
+GPH/SAPCo_liv.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(3)
+texdoc graph, label(APC_sum) figure(h!) cabove ///
+caption(Average 5-year percent change in mortality rate ratio (MRR) by country.)
+graph export "/home/jimb0w/Documents/CM/Figure_3.pdf", as(pdf) name("Graph") replace
 texdoc stlog close
 
 /***
