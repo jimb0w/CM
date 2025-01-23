@@ -219,7 +219,7 @@ ICD=International Classification of Diseases; ICD-10=International Classificatio
 \begin{table}[]
 \centering
     \caption{ICD codes for specific underlying causes of death}
-\begin{tabular}{p{0.33\textwidth}p{0.33\textwidth}p{0.33\textwidth}}
+\fontsize{7pt}{9pt}\selectfont\begin{tabular}{p{0.33\textwidth}p{0.33\textwidth}p{0.33\textwidth}}
 \hline
 Cause of death\textsuperscript{a} & ICD-10 codes & ICD-9 codes \\
 \hline
