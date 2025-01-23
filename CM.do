@@ -1,5 +1,5 @@
 
-texdoc init CM, replace logdir(CM_log) gropts(optargs(width=0.8\textwidth))
+texdoc init CM_SA, replace logdir(SA_dir) gropts(optargs(width=0.8\textwidth))
 set linesize 100
 
 *ssc install texdoc, replace
@@ -16,6 +16,393 @@ texdoc stlog, nolog nodo
 cd /home/jimb0w/Documents/CM
 texdoc do CM.do
 texdoc stlog close
+
+
+
+/***
+\documentclass[11pt]{article}
+\usepackage{fullpage}
+\usepackage{siunitx}
+\usepackage{hyperref,graphicx,booktabs,dcolumn}
+\usepackage{stata}
+\usepackage[x11names]{xcolor}
+\usepackage{natbib}
+\usepackage{chngcntr}
+\usepackage{pgfplotstable}
+\usepackage{pdflscape}
+\usepackage{amssymb}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage[section]{placeins}
+\usepackage{subcaption}
+
+\newcommand{\specialcell}[2][c]{%
+  \begin{tabular}[#1]{@{}l@{}}#2\end{tabular}}
+
+\newcommand{\specialcelr}[2][c]{%
+  \begin{tabular}[#1]{@{}r@{}}#2\end{tabular}}
+
+\usepackage[superscript,biblabel]{cite}
+
+\renewcommand{\figurename}{Supplementary Figure}
+\renewcommand{\tablename}{Supplementary Table}
+
+\newcommand{\thedate}{\today}
+
+\bibliographystyle{unsrt}
+\renewcommand{\bibsection}{}
+\makeatletter
+\renewcommand\@biblabel[1]{	#1.}
+\makeatother
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{flushright}
+        \Huge
+        \textbf{
+Trends in cause-specific mortality among people with and without diabetes: a multi-national population-based study
+}
+\rule{16cm}{2mm} \\
+\Large
+Appendix \\
+\thedate \\
+       \vfill
+    \end{flushright}
+        \Large
+
+\noindent
+Dianna J Magliano, 
+Jedidiah I Morton,
+Lei Chen PhD,
+Julian W Sacre,
+Bendix Carstensen,
+Edward W Gregg,
+Meda E Pavkov,
+Martti Arffman,
+Gillian L Booth,
+Jonne G Braake,
+Luan Manh Chu,
+Katarina Eeg-Olofsson,
+Kelly Fleetwood,
+Sandrine Fosse-Edorh,
+Milda Garbuviene,
+Marie Guion,
+Kyoung Hwa Ha,
+Padma Kaul,
+Calvin Ke,
+Ilmo Keskim{\"a}ki,
+Dae Jung Kim,
+Tinne Laurberg,
+Henrik St{\o}vring,
+Rimke C Vos,
+Sarah H Wild,
+and Jonathan E Shaw.
+\end{titlepage}
+
+\clearpage
+
+The protocol for this study is available at \href{https://github.com/jimb0w/CM/}{https://github.com/jimb0w/CM/}.
+
+\listoftables
+\listoffigures
+
+
+\clearpage
+\section{Quality score algorithm}
+We used a modified Newcastle-Ottawa Quality Assessment Scale.
+The scale includes items that assess the representativeness of the data 
+sources, sample size at each time point, the method of defining diabetes, 
+whether people with gestational diabetes were excluded, 
+completeness of the number of data points reported and 
+the assessment of the outcome (death). The maximum score was 9.
+ \\
+ \\
+\noindent \textbf{Selection}
+\begin{enumerate} 
+\item Representativeness of the general population (sampling frame).
+\begin{enumerate} 
+\item National scheme with $\geq$80\% coverage of national population (2 points) 
+\item Random sample from national health insurance
+or national population-based survey with $\geq$80\% response rate (1 point)
+\item Regional representative or national scheme with $<$80\% coverage of national population (0 points)  
+\end{enumerate}
+\item Assessment of diabetes status
+\begin{enumerate} 
+\item By blood glucose measurement (FPG, OGTT, HbA1c) or by multiple approaches / 
+administrative algorithm where 2 or more criteria are used (2 points)
+\item Clinical diagnosis (e.g. ICD code or physician-diagnosed) (1 point) 
+\item Anti-diabetic medication or self-report of physician-diagnosed diabetes (0 points)
+\end{enumerate}
+\item Exclusion of gestational diabetes
+\begin{enumerate} 
+\item Yes (1 point)
+\item No (0 points)
+\end{enumerate}
+\item Sample size at each time point.
+\begin{enumerate} 
+\item $>$10,000 (1 point)
+\item $\leq$10,000 (0 points) 
+\end{enumerate}
+\end{enumerate}
+
+\noindent \textbf{Outcome}
+\begin{enumerate} 
+\item Assessment of outcome.
+\begin{enumerate} 
+\item By record linkage e.g. national death registry (1 point)
+\item Other – regular follow-up (0 points)
+\end{enumerate}
+
+\end{enumerate}
+
+\noindent \textbf{Completeness of trend data}
+\begin{enumerate}
+\item How many time points are provided?
+\begin{enumerate}
+\item $\geq$10 (2 points)
+\item 6–9 (1 point)
+\item $<$6 (0 points)
+\end{enumerate}
+\end{enumerate}
+
+\clearpage
+
+\begin{table}[]
+\centering
+    \caption{Diabetes definitions by data source}
+\begin{tabular}{p{0.25\textwidth}p{0.5\textwidth}p{0.25\textwidth}}
+\hline
+Jurisdiction & Diabetes definition & Gestational diabetes excluded \\
+\hline
+Australia &
+Clinical diagnosis certified by a doctor, nurse or credentialed diabetes educator. &
+Yes \\
+Canada (Alberta) & 
+Algorithm incorporating >1 hospitalisations or >2 physician claims with evidence of diabetes within 2 years & 
+Yes \\
+Canada & 
+(Ontario) & 
+Algorithm incorporating >1 hospitalisations or >2 physician claims with evidence of diabetes within 2 years & 
+Yes \\
+Denmark & 
+Algorithm incorporating clinical diagnosis (ICD codes) from the hospitalisations, prescription of anti-diabetic medications, clinical and billing records. & 
+Yes \\
+Finland & 
+Algorithm incorporating clinical diagnosis (ICD codes) from the Care Register for Health Care, Register of Primary Health Care Visits, Medical Birth Register and Causes of Death Statistics and prescription of anti-diabetic medications. & 
+Yes \\
+France & 
+People who have been reimbursed for at least 3 antidiabetic medications in the year, or 2 in cases of large packaging & 
+No \\
+Lithuania & 
+Clinical diagnosis (ICD-10 codes) and anti-diabetes medications & 
+Yes \\
+Netherlands & 
+Anti-diabetes medications & 
+No \\
+Scotland & 
+Clinical diagnosis using the Read coding system. & 
+Yes \\
+South Korea & 
+Anti-diabetes medications and clinical diagnosis (ICD-10 codes). & 
+Yes \\
+Sweden & 
+Clinical diagnosis by healthcare professionals & 
+Yes \\
+\hline
+\end{tabular}
+ICD=International Classification of Diseases; ICD-10=International Classification of Diseases, 10th edition. 
+\end{table}
+
+\clearpage
+
+\begin{table}[]
+\centering
+    \caption{ICD codes for specific underlying causes of death
+\begin{tabular}{p{0.33\textwidth}p{0.33\textwidth}p{0.33\textwidth}}
+\hline
+Cause of death\textsuperscript{a} & ICD-10 codes & ICD-9 codes \\
+\hline
+Cancer & 
+C00–C97 & 
+140–208 \\
+Cardiovascular diseases & 
+I00–I99 & 
+390–434, 436–459 \\
+Chronic lower respiratory diseases & 
+J40–J47 & 
+490–494, 496 \\
+Dementia\textsuperscript{b} & 
+F00, F01, F03, G30 & 
+290.0–290.2, 290.4, 331.0 \\
+Diabetes & 
+E10–E14 & 
+250 \\
+Infectious diseases\textsuperscript{c} & 
+A00–B99 & 
+001–033, 034.1–134, 136–139, 771.3 \\
+Influenza and pneumonia & 
+J09–J18 & 
+480–487 \\
+Liver diseases & 
+K70–K76 & 
+570–572, 573.0, 573.3–573.9 \\
+Renal diseases & 
+N00–N08, N17–N19, N25–N27 & 
+580–589 \\
+All other diseases & 
+All other ICD-10 codes & 
+All other ICD-9 codes \\
+\hline
+\end{tabular}
+\textsuperscript{a}We only consider underlying cause of death. \\
+\textsuperscript{b}Alzheimer's disease, vascular dementia and unspecified dementia are included. \\
+\textsuperscript{c}Infectious diseases do not include influenza or pneumonia. \\
+ICD, International Classification of Diseases. \\
+\end{table}
+
+\clearpage
+\begin{landscape}
+
+\begin{table}[]
+\centering
+    \caption{ICD codes for specific underlying causes of death
+\begin{tabular}{p{0.2\textwidth}p{0.4\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}}
+\hline
+Jurisdiction & 
+Origin of data & 
+Representativeness of population & 
+Assessment of diabetes  & 
+Exclusion of gestational diabetes & 
+Sample size at time points & 
+Assessment of outcome & 
+Completeness (no. of data points) & 
+Total Score \\
+\hline
+Range & of allocated points & 
+0-2 & 
+0-2 & 
+0-1 & 
+0-1 & 
+0-1 & 
+0-2 & 
+9 \\
+Australia & 
+National Diabetes Services Scheme & 
+2 & 
+1 & 
+1 & 
+1 & 
+1 & 
+2 & 
+8 \\
+Canada (Alberta) & 
+Population-level healthcare administrative database in Alberta & 
+0 & 
+2 & 
+1 & 
+1 & 
+1 & 
+2 & 
+7 \\
+Canada & 
+(Ontario) & 
+Population-level healthcare administrative database in Alberta & 
+0 & 
+2 & 
+1 & 
+1 & 
+1 & 
+1 & 
+6 \\
+Denmark & 
+National administrative databases & 
+2 & 
+2 & 
+1 & 
+1 & 
+1 & 
+2 & 
+9 \\
+Finland & 
+FinDM (Diabetes in Finland) research database & 
+2 & 
+2 & 
+1 & 
+1 & 
+1 & 
+2 & 
+9 \\
+France & 
+French national health data system & 
+2 & 
+2 & 
+0 & 
+1 & 
+1 & 
+1 & 
+7 \\
+Lithuania & 
+National Compulsory Health Insurance Fund Information System & 
+2 & 
+2 & 
+1 & 
+1 & 
+1 & 
+1 & 
+8 \\
+Netherlands & 
+Statistics Netherlands, based on several linked national registries & 
+0 & 
+0 & 
+0 & 
+1 & 
+1 & 
+2 & 
+4 \\
+Scotland & 
+Scottish Diabetes Research Network (SDRN) – National Diabetes Dataset 2021 & 
+2 & 
+1 & 
+1 & 
+1 & 
+1 & 
+2 & 
+8 \\
+South Korea & 
+National Health Insurance Service - National Sample cohort & 
+1 & 
+2 & 
+1 & 
+1 & 
+1 & 
+2 & 
+8 \\
+Sweden & 
+Swedish National Diabetes Register & 
+0 & 
+1 & 
+1 & 
+1 & 
+1 & 
+2 & 
+6 \\
+\hline
+\end{tabular}
+\end{table}
+
+
+\end{landscape}
+
+
+\end{document}
+***/
+
+texdoc close
+
+
+texdoc init CM, replace logdir(CM_log) gropts(optargs(width=0.8\textwidth))
+set linesize 100
 
 /***
 
@@ -3930,12 +4317,20 @@ by country and sex. Liver disease.}
 
 texdoc close
 
+! pdflatex CM_SA
+! pdflatex CM_SA
+! pdflatex CM_SA
+
 ! pdflatex CM
 ! pdflatex CM
 ! bibtex CM
 ! pdflatex CM
 ! bibtex CM
 ! pdflatex CM
+
+erase CM_SA.aux
+erase CM_SA.log
+erase CM_SA.out
 
 erase CM.aux
 erase CM.log
