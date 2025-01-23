@@ -273,7 +273,7 @@ ICD, International Classification of Diseases. \\
 \hline
 Jurisdiction & 
 Origin of data & 
-Representativeness of population & 
+Representat-iveness of population & 
 Assessment of diabetes  & 
 Exclusion of gestational diabetes & 
 Sample size at time points & 
