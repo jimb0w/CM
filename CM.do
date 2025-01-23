@@ -269,7 +269,7 @@ ICD, International Classification of Diseases. \\
 \begin{table}[]
 \centering
     \caption{Quality assessment of the included data sources}
-\begin{tabular}{p{0.2\textwidth}p{0.4\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}}
+\begin{tabular}{p{0.15\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}}
 \hline
 Jurisdiction & 
 Origin of data & 
@@ -289,6 +289,7 @@ Range & of allocated points &
 0-1 & 
 0-2 & 
 9 \\
+\hline
 Australia & 
 National Diabetes Services Scheme & 
 2 & 
