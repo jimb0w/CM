@@ -98,7 +98,7 @@ Rimke C Vos,
 Sarah H Wild,
 and Jonathan E Shaw. \\
 \vspace{1cm} \\
-\noindent The protocol for this study is available at \href{https://github.com/jimb0w/CM/}{https://github.com/jimb0w/CM/}.
+\noindent The protocol for this study is available at \color{blue} \href{https://github.com/jimb0w/CM/}{https://github.com/jimb0w/CM/}\color{black}.
 
 \end{titlepage}
 
