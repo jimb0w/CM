@@ -101,7 +101,6 @@ and Jonathan E Shaw.
 \end{titlepage}
 
 \clearpage
-
 The protocol for this study is available at \href{https://github.com/jimb0w/CM/}{https://github.com/jimb0w/CM/}.
 
 \listoftables
@@ -179,11 +178,10 @@ Australia &
 Clinical diagnosis certified by a doctor, nurse or credentialed diabetes educator. &
 Yes \\
 Canada (Alberta) & 
-Algorithm incorporating >1 hospitalisations or >2 physician claims with evidence of diabetes within 2 years & 
+Algorithm incorporating $>$1 hospitalisations or $>$2 physician claims with evidence of diabetes within 2 years & 
 Yes \\
-Canada & 
-(Ontario) & 
-Algorithm incorporating >1 hospitalisations or >2 physician claims with evidence of diabetes within 2 years & 
+Canada (Ontario) & 
+Algorithm incorporating $>$1 hospitalisations or $>$2 physician claims with evidence of diabetes within 2 years & 
 Yes \\
 Denmark & 
 Algorithm incorporating clinical diagnosis (ICD codes) from the hospitalisations, prescription of anti-diabetic medications, clinical and billing records. & 
@@ -218,7 +216,7 @@ ICD=International Classification of Diseases; ICD-10=International Classificatio
 
 \begin{table}[]
 \centering
-    \caption{ICD codes for specific underlying causes of death
+    \caption{ICD codes for specific underlying causes of death}
 \begin{tabular}{p{0.33\textwidth}p{0.33\textwidth}p{0.33\textwidth}}
 \hline
 Cause of death\textsuperscript{a} & ICD-10 codes & ICD-9 codes \\
@@ -266,7 +264,7 @@ ICD, International Classification of Diseases. \\
 
 \begin{table}[]
 \centering
-    \caption{ICD codes for specific underlying causes of death
+    \caption{Quality assessment of the included data sources}
 \begin{tabular}{p{0.2\textwidth}p{0.4\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}}
 \hline
 Jurisdiction & 
@@ -305,8 +303,7 @@ Population-level healthcare administrative database in Alberta &
 1 & 
 2 & 
 7 \\
-Canada & 
-(Ontario) & 
+Canada (Ontario) & 
 Population-level healthcare administrative database in Alberta & 
 0 & 
 2 & 
@@ -400,7 +397,7 @@ Swedish National Diabetes Register &
 
 texdoc close
 
-
+/*
 texdoc init CM, replace logdir(CM_log) gropts(optargs(width=0.8\textwidth))
 set linesize 100
 
@@ -4317,9 +4314,7 @@ by country and sex. Liver disease.}
 
 texdoc close
 
-! pdflatex CM_SA
-! pdflatex CM_SA
-! pdflatex CM_SA
+
 
 ! pdflatex CM
 ! pdflatex CM
@@ -4331,6 +4326,9 @@ texdoc close
 erase CM_SA.aux
 erase CM_SA.log
 erase CM_SA.out
+erase CM_SA.lot
+erase CM_SA.lof
+
 
 erase CM.aux
 erase CM.log
@@ -4339,6 +4337,13 @@ erase CM.toc
 erase CM.bbl
 erase CM.blg
 
+
+*/
+
+
+! pdflatex CM_SA
+! pdflatex CM_SA
+! pdflatex CM_SA
 
 ! git init .
 ! git add CM.do CM.pdf
