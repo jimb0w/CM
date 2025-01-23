@@ -812,7 +812,7 @@ texdoc stlog close
 
 texdoc close
 
-/*
+
 texdoc init CM, replace logdir(CM_log) gropts(optargs(width=0.8\textwidth))
 set linesize 100
 
@@ -4729,7 +4729,9 @@ by country and sex. Liver disease.}
 
 texdoc close
 
-
+! pdflatex CM_SA
+! pdflatex CM_SA
+! pdflatex CM_SA
 
 ! pdflatex CM
 ! pdflatex CM
@@ -4744,21 +4746,12 @@ erase CM_SA.out
 erase CM_SA.lot
 erase CM_SA.lof
 
-
 erase CM.aux
 erase CM.log
 erase CM.out
 erase CM.toc
 erase CM.bbl
 erase CM.blg
-
-
-*/
-
-
-! pdflatex CM_SA
-! pdflatex CM_SA
-! pdflatex CM_SA
 
 ! git init .
 ! git add CM.do CM.pdf
