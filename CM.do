@@ -97,7 +97,7 @@ Henrik St{\o}vring,
 Rimke C Vos,
 Sarah H Wild,
 and Jonathan E Shaw. \\
-\vspace{2cm}
+\vspace{2cm} \\
 \noindent The protocol for this study is available at \href{https://github.com/jimb0w/CM/}{https://github.com/jimb0w/CM/}.
 
 \end{titlepage}
