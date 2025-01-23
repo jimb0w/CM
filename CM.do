@@ -98,7 +98,8 @@ Rimke C Vos,
 Sarah H Wild,
 and Jonathan E Shaw. \\
 \vspace{1cm} \\
-\noindent The protocol for this study is available at \color{blue} \href{https://github.com/jimb0w/CM/}{https://github.com/jimb0w/CM/}\color{black}.
+\noindent The protocol for this study is available at \color{blue} \href{https://github.com/jimb0w/CM/}{https://github.com/jimb0w/CM/}
+\color{black}
 
 \end{titlepage}
 
@@ -171,7 +172,7 @@ administrative algorithm where 2 or more criteria are used (2 points)
 \begin{table}[]
 \centering
     \caption{Diabetes definitions by data source}
-\begin{tabular}{p{0.25\textwidth}p{0.5\textwidth}p{0.25\textwidth}}
+\begin{tabular}{p{0.2\textwidth}p{0.5\textwidth}p{0.2\textwidth}}
 \hline
 Jurisdiction & Diabetes definition & Gestational diabetes excluded \\
 \hline
@@ -254,10 +255,12 @@ All other ICD-10 codes &
 All other ICD-9 codes \\
 \hline
 \end{tabular}
+\begin{flushleft}
 \textsuperscript{a}We only consider underlying cause of death. \\
 \textsuperscript{b}Alzheimer's disease, vascular dementia and unspecified dementia are included. \\
 \textsuperscript{c}Infectious diseases do not include influenza or pneumonia. \\
 ICD, International Classification of Diseases. \\
+\end{flushleft}
 \end{table}
 
 \clearpage
