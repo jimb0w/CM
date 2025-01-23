@@ -66,7 +66,6 @@ Trends in cause-specific mortality among people with and without diabetes: a mul
 \rule{16cm}{2mm} \\
 \Large
 Appendix \\
-\thedate \\
        \vfill
     \end{flushright}
         \Large
@@ -97,11 +96,13 @@ Tinne Laurberg,
 Henrik St{\o}vring,
 Rimke C Vos,
 Sarah H Wild,
-and Jonathan E Shaw.
+and Jonathan E Shaw. \\
+\vspace{2cm}
+\noindent The protocol for this study is available at \href{https://github.com/jimb0w/CM/}{https://github.com/jimb0w/CM/}.
+
 \end{titlepage}
 
 \clearpage
-The protocol for this study is available at \href{https://github.com/jimb0w/CM/}{https://github.com/jimb0w/CM/}.
 
 \listoftables
 \listoffigures
