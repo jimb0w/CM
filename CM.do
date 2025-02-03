@@ -862,7 +862,7 @@ texdoc stlog close
 
 texdoc close
 
-/*
+
 **DM TABLE
 /*
 clear
@@ -4793,7 +4793,7 @@ by country and sex. Liver disease.}
 
 
 texdoc close
-*/
+
 ! pdflatex CM_SA
 ! pdflatex CM_SA
 ! pdflatex CM_SA
