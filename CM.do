@@ -664,6 +664,56 @@ by country and sex. Liver disease.}
   \end{center}
 \end{table}
 
+\begin{landscape}
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in proportional mortality by country and cause of death.}
+    \hspace*{-3cm}
+    \label{propcitab}
+      \fontsize{5pt}{7pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+      display columns/0/.style={column name=Country, column type={l}},
+      display columns/1/.style={column name=Dementia, column type={r}},
+      display columns/2/.style={column name=Cancer, column type={r}},
+      display columns/3/.style={column name=CKD, column type={r}},
+      display columns/4/.style={column name=CVD, column type={r}},
+      display columns/5/.style={column name=Diabetes, column type={r}},
+      display columns/6/.style={column name=Influenza, column type={r}},
+      display columns/7/.style={column name=Infection, column type={r}},
+      display columns/8/.style={column name=Liver, column type={r}},
+      display columns/9/.style={column name=Respiratory, column type={r}},
+      display columns/10/.style={column name=Other, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/propcitab.csv}
+  \end{center}
+CKD -- kidney disease;
+CVD -- cardiovascular disease;
+Influenza -- influenza and pneumonia;
+Infection -- infectious diseases;
+Liver -- liver disease;
+Respiratory -- chronic lower respiratory disease.
+\end{table}
+\end{landscape}
+
+
+\begin{figure}[h!]
+    \centering
+    \caption{An illustration of the practical meaning of the stable and uncertain changes in trends.
+Estimates were chosen so that all substantial effects are decreasing, but the mirrored (i.e., increasing) plot would
+add nothing new.}
+    \includegraphics[width=\textwidth]{ci-ex_v2.pdf}
+\end{figure}
+
+
+
 ***/
 
 texdoc stlog, nolog
@@ -812,6 +862,23 @@ texdoc stlog close
 
 texdoc close
 
+/*
+**DM TABLE
+/*
+clear
+edit
+save propcitab
+use propcitab, clear
+tostring a1-j3, force format(%9.2f) replace
+foreach i in a b c d e f g h i j {
+gen `i' = `i'1+" ("+`i'2+", "+`i'3+")"
+}
+drop a1-j3
+replace country = "South Korea" if country == "SouthKorea"
+replace country = "Canada (Alberta)" if country == "Canada1"
+replace country = "Canada (Ontario)" if country == "Canada2"
+export delimited using CSV/propcitab.csv, delimiter(":") novarnames replace
+*/
 
 texdoc init CM, replace logdir(CM_log) gropts(optargs(width=0.8\textwidth))
 set linesize 100
@@ -3354,7 +3421,7 @@ xscale(range(2000 2020)) ///
 xlabel(2000(5)2020, nogrid) ///
 ytitle("Mortality rate (per 1,000 person-years)", margin(a+2)) ///
 xtitle("Calendar year") ///
-title("`oo', people `w' diabetes", placement(west) color(black) size(medium))
+title("`oo'", placement(west) color(black) size(medium))
 }
 else {
 twoway ///
@@ -4315,9 +4382,7 @@ restore
 twoway ///
 (rcap A6 A5 AA if A2 == "`i'" & A3 == 2, horizontal col(black)) ///
 (scatter AA A4 if A2 == "`i'" & A3 == 2, col(black)) ///
-, graphregion(color(white)) legend(order( ///
-2 "Overall") cols(1) ///
-region(lcolor(none) color(none)) position(3)) ///
+, graphregion(color(white)) legend(off) ///
 ylabel( ///
 -1 "`C1'" ///
 -2 "`C2'" ///
@@ -4728,7 +4793,7 @@ by country and sex. Liver disease.}
 
 
 texdoc close
-
+*/
 ! pdflatex CM_SA
 ! pdflatex CM_SA
 ! pdflatex CM_SA
