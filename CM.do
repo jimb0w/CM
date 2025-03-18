@@ -83,7 +83,7 @@ Monash University, Melbourne, Australia \\
 \section{Data cleaning}
 
 This is the protocol for an analysis of trends in cause of death (COD) in people with and without 
-diabetes across several countries over the period spanning 2000 to 2021. 
+diabetes across several countries over the period spanning 2000 to 2023. 
 
 We have been provided with many different variables and some countries have restrictions
 on what data they can provide, so we need to harmonize and clean the data into an analysable format.
@@ -1206,6 +1206,7 @@ texdoc stlog close
 
 \begin{table}[h!]
   \begin{center}
+    \vspace*{-2cm}
     \caption{Summary of data received for the analysis.}
 	\hspace*{-1.5cm}
     \label{cleansumtab}
