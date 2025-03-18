@@ -1,6 +1,7 @@
 
-texdoc init CM_SA, replace logdir(SA_dir) gropts(optargs(width=0.8\textwidth))
+texdoc init CM, replace logdir(CM_log) gropts(optargs(width=0.8\textwidth))
 set linesize 100
+
 
 *ssc install texdoc, replace
 *net from http://www.stata-journal.com/production
@@ -11,877 +12,10 @@ set linesize 100
 cd /home/jimb0w/Documents/CM
 ! git clone https://github.com/jimb0w/Library.git
 
-
 texdoc stlog, nolog nodo
 cd /home/jimb0w/Documents/CM
 texdoc do CM.do
 texdoc stlog close
-
-
-
-/***
-\documentclass[11pt]{article}
-\usepackage{fullpage}
-\usepackage{siunitx}
-\usepackage{hyperref,graphicx,booktabs,dcolumn}
-\usepackage{stata}
-\usepackage[x11names]{xcolor}
-\usepackage{natbib}
-\usepackage{chngcntr}
-\usepackage{pgfplotstable}
-\usepackage{pdflscape}
-\usepackage{amssymb}
-\usepackage{multirow}
-\usepackage{booktabs}
-\usepackage[section]{placeins}
-\usepackage{subcaption}
-
-\newcommand{\specialcell}[2][c]{%
-  \begin{tabular}[#1]{@{}l@{}}#2\end{tabular}}
-
-\newcommand{\specialcelr}[2][c]{%
-  \begin{tabular}[#1]{@{}r@{}}#2\end{tabular}}
-
-\usepackage[superscript,biblabel]{cite}
-
-\renewcommand{\figurename}{Supplementary Figure}
-\renewcommand{\tablename}{Supplementary Table}
-
-\newcommand{\thedate}{\today}
-
-\bibliographystyle{unsrt}
-\renewcommand{\bibsection}{}
-\makeatletter
-\renewcommand\@biblabel[1]{	#1.}
-\makeatother
-
-\begin{document}
-
-\begin{titlepage}
-    \begin{flushright}
-        \Huge
-        \textbf{
-Trends in cause-specific mortality among people with and without diabetes: a multi-national population-based study
-}
-\rule{16cm}{2mm} \\
-\Large
-Appendix \\
-       \vfill
-    \end{flushright}
-        \Large
-
-\noindent
-Dianna J Magliano, 
-Jedidiah I Morton,
-Lei Chen PhD,
-Julian W Sacre,
-Bendix Carstensen,
-Edward W Gregg,
-Meda E Pavkov,
-Martti Arffman,
-Gillian L Booth,
-Jonne G Braake,
-Luan Manh Chu,
-Katarina Eeg-Olofsson,
-Kelly Fleetwood,
-Sandrine Fosse-Edorh,
-Milda Garbuviene,
-Marie Guion,
-Kyoung Hwa Ha,
-Padma Kaul,
-Calvin Ke,
-Ilmo Keskim{\"a}ki,
-Dae Jung Kim,
-Tinne Laurberg,
-Henrik St{\o}vring,
-Rimke C Vos,
-Sarah H Wild,
-and Jonathan E Shaw. \\
-\vspace{1cm} \\
-\noindent The protocol for this study is available at \color{blue} \href{https://github.com/jimb0w/CM/}{https://github.com/jimb0w/CM/}
-\color{black}
-
-\end{titlepage}
-
-\clearpage
-
-\listoftables
-\listoffigures
-
-
-\clearpage
-\section{Quality score algorithm}
-We used a modified Newcastle-Ottawa Quality Assessment Scale.
-The scale includes items that assess the representativeness of the data 
-sources, sample size at each time point, the method of defining diabetes, 
-whether people with gestational diabetes were excluded, 
-completeness of the number of data points reported and 
-the assessment of the outcome (death). The maximum score was 9.
- \\
- \\
-\noindent \textbf{Selection}
-\begin{enumerate} 
-\item Representativeness of the general population (sampling frame).
-\begin{enumerate} 
-\item National scheme with $\geq$80\% coverage of national population (2 points) 
-\item Random sample from national health insurance
-or national population-based survey with $\geq$80\% response rate (1 point)
-\item Regional representative or national scheme with $<$80\% coverage of national population (0 points)  
-\end{enumerate}
-\item Assessment of diabetes status
-\begin{enumerate} 
-\item By blood glucose measurement (FPG, OGTT, HbA1c) or by multiple approaches / 
-administrative algorithm where 2 or more criteria are used (2 points)
-\item Clinical diagnosis (e.g. ICD code or physician-diagnosed) (1 point) 
-\item Anti-diabetic medication or self-report of physician-diagnosed diabetes (0 points)
-\end{enumerate}
-\item Exclusion of gestational diabetes
-\begin{enumerate} 
-\item Yes (1 point)
-\item No (0 points)
-\end{enumerate}
-\item Sample size at each time point.
-\begin{enumerate} 
-\item $>$10,000 (1 point)
-\item $\leq$10,000 (0 points) 
-\end{enumerate}
-\end{enumerate}
-
-\noindent \textbf{Outcome}
-\begin{enumerate} 
-\item Assessment of outcome.
-\begin{enumerate} 
-\item By record linkage e.g. national death registry (1 point)
-\item Other – regular follow-up (0 points)
-\end{enumerate}
-
-\end{enumerate}
-
-\noindent \textbf{Completeness of trend data}
-\begin{enumerate}
-\item How many time points are provided?
-\begin{enumerate}
-\item $\geq$10 (2 points)
-\item 6–9 (1 point)
-\item $<$6 (0 points)
-\end{enumerate}
-\end{enumerate}
-
-\clearpage
-
-\begin{table}[]
-\centering
-    \caption{Diabetes definitions by data source}
-\begin{tabular}{p{0.2\textwidth}p{0.5\textwidth}p{0.2\textwidth}}
-\hline
-Jurisdiction & Diabetes definition & Gestational diabetes excluded \\
-\hline
-Australia &
-Clinical diagnosis certified by a doctor, nurse or credentialed diabetes educator. &
-Yes \\
-Canada (Alberta) & 
-Algorithm incorporating $>$1 hospitalisations or $>$2 physician claims with evidence of diabetes within 2 years & 
-Yes \\
-Canada (Ontario) & 
-Algorithm incorporating $>$1 hospitalisations or $>$2 physician claims with evidence of diabetes within 2 years & 
-Yes \\
-Denmark & 
-Algorithm incorporating clinical diagnosis (ICD codes) from the hospitalisations, prescription of anti-diabetic medications, clinical and billing records. & 
-Yes \\
-Finland & 
-Algorithm incorporating clinical diagnosis (ICD codes) from the Care Register for Health Care, Register of Primary Health Care Visits, Medical Birth Register and Causes of Death Statistics and prescription of anti-diabetic medications. & 
-Yes \\
-France & 
-People who have been reimbursed for at least 3 antidiabetic medications in the year, or 2 in cases of large packaging & 
-No \\
-Lithuania & 
-Clinical diagnosis (ICD-10 codes) and anti-diabetes medications & 
-Yes \\
-Netherlands & 
-Anti-diabetes medications & 
-No \\
-Scotland & 
-Clinical diagnosis using the Read coding system. & 
-Yes \\
-South Korea & 
-Anti-diabetes medications and clinical diagnosis (ICD-10 codes). & 
-Yes \\
-Sweden & 
-Clinical diagnosis by healthcare professionals & 
-Yes \\
-\hline
-\end{tabular}
-ICD=International Classification of Diseases; ICD-10=International Classification of Diseases, 10th edition. 
-\end{table}
-
-\clearpage
-
-\begin{table}[]
-\centering
-    \caption{ICD codes for specific underlying causes of death}
-\begin{tabular}{p{0.33\textwidth}p{0.33\textwidth}p{0.33\textwidth}}
-\hline
-Cause of death\textsuperscript{a} & ICD-10 codes & ICD-9 codes \\
-\hline
-Cancer & 
-C00–C97 & 
-140–208 \\
-Cardiovascular diseases & 
-I00–I99 & 
-390–434, 436–459 \\
-Chronic lower respiratory diseases & 
-J40–J47 & 
-490–494, 496 \\
-Dementia\textsuperscript{b} & 
-F00, F01, F03, G30 & 
-290.0–290.2, 290.4, 331.0 \\
-Diabetes & 
-E10–E14 & 
-250 \\
-Infectious diseases\textsuperscript{c} & 
-A00–B99 & 
-001–033, 034.1–134, 136–139, 771.3 \\
-Influenza and pneumonia & 
-J09–J18 & 
-480–487 \\
-Liver diseases & 
-K70–K76 & 
-570–572, 573.0, 573.3–573.9 \\
-Renal diseases & 
-N00–N08, N17–N19, N25–N27 & 
-580–589 \\
-All other diseases & 
-All other ICD-10 codes & 
-All other ICD-9 codes \\
-\hline
-\end{tabular}
-\begin{flushleft}
-\textsuperscript{a}We only consider underlying cause of death. \\
-\textsuperscript{b}Alzheimer's disease, vascular dementia and unspecified dementia are included. \\
-\textsuperscript{c}Infectious diseases do not include influenza or pneumonia. \\
-ICD, International Classification of Diseases. \\
-\end{flushleft}
-\end{table}
-
-\clearpage
-\begin{landscape}
-
-\begin{table}[]
-\centering
-    \caption{Quality assessment of the included data sources}
-\fontsize{7pt}{9pt}\selectfont\begin{tabular}{p{0.15\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}}
-\hline
-Jurisdiction & 
-Origin of data & 
-Representat-iveness of population & 
-Assessment of diabetes  & 
-Exclusion of gestational diabetes & 
-Sample size at time points & 
-Assessment of outcome & 
-Completeness (no. of data points) & 
-Total Score \\
-\hline
-Range & of allocated points & 
-0-2 & 
-0-2 & 
-0-1 & 
-0-1 & 
-0-1 & 
-0-2 & 
-9 \\
-\hline
-Australia & 
-National Diabetes Services Scheme & 
-2 & 
-1 & 
-1 & 
-1 & 
-1 & 
-2 & 
-8 \\
-Canada (Alberta) & 
-Population-level healthcare administrative database in Alberta & 
-0 & 
-2 & 
-1 & 
-1 & 
-1 & 
-2 & 
-7 \\
-Canada (Ontario) & 
-Population-level healthcare administrative database in Alberta & 
-0 & 
-2 & 
-1 & 
-1 & 
-1 & 
-1 & 
-6 \\
-Denmark & 
-National administrative databases & 
-2 & 
-2 & 
-1 & 
-1 & 
-1 & 
-2 & 
-9 \\
-Finland & 
-FinDM (Diabetes in Finland) research database & 
-2 & 
-2 & 
-1 & 
-1 & 
-1 & 
-2 & 
-9 \\
-France & 
-French national health data system & 
-2 & 
-2 & 
-0 & 
-1 & 
-1 & 
-1 & 
-7 \\
-Lithuania & 
-National Compulsory Health Insurance Fund Information System & 
-2 & 
-2 & 
-1 & 
-1 & 
-1 & 
-1 & 
-8 \\
-Netherlands & 
-Statistics Netherlands, based on several linked national registries & 
-0 & 
-0 & 
-0 & 
-1 & 
-1 & 
-2 & 
-4 \\
-Scotland & 
-Scottish Diabetes Research Network (SDRN) – National Diabetes Dataset 2021 & 
-2 & 
-1 & 
-1 & 
-1 & 
-1 & 
-2 & 
-8 \\
-South Korea & 
-National Health Insurance Service - National Sample cohort & 
-1 & 
-2 & 
-1 & 
-1 & 
-1 & 
-2 & 
-8 \\
-Sweden & 
-Swedish National Diabetes Register & 
-0 & 
-1 & 
-1 & 
-1 & 
-1 & 
-2 & 
-6 \\
-\hline
-\end{tabular}
-\end{table}
-\end{landscape}
-
-\clearpage
-
-\begin{table}[h!]
-  \begin{center}
-    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
-by country and sex. Cancer.}
-    \label{cleansumtab}
-     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
-      multicolumn names,
-      col sep=colon,
-      header=false,
-      string type,
-	  display columns/0/.style={column name=Country,
-		assign cell content/.code={
-\pgfkeyssetvalue{/pgfplots/table/@cell content}
-{\multirow{3}{*}{##1}}}},
-      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
-      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
-      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
-      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
-      every head row/.style={
-        before row={\toprule
-					},
-        after row={\midrule}
-            },
-        every nth row={3}{before row=\midrule},
-        every last row/.style={after row=\bottomrule},
-    ]{CSV/APCt_can.csv}
-  \end{center}
-\end{table}
-\clearpage
-
-\begin{table}[h!]
-  \begin{center}
-    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
-by country and sex. Cardiovascular disease.}
-    \label{cleansumtab}
-     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
-      multicolumn names,
-      col sep=colon,
-      header=false,
-      string type,
-	  display columns/0/.style={column name=Country,
-		assign cell content/.code={
-\pgfkeyssetvalue{/pgfplots/table/@cell content}
-{\multirow{3}{*}{##1}}}},
-      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
-      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
-      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
-      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
-      every head row/.style={
-        before row={\toprule
-					},
-        after row={\midrule}
-            },
-        every nth row={3}{before row=\midrule},
-        every last row/.style={after row=\bottomrule},
-    ]{CSV/APCt_cvd.csv}
-  \end{center}
-\end{table}
-\clearpage
-
-\begin{table}[h!]
-  \begin{center}
-    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
-by country and sex. Chronic lower respiratory disease.}
-    \label{cleansumtab}
-     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
-      multicolumn names,
-      col sep=colon,
-      header=false,
-      string type,
-	  display columns/0/.style={column name=Country,
-		assign cell content/.code={
-\pgfkeyssetvalue{/pgfplots/table/@cell content}
-{\multirow{3}{*}{##1}}}},
-      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
-      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
-      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
-      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
-      every head row/.style={
-        before row={\toprule
-					},
-        after row={\midrule}
-            },
-        every nth row={3}{before row=\midrule},
-        every last row/.style={after row=\bottomrule},
-    ]{CSV/APCt_res.csv}
-  \end{center}
-\end{table}
-\clearpage
-
-\begin{table}[h!]
-  \begin{center}
-    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
-by country and sex. Dementia.}
-    \label{cleansumtab}
-     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
-      multicolumn names,
-      col sep=colon,
-      header=false,
-      string type,
-	  display columns/0/.style={column name=Country,
-		assign cell content/.code={
-\pgfkeyssetvalue{/pgfplots/table/@cell content}
-{\multirow{3}{*}{##1}}}},
-      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
-      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
-      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
-      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
-      every head row/.style={
-        before row={\toprule
-					},
-        after row={\midrule}
-            },
-        every nth row={3}{before row=\midrule},
-        every last row/.style={after row=\bottomrule},
-    ]{CSV/APCt_azd.csv}
-  \end{center}
-\end{table}
-\clearpage
-
-\begin{table}[h!]
-  \begin{center}
-    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
-by country and sex. Diabetes.}
-    \label{cleansumtab}
-     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
-      multicolumn names,
-      col sep=colon,
-      header=false,
-      string type,
-	  display columns/0/.style={column name=Country,
-		assign cell content/.code={
-\pgfkeyssetvalue{/pgfplots/table/@cell content}
-{\multirow{3}{*}{##1}}}},
-      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
-      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
-      every head row/.style={
-        before row={\toprule
-					},
-        after row={\midrule}
-            },
-        every nth row={3}{before row=\midrule},
-        every last row/.style={after row=\bottomrule},
-    ]{CSV/APCt_dmd.csv}
-  \end{center}
-\end{table}
-\clearpage
-
-\begin{table}[h!]
-  \begin{center}
-    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
-by country and sex. Infectious diseases.}
-    \label{cleansumtab}
-     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
-      multicolumn names,
-      col sep=colon,
-      header=false,
-      string type,
-	  display columns/0/.style={column name=Country,
-		assign cell content/.code={
-\pgfkeyssetvalue{/pgfplots/table/@cell content}
-{\multirow{3}{*}{##1}}}},
-      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
-      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
-      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
-      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
-      every head row/.style={
-        before row={\toprule
-					},
-        after row={\midrule}
-            },
-        every nth row={3}{before row=\midrule},
-        every last row/.style={after row=\bottomrule},
-    ]{CSV/APCt_inf.csv}
-  \end{center}
-\end{table}
-\clearpage
-
-\begin{table}[h!]
-  \begin{center}
-    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
-by country and sex. Influenza and pneumonia.}
-    \label{cleansumtab}
-     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
-      multicolumn names,
-      col sep=colon,
-      header=false,
-      string type,
-	  display columns/0/.style={column name=Country,
-		assign cell content/.code={
-\pgfkeyssetvalue{/pgfplots/table/@cell content}
-{\multirow{3}{*}{##1}}}},
-      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
-      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
-      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
-      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
-      every head row/.style={
-        before row={\toprule
-					},
-        after row={\midrule}
-            },
-        every nth row={3}{before row=\midrule},
-        every last row/.style={after row=\bottomrule},
-    ]{CSV/APCt_flu.csv}
-  \end{center}
-\end{table}
-
-\clearpage
-
-\begin{table}[h!]
-  \begin{center}
-    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
-by country and sex. Kidney disease.}
-    \label{cleansumtab}
-     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
-      multicolumn names,
-      col sep=colon,
-      header=false,
-      string type,
-	  display columns/0/.style={column name=Country,
-		assign cell content/.code={
-\pgfkeyssetvalue{/pgfplots/table/@cell content}
-{\multirow{3}{*}{##1}}}},
-      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
-      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
-      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
-      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
-      every head row/.style={
-        before row={\toprule
-					},
-        after row={\midrule}
-            },
-        every nth row={3}{before row=\midrule},
-        every last row/.style={after row=\bottomrule},
-    ]{CSV/APCt_ckd.csv}
-  \end{center}
-\end{table}
-\clearpage
-
-\begin{table}[h!]
-  \begin{center}
-    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
-by country and sex. Liver disease.}
-    \label{cleansumtab}
-     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
-      multicolumn names,
-      col sep=colon,
-      header=false,
-      string type,
-	  display columns/0/.style={column name=Country,
-		assign cell content/.code={
-\pgfkeyssetvalue{/pgfplots/table/@cell content}
-{\multirow{3}{*}{##1}}}},
-      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
-      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
-      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
-      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
-      every head row/.style={
-        before row={\toprule
-					},
-        after row={\midrule}
-            },
-        every nth row={3}{before row=\midrule},
-        every last row/.style={after row=\bottomrule},
-    ]{CSV/APCt_liv.csv}
-  \end{center}
-\end{table}
-
-\begin{landscape}
-\begin{table}[h!]
-  \begin{center}
-    \caption{Average 5-year percent change in proportional mortality by country and cause of death.}
-    \hspace*{-3cm}
-    \label{propcitab}
-      \fontsize{5pt}{7pt}\selectfont\pgfplotstabletypeset[
-      multicolumn names,
-      col sep=colon,
-      header=false,
-      string type,
-      display columns/0/.style={column name=Country, column type={l}},
-      display columns/1/.style={column name=Dementia, column type={r}},
-      display columns/2/.style={column name=Cancer, column type={r}},
-      display columns/3/.style={column name=CKD, column type={r}},
-      display columns/4/.style={column name=CVD, column type={r}},
-      display columns/5/.style={column name=Diabetes, column type={r}},
-      display columns/6/.style={column name=Influenza, column type={r}},
-      display columns/7/.style={column name=Infection, column type={r}},
-      display columns/8/.style={column name=Liver, column type={r}},
-      display columns/9/.style={column name=Respiratory, column type={r}},
-      display columns/10/.style={column name=Other, column type={r}},
-      every head row/.style={
-        before row={\toprule
-					},
-        after row={\midrule}
-            },
-        every last row/.style={after row=\bottomrule},
-    ]{CSV/propcitab.csv}
-  \end{center}
-CKD -- kidney disease;
-CVD -- cardiovascular disease;
-Influenza -- influenza and pneumonia;
-Infection -- infectious diseases;
-Liver -- liver disease;
-Respiratory -- chronic lower respiratory disease.
-\end{table}
-\end{landscape}
-
-
-\begin{figure}[h!]
-    \centering
-    \caption{An illustration of the practical meaning of the stable and uncertain changes in trends.
-Estimates were chosen so that all substantial effects are decreasing, but the mirrored (i.e., increasing) plot would
-add nothing new.}
-    \includegraphics[width=\textwidth]{ci-ex_v2.pdf}
-\end{figure}
-
-
-
-***/
-
-texdoc stlog, nolog
-foreach ii in can cvd res azd dmd inf flu ckd liv {
-if "`ii'" == "can" {
-local oo = "Cancer"
-}
-if "`ii'" == "cvd" {
-local oo = "Cardiovascular disease"
-}
-if "`ii'" == "res" {
-local oo = "Chronic lower respiratory disease"
-}
-if "`ii'" == "azd" {
-local oo = "Dementia"
-}
-if "`ii'" == "dmd" {
-local oo = "Diabetes"
-}
-if "`ii'" == "inf" {
-local oo = "Infectious diseases"
-}
-if "`ii'" == "flu" {
-local oo = "Influenza and pneumonia"
-}
-if "`ii'" == "ckd" {
-local oo = "Kidney disease"
-}
-if "`ii'" == "liv" {
-local oo = "Liver disease"
-}
-if "`ii'" == "dmd" {
-graph combine ///
-GPH/STD_GPH_`ii'_dm.gph ///
-GPH/STD_GPH_`ii'_dm_0.gph ///
-GPH/STD_GPH_`ii'_dm_1.gph ///
-, graphregion(color(white)) cols(1) altshrink xsize(2)
-texdoc graph, label(STDMRF_`ii') figure(h!) cabove optargs(width=0.6\textwidth) ///
-caption(Age-standardised mortality rate by cause of death, people aged 40-89. `oo'.)
-}
-else {
-graph combine ///
-GPH/STD_GPH_`ii'_dm.gph ///
-GPH/STD_GPH_`ii'_nondm.gph ///
-GPH/STD_GPH_`ii'_dm_0.gph ///
-GPH/STD_GPH_`ii'_nondm_0.gph ///
-GPH/STD_GPH_`ii'_dm_1.gph ///
-GPH/STD_GPH_`ii'_nondm_1.gph ///
-, graphregion(color(white)) cols(2) altshrink xsize(4)
-texdoc graph, label(STDMRF_`ii') figure(h!) cabove ///
-caption(Age-standardised mortality rate by cause of death, people aged 40-89. `oo'.)
-}
-}
-foreach ii in can cvd res azd dmd inf flu ckd liv {
-if "`ii'" == "can" {
-local oo = "Cancer"
-}
-if "`ii'" == "cvd" {
-local oo = "Cardiovascular disease"
-}
-if "`ii'" == "res" {
-local oo = "Chronic lower respiratory disease"
-}
-if "`ii'" == "azd" {
-local oo = "Dementia"
-}
-if "`ii'" == "dmd" {
-local oo = "Diabetes"
-}
-if "`ii'" == "inf" {
-local oo = "Infectious diseases"
-}
-if "`ii'" == "flu" {
-local oo = "Influenza and pneumonia"
-}
-if "`ii'" == "ckd" {
-local oo = "Kidney disease"
-}
-if "`ii'" == "liv" {
-local oo = "Liver disease"
-}
-if "`ii'" == "dmd" {
-local ii = "dmd"
-graph combine ///
-GPH/APCo_`ii'.gph ///
-GPH/APCs_`ii'.gph ///
-, graphregion(color(white)) cols(1) altshrink xsize(3)
-texdoc graph, label(APC_`ii') figure(h!) cabove ///
-caption(Average 5-year percent change in mortality rate by country. Overall (top) and by sex (bottom). `oo'.)
-}
-else {
-graph combine ///
-GPH/APCo_`ii'.gph ///
-GPH/SAPCo_`ii'.gph ///
-GPH/APCs_`ii'.gph ///
-GPH/SAPCs_`ii'.gph ///
-, graphregion(color(white)) cols(2) altshrink xsize(6)
-texdoc graph, label(APC_`ii') figure(h!) cabove ///
-caption(Average 5-year percent change in mortality rate and mortality rate ratio (MRR) by country. ///
-Overall (top) and by sex (bottom). `oo'.)
-}
-}
-
-foreach ii in can cvd res azd inf flu ckd liv {
-if "`ii'" == "cvd" {
-local oo = "Cardiovascular disease"
-}
-if "`ii'" == "can" {
-local oo = "Cancer"
-}
-if "`ii'" == "res" {
-local oo = "Chronic lower respiratory disease"
-}
-if "`ii'" == "azd" {
-local oo = "Dementia"
-}
-if "`ii'" == "dmd" {
-local oo = "Diabetes"
-}
-if "`ii'" == "inf" {
-local oo = "Infectious diseases"
-}
-if "`ii'" == "flu" {
-local oo = "Influenza and pneumonia"
-}
-if "`ii'" == "liv" {
-local oo = "Liver disease"
-}
-if "`ii'" == "ckd" {
-local oo = "Kidney disease"
-}
-graph combine ///
-GPH/SMR_`ii'.gph ///
-GPH/SMR_`ii'_0.gph ///
-GPH/SMR_`ii'_1.gph ///
-, graphregion(color(white)) cols(1) altshrink xsize(2.5)
-texdoc graph, label(STDMRF_`ii') figure(h!) cabove ///
-caption(Mortality rate ratio by cause of death and sex. `oo'.)
-}
-texdoc stlog close
-
-/***
-
-\end{document}
-***/
-
-texdoc close
-
-
-**DM TABLE
-/*
-clear
-edit
-save propcitab
-use propcitab, clear
-tostring a1-j3, force format(%9.2f) replace
-foreach i in a b c d e f g h i j {
-gen `i' = `i'1+" ("+`i'2+", "+`i'3+")"
-}
-drop a1-j3
-replace country = "South Korea" if country == "SouthKorea"
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
-export delimited using CSV/propcitab.csv, delimiter(":") novarnames replace
-*/
-
-texdoc init CM, replace logdir(CM_log) gropts(optargs(width=0.8\textwidth))
-set linesize 100
 
 /***
 
@@ -1026,7 +160,9 @@ texdoc stlog, cmdlog
 cd /home/jimb0w/Documents/CM
 texdoc stlog close
 texdoc stlog, cmdlog
-import delimited "Consortium COD database v8.csv", clear
+import delimited "Consortium COD database v10.csv", clear
+replace age_gp1 = "0-39" if age_gp1=="<40"
+drop azd_f01_d_dm-azd_g30_d_nondm
 save uncleandbase, replace
 texdoc stlog close
 texdoc stlog, cmdlog
@@ -2025,7 +1161,7 @@ rename (liv1_d_dm liv1_d_nondm) (liv_d_dm liv_d_nondm)
 save `c', replace
 }
 erase uncleandbase.dta
-use CMdata, clear
+use CMdata_prop, clear
 bysort country (cal) : egen lb = min(cal)
 bysort country (cal) : egen ub = max(cal)
 tostring lb ub, replace
@@ -2057,6 +1193,8 @@ drop njm
 replace country = "South Korea" if country == "SKorea"
 replace country = "Canada (Alberta)" if country == "Canada1"
 replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Netherlands\textsuperscript{1}" if country == "Netherlands"
+replace country = "Sweden\textsuperscript{1}" if country == "Sweden"
 export delimited using CSV/T1.csv, delimiter(":") novarnames replace
 texdoc stlog close
 
@@ -2110,6 +1248,7 @@ texdoc stlog close
         every last row/.style={after row=\bottomrule},
     ]{CSV/T1.csv}
   \end{center}
+\textsuperscript{1}Only included in the proportional mortality analysis. \\
 Abbreviations: DEM -- Dementia; CAN -- Cancer; CVD -- Cardiovascular disease; 
 RES -- Chronic lower respiratory disease; DMD -- Diabetes; INF -- Infectious diseases; 
 FLU -- Influenza and pneumonia; CKD -- Kidney disease; LIV -- Liver disease;
@@ -3541,7 +2680,8 @@ texdoc stlog close
 \clearpage
 \section{Cause-specific mortality rate ratios}
 
-To estimate the mortality rate ratios (MRRs) by calendar time, I will fit a model with spline effects of 
+To estimate the mortality rate ratios (MRRs) for people with vs. without diabetes 
+by calendar time, I will fit a model with spline effects of 
 age, a binary effect of sex, and an interaction between spline effects of calendar time and diabetes status. 
 
 \color{Blue4}
@@ -4336,6 +3476,13 @@ local ii = "Kidney disease"
 use APCs, clear
 gen AA = -A1+0.15 if A3 == "dm"
 replace AA = -A1-0.15 if A3 == "nondm"
+set obs 461
+replace A7 = -5 in 460
+replace A7 = -5 in 461
+replace A6 = 5 in 460
+replace A6 = 5 in 461
+replace AA = -9.2 in 460
+replace AA = -0.8 in 461
 replace country = "Canada (Alberta)" if country == "Canada1"
 replace country = "Canada (Ontario)" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
@@ -4346,6 +3493,7 @@ local C`c' = country[`c']
 }
 restore
 twoway ///
+(rarea A7 A6 AA if A1==., horizontal color(black%20) fintensity(inten50) lwidth(none)) ///
 (rcap A7 A6 AA if A2 == "`i'" & A3 == "dm" & A4 == 2, horizontal col(blue)) ///
 (scatter AA A5 if A2 == "`i'" & A3 == "dm" & A4 == 2, col(blue)) ///
 (rcap A7 A6 AA if A2 == "`i'" & A3 == "nondm" & A4 == 2, horizontal col(green)) ///
@@ -4370,6 +3518,13 @@ graph save GPH/APCo_`i'_F2, replace
 if "`i'" != "dmd" {
 use SMR_APCs, clear
 gen AA = -A1
+set obs 218
+replace A7 = -5 in 217
+replace A7 = -5 in 218
+replace A6 = 5 in 217
+replace A6 = 5 in 218
+replace AA = -9.2 in 217
+replace AA = -0.8 in 218
 replace country = "Canada (Alberta)" if country == "Canada1"
 replace country = "Canada (Ontario)" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
@@ -4380,6 +3535,7 @@ local C`c' = country[`c']
 }
 restore
 twoway ///
+(rarea A7 A6 AA if A1==., horizontal color(black%20) fintensity(inten50) lwidth(none)) ///
 (rcap A6 A5 AA if A2 == "`i'" & A3 == 2, horizontal col(black)) ///
 (scatter AA A4 if A2 == "`i'" & A3 == 2, col(black)) ///
 , graphregion(color(white)) legend(off) ///
@@ -4634,7 +3790,7 @@ by country and sex. Dementia.}
 
 \begin{table}[h!]
   \begin{center}
-    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
+    \caption{Average 5-year percent change in mortality rates, 
 by country and sex. Diabetes.}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
@@ -4793,6 +3949,879 @@ by country and sex. Liver disease.}
 
 
 texdoc close
+
+**# Bookmark #2
+
+texdoc init CM_SA, replace logdir(SA_dir) gropts(optargs(width=0.8\textwidth))
+set linesize 100
+
+
+
+/***
+\documentclass[11pt]{article}
+\usepackage{fullpage}
+\usepackage{siunitx}
+\usepackage{hyperref,graphicx,booktabs,dcolumn}
+\usepackage{stata}
+\usepackage[x11names]{xcolor}
+\usepackage{natbib}
+\usepackage{chngcntr}
+\usepackage{pgfplotstable}
+\usepackage{pdflscape}
+\usepackage{amssymb}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage[section]{placeins}
+\usepackage{subcaption}
+
+\newcommand{\specialcell}[2][c]{%
+  \begin{tabular}[#1]{@{}l@{}}#2\end{tabular}}
+
+\newcommand{\specialcelr}[2][c]{%
+  \begin{tabular}[#1]{@{}r@{}}#2\end{tabular}}
+
+\usepackage[superscript,biblabel]{cite}
+
+\renewcommand{\figurename}{Supplementary Figure}
+\renewcommand{\tablename}{Supplementary Table}
+
+\newcommand{\thedate}{\today}
+
+\bibliographystyle{unsrt}
+\renewcommand{\bibsection}{}
+\makeatletter
+\renewcommand\@biblabel[1]{	#1.}
+\makeatother
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{flushright}
+        \Huge
+        \textbf{
+Trends in cause-specific mortality among people with and without diabetes: a multi-national population-based study
+}
+\rule{16cm}{2mm} \\
+\Large
+Appendix \\
+       \vfill
+    \end{flushright}
+        \Large
+
+\noindent
+Dianna J Magliano,\textsuperscript{1} 
+Jedidiah I Morton,\textsuperscript{1}
+Lei Chen,
+Julian W Sacre,
+Agus Salim,
+Bendix Carstensen,
+Edward W Gregg,
+Martti Arffman,
+Gillian L Booth,
+Jonne G Braake,
+Luan Manh Chu,
+Katarina Eeg-Olofsson,
+Kelly Fleetwood,
+Sandrine Fosse-Edorh,
+Milda Garbuviene,
+Marie Guion,
+Kyoung Hwa Ha,
+Padma Kaul,
+Calvin Ke,
+Ilmo Keskim{\"a}ki,
+Dae Jung Kim,
+Tinne Laurberg,
+Henrik St{\o}vring,
+Rimke C Vos,
+Sarah H Wild,
+and Jonathan E Shaw. \\
+\vspace{1cm} \\
+\textsuperscript{1}These authors share first authorship. \\
+\vspace{1cm} \\
+\noindent The protocol for this study is available at \color{blue} \href{https://github.com/jimb0w/CM/}{https://github.com/jimb0w/CM/}
+\color{black}
+
+\end{titlepage}
+
+\clearpage
+
+\listoftables
+\listoffigures
+
+
+\clearpage
+\section{Quality score algorithm}
+We used a modified Newcastle-Ottawa Quality Assessment Scale.
+The scale includes items that assess the representativeness of the data 
+sources, sample size at each time point, the method of defining diabetes, 
+whether people with gestational diabetes were excluded, 
+completeness of the number of data points reported and 
+the assessment of the outcome (death). The maximum score was 9.
+ \\
+ \\
+\noindent \textbf{Selection}
+\begin{enumerate} 
+\item Representativeness of the general population (sampling frame).
+\begin{enumerate} 
+\item National scheme with $\geq$80\% coverage of national population (2 points) 
+\item Random sample from national health insurance
+or national population-based survey with $\geq$80\% response rate (1 point)
+\item Regional representative or national scheme with $<$80\% coverage of national population (0 points)  
+\end{enumerate}
+\item Assessment of diabetes status
+\begin{enumerate} 
+\item By blood glucose measurement (FPG, OGTT, HbA1c) or by multiple approaches / 
+administrative algorithm where 2 or more criteria are used (2 points)
+\item Clinical diagnosis (e.g. ICD code or physician-diagnosed) (1 point) 
+\item Anti-diabetic medication or self-report of physician-diagnosed diabetes (0 points)
+\end{enumerate}
+\item Exclusion of gestational diabetes
+\begin{enumerate} 
+\item Yes (1 point)
+\item No (0 points)
+\end{enumerate}
+\item Sample size at each time point.
+\begin{enumerate} 
+\item $>$10,000 (1 point)
+\item $\leq$10,000 (0 points) 
+\end{enumerate}
+\end{enumerate}
+
+\noindent \textbf{Outcome}
+\begin{enumerate} 
+\item Assessment of outcome.
+\begin{enumerate} 
+\item By record linkage e.g. national death registry (1 point)
+\item Other – regular follow-up (0 points)
+\end{enumerate}
+
+\end{enumerate}
+
+\noindent \textbf{Completeness of trend data}
+\begin{enumerate}
+\item How many time points are provided?
+\begin{enumerate}
+\item $\geq$10 (2 points)
+\item 6–9 (1 point)
+\item $<$6 (0 points)
+\end{enumerate}
+\end{enumerate}
+
+\clearpage
+
+\begin{table}[]
+\centering
+    \caption{Diabetes definitions by data source}
+\begin{tabular}{p{0.2\textwidth}p{0.5\textwidth}p{0.2\textwidth}}
+\hline
+Jurisdiction & Diabetes definition & Gestational diabetes excluded \\
+\hline
+Australia &
+Clinical diagnosis certified by a doctor, nurse or credentialed diabetes educator. &
+Yes \\
+Canada (Alberta) & 
+Algorithm incorporating $>$1 hospitalisations or $>$2 physician claims with evidence of diabetes within 2 years & 
+Yes \\
+Canada (Ontario) & 
+Algorithm incorporating $>$1 hospitalisations or $>$2 physician claims with evidence of diabetes within 2 years & 
+Yes \\
+Denmark & 
+Algorithm incorporating clinical diagnosis (ICD codes) from the hospitalisations, prescription of anti-diabetic medications, clinical and billing records. & 
+Yes \\
+Finland & 
+Algorithm incorporating clinical diagnosis (ICD codes) from the Care Register for Health Care, Register of Primary Health Care Visits, Medical Birth Register and Causes of Death Statistics and prescription of anti-diabetic medications. & 
+Yes \\
+France & 
+People who have been reimbursed for at least 3 antidiabetic medications in the year, or 2 in cases of large packaging & 
+No \\
+Lithuania & 
+Clinical diagnosis (ICD-10 codes) and anti-diabetes medications & 
+Yes \\
+Netherlands & 
+Anti-diabetes medications & 
+No \\
+Scotland & 
+Clinical diagnosis using the Read coding system. & 
+Yes \\
+South Korea & 
+Anti-diabetes medications and clinical diagnosis (ICD-10 codes). & 
+Yes \\
+Sweden & 
+Clinical diagnosis by healthcare professionals & 
+Yes \\
+\hline
+\end{tabular}
+\begin{flushleft}
+\noindent ICD=International Classification of Diseases; ICD-10=International Classification of Diseases, 10th edition. 
+\end{flushleft}
+\end{table}
+
+\clearpage
+
+\begin{table}[]
+\centering
+    \caption{ICD codes for specific underlying causes of death}
+\begin{tabular}{p{0.33\textwidth}p{0.33\textwidth}p{0.33\textwidth}}
+\hline
+Cause of death\textsuperscript{a} & ICD-10 codes & ICD-9 codes \\
+\hline
+Cancer & 
+C00–C97 & 
+140–208 \\
+Cardiovascular diseases & 
+I00–I99 & 
+390–434, 436–459 \\
+Chronic lower respiratory diseases & 
+J40–J47 & 
+490–494, 496 \\
+Dementia\textsuperscript{b} & 
+F00, F01, F03, G30 & 
+290.0–290.2, 290.4, 331.0 \\
+Diabetes & 
+E10–E14 & 
+250 \\
+Infectious diseases\textsuperscript{c} & 
+A00–B99 & 
+001–033, 034.1–134, 136–139, 771.3 \\
+Influenza and pneumonia & 
+J09–J18 & 
+480–487 \\
+Liver diseases & 
+K70–K76 & 
+570–572, 573.0, 573.3–573.9 \\
+Renal diseases & 
+N00–N08, N17–N19, N25–N27 & 
+580–589 \\
+All other diseases & 
+All other ICD-10 codes & 
+All other ICD-9 codes \\
+\hline
+\end{tabular}
+\begin{flushleft}
+\textsuperscript{a}We only consider underlying cause of death. \\
+\textsuperscript{b}Alzheimer's disease, vascular dementia and unspecified dementia are included. \\
+\textsuperscript{c}Infectious diseases do not include influenza or pneumonia. \\
+ICD, International Classification of Diseases. \\
+\end{flushleft}
+\end{table}
+
+\clearpage
+\begin{landscape}
+
+\begin{table}[]
+\centering
+    \caption{Quality assessment of the included data sources}
+\fontsize{7pt}{9pt}\selectfont\begin{tabular}{p{0.15\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}}
+\hline
+Jurisdiction & 
+Origin of data & 
+Representat-iveness of population & 
+Assessment of diabetes  & 
+Exclusion of gestational diabetes & 
+Sample size at time points & 
+Assessment of outcome & 
+Completeness (no. of data points) & 
+Total Score \\
+\hline
+Range & of allocated points & 
+0-2 & 
+0-2 & 
+0-1 & 
+0-1 & 
+0-1 & 
+0-2 & 
+9 \\
+\hline
+Australia & 
+National Diabetes Services Scheme & 
+2 & 
+1 & 
+1 & 
+1 & 
+1 & 
+2 & 
+8 \\
+Canada (Alberta) & 
+Population-level healthcare administrative database in Alberta & 
+0 & 
+2 & 
+1 & 
+1 & 
+1 & 
+2 & 
+7 \\
+Canada (Ontario) & 
+Population-level healthcare administrative database in Alberta & 
+0 & 
+2 & 
+1 & 
+1 & 
+1 & 
+1 & 
+6 \\
+Denmark & 
+National administrative databases & 
+2 & 
+2 & 
+1 & 
+1 & 
+1 & 
+2 & 
+9 \\
+Finland & 
+FinDM (Diabetes in Finland) research database & 
+2 & 
+2 & 
+1 & 
+1 & 
+1 & 
+2 & 
+9 \\
+France & 
+French national health data system & 
+2 & 
+2 & 
+0 & 
+1 & 
+1 & 
+1 & 
+7 \\
+Lithuania & 
+National Compulsory Health Insurance Fund Information System & 
+2 & 
+2 & 
+1 & 
+1 & 
+1 & 
+1 & 
+8 \\
+Netherlands & 
+Statistics Netherlands, based on several linked national registries & 
+0 & 
+0 & 
+0 & 
+1 & 
+1 & 
+2 & 
+4 \\
+Scotland & 
+Scottish Diabetes Research Network (SDRN) – National Diabetes Dataset 2021 & 
+2 & 
+1 & 
+1 & 
+1 & 
+1 & 
+2 & 
+8 \\
+South Korea & 
+National Health Insurance Service - National Sample cohort & 
+1 & 
+2 & 
+1 & 
+1 & 
+1 & 
+2 & 
+8 \\
+Sweden & 
+Swedish National Diabetes Register & 
+0 & 
+1 & 
+1 & 
+1 & 
+1 & 
+2 & 
+6 \\
+\hline
+\end{tabular}
+\end{table}
+\end{landscape}
+
+\clearpage
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
+by country and sex. Cancer.}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/APCt_can.csv}
+  \end{center}
+\end{table}
+\clearpage
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
+by country and sex. Cardiovascular disease.}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/APCt_cvd.csv}
+  \end{center}
+\end{table}
+\clearpage
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
+by country and sex. Chronic lower respiratory disease.}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/APCt_res.csv}
+  \end{center}
+\end{table}
+\clearpage
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
+by country and sex. Dementia.}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/APCt_azd.csv}
+  \end{center}
+\end{table}
+\clearpage
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in mortality rates, 
+by country and sex. Diabetes.}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/APCt_dmd.csv}
+  \end{center}
+\end{table}
+\clearpage
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
+by country and sex. Infectious diseases.}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/APCt_inf.csv}
+  \end{center}
+\end{table}
+\clearpage
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
+by country and sex. Influenza and pneumonia.}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/APCt_flu.csv}
+  \end{center}
+\end{table}
+
+\clearpage
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
+by country and sex. Kidney disease.}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/APCt_ckd.csv}
+  \end{center}
+\end{table}
+\clearpage
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
+by country and sex. Liver disease.}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/APCt_liv.csv}
+  \end{center}
+\end{table}
+
+\begin{landscape}
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in proportional mortality by country and cause of death.}
+    \hspace*{-3cm}
+    \label{propcitab}
+      \fontsize{5pt}{7pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+      display columns/0/.style={column name=Country, column type={l}},
+      display columns/1/.style={column name=Dementia, column type={r}},
+      display columns/2/.style={column name=Cancer, column type={r}},
+      display columns/3/.style={column name=CKD, column type={r}},
+      display columns/4/.style={column name=CVD, column type={r}},
+      display columns/5/.style={column name=Diabetes, column type={r}},
+      display columns/6/.style={column name=Influenza, column type={r}},
+      display columns/7/.style={column name=Infection, column type={r}},
+      display columns/8/.style={column name=Liver, column type={r}},
+      display columns/9/.style={column name=Respiratory, column type={r}},
+      display columns/10/.style={column name=Other, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/propcitab.csv}
+  \end{center}
+CKD -- kidney disease;
+CVD -- cardiovascular disease;
+Influenza -- influenza and pneumonia;
+Infection -- infectious diseases;
+Liver -- liver disease;
+Respiratory -- chronic lower respiratory disease.
+\end{table}
+\end{landscape}
+
+
+\begin{figure}[h!]
+    \centering
+    \caption{An illustration of changes in rates that have been labelled as uncertain, meaningful or stable, 
+using a null interval (NI) of $-$5 to 5. Estimate refers to the trend in a rate or rate ratio over time, 
+together with its confidence interval (spokes originating from the effect estimate dots).}
+    \includegraphics[width=\textwidth]{ciex_v3.pdf}
+\end{figure}
+
+
+
+***/
+
+texdoc stlog, nolog
+foreach ii in can cvd res azd dmd inf flu ckd liv {
+if "`ii'" == "can" {
+local oo = "Cancer"
+}
+if "`ii'" == "cvd" {
+local oo = "Cardiovascular disease"
+}
+if "`ii'" == "res" {
+local oo = "Chronic lower respiratory disease"
+}
+if "`ii'" == "azd" {
+local oo = "Dementia"
+}
+if "`ii'" == "dmd" {
+local oo = "Diabetes"
+}
+if "`ii'" == "inf" {
+local oo = "Infectious diseases"
+}
+if "`ii'" == "flu" {
+local oo = "Influenza and pneumonia"
+}
+if "`ii'" == "ckd" {
+local oo = "Kidney disease"
+}
+if "`ii'" == "liv" {
+local oo = "Liver disease"
+}
+if "`ii'" == "dmd" {
+graph combine ///
+GPH/STD_GPH_`ii'_dm.gph ///
+GPH/STD_GPH_`ii'_dm_0.gph ///
+GPH/STD_GPH_`ii'_dm_1.gph ///
+, graphregion(color(white)) cols(1) altshrink xsize(2)
+texdoc graph, label(STDMRF_`ii') figure(h!) cabove optargs(width=0.6\textwidth) ///
+caption(Age-standardised mortality rate by cause of death, people aged 40-89. `oo'.)
+}
+else {
+graph combine ///
+GPH/STD_GPH_`ii'_dm.gph ///
+GPH/STD_GPH_`ii'_nondm.gph ///
+GPH/STD_GPH_`ii'_dm_0.gph ///
+GPH/STD_GPH_`ii'_nondm_0.gph ///
+GPH/STD_GPH_`ii'_dm_1.gph ///
+GPH/STD_GPH_`ii'_nondm_1.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(4)
+texdoc graph, label(STDMRF_`ii') figure(h!) cabove ///
+caption(Age-standardised mortality rate by cause of death, people aged 40-89. `oo'.)
+}
+}
+foreach ii in can cvd res azd dmd inf flu ckd liv {
+if "`ii'" == "can" {
+local oo = "Cancer"
+}
+if "`ii'" == "cvd" {
+local oo = "Cardiovascular disease"
+}
+if "`ii'" == "res" {
+local oo = "Chronic lower respiratory disease"
+}
+if "`ii'" == "azd" {
+local oo = "Dementia"
+}
+if "`ii'" == "dmd" {
+local oo = "Diabetes"
+}
+if "`ii'" == "inf" {
+local oo = "Infectious diseases"
+}
+if "`ii'" == "flu" {
+local oo = "Influenza and pneumonia"
+}
+if "`ii'" == "ckd" {
+local oo = "Kidney disease"
+}
+if "`ii'" == "liv" {
+local oo = "Liver disease"
+}
+if "`ii'" == "dmd" {
+local ii = "dmd"
+graph combine ///
+GPH/APCo_`ii'.gph ///
+GPH/APCs_`ii'.gph ///
+, graphregion(color(white)) cols(1) altshrink xsize(3)
+texdoc graph, label(APC_`ii') figure(h!) cabove ///
+caption(Average 5-year percent change in mortality rate by country. Overall (top) and by sex (bottom). `oo'.)
+}
+else {
+graph combine ///
+GPH/APCo_`ii'.gph ///
+GPH/SAPCo_`ii'.gph ///
+GPH/APCs_`ii'.gph ///
+GPH/SAPCs_`ii'.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(6)
+texdoc graph, label(APC_`ii') figure(h!) cabove ///
+caption(Average 5-year percent change in mortality rate and mortality rate ratio (MRR) by country. ///
+Overall (top) and by sex (bottom). `oo'.)
+}
+}
+
+foreach ii in can cvd res azd inf flu ckd liv {
+if "`ii'" == "cvd" {
+local oo = "Cardiovascular disease"
+}
+if "`ii'" == "can" {
+local oo = "Cancer"
+}
+if "`ii'" == "res" {
+local oo = "Chronic lower respiratory disease"
+}
+if "`ii'" == "azd" {
+local oo = "Dementia"
+}
+if "`ii'" == "dmd" {
+local oo = "Diabetes"
+}
+if "`ii'" == "inf" {
+local oo = "Infectious diseases"
+}
+if "`ii'" == "flu" {
+local oo = "Influenza and pneumonia"
+}
+if "`ii'" == "liv" {
+local oo = "Liver disease"
+}
+if "`ii'" == "ckd" {
+local oo = "Kidney disease"
+}
+graph combine ///
+GPH/SMR_`ii'.gph ///
+GPH/SMR_`ii'_0.gph ///
+GPH/SMR_`ii'_1.gph ///
+, graphregion(color(white)) cols(1) altshrink xsize(2.5)
+texdoc graph, label(STDMRF_`ii') figure(h!) cabove ///
+caption(Mortality rate ratio by cause of death and sex. `oo'.)
+}
+texdoc stlog close
+
+/***
+
+\end{document}
+***/
+
+texdoc close
+
+
+**DM TABLE
+/*
+clear
+edit
+save propcitab
+use propcitab, clear
+tostring a1-j3, force format(%9.2f) replace
+foreach i in a b c d e f g h i j {
+gen `i' = `i'1+" ("+`i'2+", "+`i'3+")"
+}
+drop a1-j3
+replace country = "South Korea" if country == "SouthKorea"
+replace country = "Canada (Alberta)" if country == "Canada1"
+replace country = "Canada (Ontario)" if country == "Canada2"
+export delimited using CSV/propcitab.csv, delimiter(":") novarnames replace
+*/
+
 
 ! pdflatex CM_SA
 ! pdflatex CM_SA
