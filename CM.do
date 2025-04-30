@@ -4823,6 +4823,40 @@ replace country = "Canada (Ontario)" if country == "Canada2"
 export delimited using CSV/propcitab.csv, delimiter(":") novarnames replace
 */
 
+**Proportion of deaths >90
+/*
+*/
+cd /home/jimb0w/Documents/CM
+import delimited "Consortium COD database v10.csv", clear
+keep if age_gp1!=""
+ta country
+bysort country cal sex (age_gp1) : egen total = sum(alldeath_dm)
+gen death = alldeath_dm/total
+
+twoway ///
+(line death cal if country == "Australia_1" & sex == "F" & age_gp1 == "90+") ///
+(line death cal if country == "Canada (Alberta)_1" & sex == "F" & age_gp1 == "90+") ///
+(line death cal if country == "Canada (Ontario)_1" & sex == "F" & age_gp1 == "90+") ///
+(line death cal if country == "Denmark" & sex == "F" & age_gp1 == "90+") ///
+(line death cal if country == "Finland" & sex == "F" & age_gp1 == "90+") ///
+(line death cal if country == "France_1" & sex == "F" & age_gp1 == "90+") ///
+(line death cal if country == "Lithuania" & sex == "F" & age_gp1 == "90+") ///
+(line death cal if country == "Scotland" & sex == "F" & age_gp1 == "90+") ///
+(line death cal if country == "South Korea" & sex == "F" & age_gp1 == "90+") ///
+, legend(order( ///
+1 "Australia" ///
+2 "Canada (Alberta)" ///
+3 "Canada (Ontario)" ///
+4 "Denmark" ///
+5 "Finland" ///
+6 "France" ///
+7 "Lithuania" ///
+8 "Scotland" ///
+9 "South Korea"))
+
+*/
+
+
 
 ! pdflatex CM_SA
 ! pdflatex CM_SA
