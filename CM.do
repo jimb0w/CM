@@ -3945,6 +3945,7 @@ analyses excluding data from 2020 onwards.
 
 \subsection{Age-standardised mortality rates}
 
+\color{Blue4}
 ***/
 
 
