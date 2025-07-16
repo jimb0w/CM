@@ -1,4 +1,4 @@
-
+/*
 texdoc init CM, replace logdir(CM_log) gropts(optargs(width=0.8\textwidth))
 set linesize 100
 
@@ -5522,8 +5522,9 @@ texdoc stlog close
 
 
 texdoc close
-
+*/
 **# Bookmark #2
+
 
 texdoc init CM_SA, replace logdir(SA_dir) gropts(optargs(width=0.8\textwidth))
 set linesize 100
@@ -5617,7 +5618,7 @@ and Jonathan E Shaw. \\
 \end{titlepage}
 
 \clearpage
-
+\tableofcontents
 \listoftables
 \listoffigures
 
@@ -5681,7 +5682,7 @@ administrative algorithm where 2 or more criteria are used (2 points)
 \end{enumerate}
 
 \clearpage
-
+\section{Supplementary Tables}
 \begin{table}[]
 \centering
     \caption{Diabetes definitions by data source}
@@ -6218,6 +6219,8 @@ Respiratory -- chronic lower respiratory disease.
 \end{table}
 \end{landscape}
 
+\clearpage
+\section{Supplementary Figures}
 
 \begin{figure}[h!]
     \centering
