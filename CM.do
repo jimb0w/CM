@@ -1,4 +1,4 @@
-/*
+
 texdoc init CM, replace logdir(CM_log) gropts(optargs(width=0.8\textwidth))
 set linesize 100
 
@@ -5522,7 +5522,7 @@ texdoc stlog close
 
 
 texdoc close
-*/
+
 **# Bookmark #2
 
 
