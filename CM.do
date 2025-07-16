@@ -5683,7 +5683,7 @@ administrative algorithm where 2 or more criteria are used (2 points)
 
 \clearpage
 \section{Supplementary Tables}
-\begin{table}[]
+\begin{table}[h!]
 \centering
     \caption{Diabetes definitions by data source}
 \begin{tabular}{p{0.2\textwidth}p{0.5\textwidth}p{0.2\textwidth}}
