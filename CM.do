@@ -5329,6 +5329,189 @@ aged 80 and above or 90 and above (as a proportion of all deaths among people wi
 texdoc stlog close
 
 /***
+
+\clearpage
+\section{Sensitivity analyses using 3\% and 7\% as APC cutoffs}
+
+The primary analysis set 5\% as the cutoff for a meaningful change
+in rates and rate ratios over time. I will re-plot those
+figures using 3\% and 7\% shading to determine the impact of the 
+somewhat arbitrarily selected 5\% cutoff. 
+
+***/
+
+texdoc stlog, cmdlog nodo
+foreach j in 3 7 {
+foreach i in can cvd res azd dmd inf flu ckd liv {
+if "`i'" == "can" {
+local ii = "Cancer"
+}
+if "`i'" == "cvd" {
+local ii = "Cardiovascular disease"
+}
+if "`i'" == "res" {
+local ii = "Chronic lower respiratory disease"
+}
+if "`i'" == "azd" {
+local ii = "Dementia"
+}
+if "`i'" == "dmd" {
+local ii = "Diabetes"
+}
+if "`i'" == "inf" {
+local ii = "Infectious diseases"
+}
+if "`i'" == "flu" {
+local ii = "Influenza and pneumonia"
+}
+if "`i'" == "liv" {
+local ii = "Liver disease"
+}
+if "`i'" == "ckd" {
+local ii = "Kidney disease"
+}
+use APCs, clear
+gen AA = -A1+0.15 if A3 == "dm"
+replace AA = -A1-0.15 if A3 == "nondm"
+set obs 461
+replace A7 = -`j' in 460
+replace A7 = -`j' in 461
+replace A6 = `j' in 460
+replace A6 = `j' in 461
+replace AA = -9.2 in 460
+replace AA = -0.8 in 461
+replace country = "Canada (Alberta)" if country == "Canada1"
+replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "South Korea" if country == "SKorea"
+preserve
+bysort A1 : keep if _n == 1
+forval c = 1/9 {
+local C`c' = country[`c']
+}
+restore
+twoway ///
+(rarea A7 A6 AA if A1==., horizontal color(black%20) fintensity(inten50) lwidth(none)) ///
+(rcap A7 A6 AA if A2 == "`i'" & A3 == "dm" & A4 == 2, horizontal col(blue)) ///
+(scatter AA A5 if A2 == "`i'" & A3 == "dm" & A4 == 2, col(blue)) ///
+(rcap A7 A6 AA if A2 == "`i'" & A3 == "nondm" & A4 == 2, horizontal col(green)) ///
+(scatter AA A5 if A2 == "`i'" & A3 == "nondm" & A4 == 2, col(green)) ///
+, graphregion(color(white)) legend(order( ///
+2 "Diabetes" 4 "No diabetes") cols(1) ///
+region(lcolor(none) color(none)) position(3)) ///
+ylabel( ///
+-1 "`C1'" ///
+-2 "`C2'" ///
+-3 "`C3'" ///
+-4 "`C4'" ///
+-5 "`C5'" ///
+-6 "`C6'" ///
+-7 "`C7'" ///
+-8 "`C8'" ///
+-9 "`C9'" ///
+, angle(0) nogrid) ytitle("") xscale(range(0)) xline(0, lcol(black) lstyle(solid)) ///
+xlabel(, format(%9.0f)) xtitle(5-year percent change) ///
+title("`ii'", placement(west) col(black) size(medium))
+graph save GPH/APCo_`i'_F2_`j', replace
+if "`i'" != "dmd" {
+use SMR_APCs, clear
+gen AA = -A1
+set obs 218
+replace A7 = -`j' in 217
+replace A7 = -`j' in 218
+replace A6 = `j' in 217
+replace A6 = `j' in 218
+replace AA = -9.2 in 217
+replace AA = -0.8 in 218
+replace country = "Canada (Alberta)" if country == "Canada1"
+replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "South Korea" if country == "SKorea"
+preserve
+bysort A1 : keep if _n == 1
+forval c = 1/9 {
+local C`c' = country[`c']
+}
+restore
+twoway ///
+(rarea A7 A6 AA if A1==., horizontal color(black%20) fintensity(inten50) lwidth(none)) ///
+(rcap A6 A5 AA if A2 == "`i'" & A3 == 2, horizontal col(black)) ///
+(scatter AA A4 if A2 == "`i'" & A3 == 2, col(black)) ///
+, graphregion(color(white)) legend(off) ///
+ylabel( ///
+-1 "`C1'" ///
+-2 "`C2'" ///
+-3 "`C3'" ///
+-4 "`C4'" ///
+-5 "`C5'" ///
+-6 "`C6'" ///
+-7 "`C7'" ///
+-8 "`C8'" ///
+-9 "`C9'" ///
+, angle(0) nogrid) ytitle("") xscale(range(0)) xline(0, lcol(black)) ///
+xlabel(, format(%9.0f)) xtitle(5-year percent change) ///
+title("`ii'", placement(west) col(black) size(medium))
+graph save GPH/SAPCo_`i'_F3_`j', replace
+}
+}
+}
+texdoc stlog close
+texdoc stlog
+graph combine ///
+GPH/APCo_can_F2_3.gph ///
+GPH/APCo_cvd_F2_3.gph ///
+GPH/APCo_dmd_F2_3.gph ///
+GPH/APCo_res_F2_3.gph ///
+GPH/APCo_azd_F2_3.gph ///
+GPH/APCo_inf_F2_3.gph ///
+GPH/APCo_flu_F2_3.gph ///
+GPH/APCo_ckd_F2_3.gph ///
+GPH/APCo_liv_F2_3.gph ///
+, graphregion(color(white)) cols(3) altshrink xsize(7)
+texdoc graph, label(APC_sum) figure(h!) cabove ///
+caption(Average 5-year percent change in mortality rate by country. ///
+Shaded areas show plus and minus 3\%.)
+graph combine ///
+GPH/SAPCo_can_F3_3.gph ///
+GPH/SAPCo_cvd_F3_3.gph ///
+GPH/SAPCo_res_F3_3.gph ///
+GPH/SAPCo_azd_F3_3.gph ///
+GPH/SAPCo_inf_F3_3.gph ///
+GPH/SAPCo_flu_F3_3.gph ///
+GPH/SAPCo_ckd_F3_3.gph ///
+GPH/SAPCo_liv_F3_3.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(3)
+texdoc graph, label(APC_sum) figure(h!) cabove ///
+caption(Average 5-year percent change in mortality rate ratio (MRR) by country. ///
+Shaded areas show plus and minus 3\%.)
+graph combine ///
+GPH/APCo_can_F2_7.gph ///
+GPH/APCo_cvd_F2_7.gph ///
+GPH/APCo_dmd_F2_7.gph ///
+GPH/APCo_res_F2_7.gph ///
+GPH/APCo_azd_F2_7.gph ///
+GPH/APCo_inf_F2_7.gph ///
+GPH/APCo_flu_F2_7.gph ///
+GPH/APCo_ckd_F2_7.gph ///
+GPH/APCo_liv_F2_7.gph ///
+, graphregion(color(white)) cols(3) altshrink xsize(7)
+texdoc graph, label(APC_sum) figure(h!) cabove ///
+caption(Average 5-year percent change in mortality rate by country. ///
+Shaded areas show plus and minus 7\%.)
+graph combine ///
+GPH/SAPCo_can_F3_7.gph ///
+GPH/SAPCo_cvd_F3_7.gph ///
+GPH/SAPCo_res_F3_7.gph ///
+GPH/SAPCo_azd_F3_7.gph ///
+GPH/SAPCo_inf_F3_7.gph ///
+GPH/SAPCo_flu_F3_7.gph ///
+GPH/SAPCo_ckd_F3_7.gph ///
+GPH/SAPCo_liv_F3_7.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(3)
+texdoc graph, label(APC_sum) figure(h!) cabove ///
+caption(Average 5-year percent change in mortality rate ratio (MRR) by country. ///
+Shaded areas show plus and minus 7\%.)
+texdoc stlog close
+
+/***
 \color{black}
 \clearpage
 \section*{References}
