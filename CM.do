@@ -5589,6 +5589,7 @@ Jedidiah I Morton,\textsuperscript{1}
 Lei Chen,
 Julian W Sacre,
 Agus Salim,
+Joanna Y Gong,
 Bendix Carstensen,
 Edward W Gregg,
 Martti Arffman,
