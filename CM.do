@@ -366,7 +366,7 @@ texdoc stlog close
 \clearpage
 \subsection{Canada (Alberta)}
 
-For Canada (Alberta), 
+For Alberta, Canada, 
 we have the following variables (by age, sex, and calendar year): 
 total population size, prevalence of diabetes, incidence of diabetes, 
 deaths in people with diabetes, and deaths in the total population. 
@@ -477,7 +477,7 @@ texdoc stlog close
 \clearpage
 \subsection{Canada (Ontario)}
 
-For Canada (Ontario), 
+For Ontario, Canada, 
 we have the following variables (by age, sex, and calendar year): 
 total population size, prevalence of diabetes, incidence of diabetes, person-years in people with diabetes, 
 deaths in people with diabetes, and deaths in the total population. 
@@ -1179,6 +1179,11 @@ replace `i' = `i'_d_nondm if DM == "0"
 }
 keep country-rang DM-other
 order country rang DM sex
+replace country = "South Korea" if country == "SKorea"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
+replace country = "Netherlands\textsuperscript{1}" if country == "Netherlands"
+replace country = "Sweden\textsuperscript{1}" if country == "Sweden"
 sort country rang DM sex
 gen njm = _n
 bysort country DM (njm) : replace DM ="" if _n!=1
@@ -1190,11 +1195,6 @@ replace DM = "Diabetes" if DM == "1"
 replace sex = "Female" if sex == "0"
 replace sex = "Male" if sex == "1"
 drop njm
-replace country = "South Korea" if country == "SKorea"
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
-replace country = "Netherlands\textsuperscript{1}" if country == "Netherlands"
-replace country = "Sweden\textsuperscript{1}" if country == "Sweden"
 export delimited using CSV/T1.csv, delimiter(":") novarnames replace
 texdoc stlog close
 
@@ -1268,10 +1268,10 @@ texdoc stlog, cmdlog nodo
 foreach c in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 use `c', clear
 if "`c'" == "Canada1" {
-local co = "Canada (Alberta)"
+local co = "Alberta, Canada"
 }
 else if "`c'" == "Canada2" {
-local co = "Canada (Ontario)"
+local co = "Ontario, Canada"
 }
 else if "`c'" == "SKorea" {
 local co = "South Korea"
@@ -1341,10 +1341,10 @@ texdoc stlog, nolog
 foreach c in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 use `c', clear
 if "`c'" == "Canada1" {
-local co = "Canada (Alberta)"
+local co = "Alberta, Canada"
 }
 else if "`c'" == "Canada2" {
-local co = "Canada (Ontario)"
+local co = "Ontario, Canada"
 }
 else if "`c'" == "SKorea" {
 local co = "South Korea"
@@ -2358,8 +2358,8 @@ clear
 foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 append using MD/STD_`i'_`ii'_`iii'
 }
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort country : keep if _n == 1
@@ -2418,8 +2418,8 @@ clear
 foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 append using MD/STD_`i'_`ii'_`iii'_`iiii'
 }
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort country : keep if _n == 1
@@ -2513,8 +2513,8 @@ clear
 foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 append using MD/STD_`i'_`ii'_`iii'
 }
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort country : keep if _n == 1
@@ -2603,6 +2603,7 @@ ytitle("Mortality rate (per 1,000 person-years)", margin(a+2)) ///
 xtitle("Calendar year") ///
 title("`oo'", placement(west) color(black) size(medium))
 }
+stop
 graph save GPH/STD_GPH_`ii'_`iii'_F1, replace
 }
 }
@@ -2938,8 +2939,8 @@ clear
 foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 append using MD/SMR_`i'_`ii'
 }
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort country : keep if _n == 1
@@ -2998,8 +2999,8 @@ clear
 foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 append using MD/SMR_`i'_`ii'_`iii'
 }
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort country : keep if _n == 1
@@ -3306,8 +3307,8 @@ local ii = "kidney disease"
 use APCs, clear
 gen AA = -A1+0.15 if A3 == "dm"
 replace AA = -A1-0.15 if A3 == "nondm"
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
@@ -3341,8 +3342,8 @@ use APCs, clear
 gen AA = -A1-0.1 if A4 == 0
 replace AA = -A1-0.25 if A4 == 1
 replace AA = AA + 0.35 if A3=="nondm"
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
@@ -3381,8 +3382,8 @@ graph save GPH/APCs_`i', replace
 if "`i'" != "dmd" {
 use SMR_APCs, clear
 gen AA = -A1
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
@@ -3413,8 +3414,8 @@ graph save GPH/SAPCo_`i', replace
 use SMR_APCs, clear
 gen AA = -A1+0.15 if A3 == 0
 replace AA = -A1-0.15 if A3 == 1
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
@@ -3484,8 +3485,8 @@ replace A6 = 5 in 460
 replace A6 = 5 in 461
 replace AA = -9.2 in 460
 replace AA = -0.8 in 461
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
@@ -3526,8 +3527,8 @@ replace A6 = 5 in 217
 replace A6 = 5 in 218
 replace AA = -9.2 in 217
 replace AA = -0.8 in 218
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
@@ -3574,15 +3575,15 @@ keep A3 A4 A country
 reshape wide A, i(country A4) j(A3) string
 merge 1:1 country A4 using MD/SMR_APC_`i'
 drop _merge
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
+replace country = "South Korea" if country == "SKorea"
 bysort country (A4) : replace country = "" if _n!=1
 tostring A4, replace force
 replace A4 = "Females" if A4 == "0"
 replace A4 = "Males" if A4 == "1"
 replace A4 = "Overall" if A4 == "2"
 order country A4
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
-replace country = "South Korea" if country == "SKorea"
 if "`i'" == "dmd" {
 drop AA
 }
@@ -3937,7 +3938,7 @@ by country and sex. Liver disease.}
 \clearpage
 \section{Sensitivity analysis excluding COVID-19 years}
 
-Australia, Canada (Alberta), Finland, France, Lithuania, and Scotland
+Alberta (Canada), Australia, Finland, France, Lithuania, and Scotland
 all have data that ends on or after 2020. There is a potential effect 
 of the COVID-19 pandemic (the virus itself and the public health measures implemented
 to address the spread) that could impact trends. Therefore, we will repeat the 
@@ -4198,8 +4199,8 @@ clear
 foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 append using MD/STD_`i'_`ii'_`iii'_C19
 }
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort country : keep if _n == 1
@@ -4258,8 +4259,8 @@ clear
 foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 append using MD/STD_`i'_`ii'_`iii'_`iiii'_C19
 }
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort country : keep if _n == 1
@@ -4615,8 +4616,8 @@ clear
 foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 append using MD/SMR_`i'_`ii'_C19
 }
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort country : keep if _n == 1
@@ -4675,8 +4676,8 @@ clear
 foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 append using MD/SMR_`i'_`ii'_`iii'_C19
 }
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort country : keep if _n == 1
@@ -4961,15 +4962,15 @@ keep A3 A4 A country
 reshape wide A, i(country A4) j(A3) string
 merge 1:1 country A4 using MD/SMR_APC_`i'_C19
 drop _merge
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
+replace country = "South Korea" if country == "SKorea"
 bysort country (A4) : replace country = "" if _n!=1
 tostring A4, replace force
 replace A4 = "Females" if A4 == "0"
 replace A4 = "Males" if A4 == "1"
 replace A4 = "Overall" if A4 == "2"
 order country A4
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
-replace country = "South Korea" if country == "SKorea"
 if "`i'" == "dmd" {
 drop AA
 }
@@ -5261,8 +5262,8 @@ clear
 foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
 append using `i'
 }
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 keep country cal sex age_dm alldeath_d_dm
 preserve
@@ -5286,24 +5287,24 @@ local s1 = "Males"
 use propdeath`i', clear
 colorpalette hue, n(9) luminance(50) nograph
 twoway ///
-(line death cal if country == "Australia" & sex == `s' & age_dm == 95, color("`r(p1)'")) ///
-(line death cal if country == "Canada (Alberta)" & sex == `s' & age_dm == 95, color("`r(p2)'")) ///
-(line death cal if country == "Canada (Ontario)" & sex == `s' & age_dm == 95, color("`r(p3)'")) ///
-(line death cal if country == "Denmark" & sex == `s' & age_dm == 95, color("`r(p4)'")) ///
-(line death cal if country == "Finland" & sex == `s' & age_dm == 95, color("`r(p5)'")) ///
-(line death cal if country == "France" & sex == `s' & age_dm == 95, color("`r(p6)'")) ///
-(line death cal if country == "Lithuania" & sex == `s' & age_dm == 95, color("`r(p7)'")) ///
+(line death cal if country == "Alberta, Canada" & sex == `s' & age_dm == 95, color("`r(p1)'")) ///
+(line death cal if country == "Australia" & sex == `s' & age_dm == 95, color("`r(p2)'")) ///
+(line death cal if country == "Denmark" & sex == `s' & age_dm == 95, color("`r(p3)'")) ///
+(line death cal if country == "Finland" & sex == `s' & age_dm == 95, color("`r(p4)'")) ///
+(line death cal if country == "France" & sex == `s' & age_dm == 95, color("`r(p5)'")) ///
+(line death cal if country == "Lithuania" & sex == `s' & age_dm == 95, color("`r(p6)'")) ///
+(line death cal if country == "Ontario, Canada" & sex == `s' & age_dm == 95, color("`r(p7)'")) ///
 (line death cal if country == "Scotland" & sex == `s' & age_dm == 95, color("`r(p8)'")) ///
 (line death cal if country == "South Korea" & sex == `s' & age_dm == 95, color("`r(p9)'")) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order( ///
-1 "Australia" ///
-2 "Canada (Alberta)" ///
-3 "Canada (Ontario)" ///
-4 "Denmark" ///
-5 "Finland" ///
-6 "France" ///
-7 "Lithuania" ///
+1 "Alberta, Canada" ///
+2 "Australia" ///
+3 "Denmark" ///
+4 "Finland" ///
+5 "France" ///
+6 "Lithuania" ///
+7 "Ontario, Canada" ///
 8 "Scotland" ///
 9 "South Korea") cols(1)) ///
 graphregion(color(white)) ///
@@ -5380,8 +5381,8 @@ replace A6 = `j' in 460
 replace A6 = `j' in 461
 replace AA = -9.2 in 460
 replace AA = -0.8 in 461
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
@@ -5422,8 +5423,8 @@ replace A6 = `j' in 217
 replace A6 = `j' in 218
 replace AA = -9.2 in 217
 replace AA = -0.8 in 218
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
 replace country = "South Korea" if country == "SKorea"
 preserve
 bysort A1 : keep if _n == 1
@@ -5690,14 +5691,11 @@ administrative algorithm where 2 or more criteria are used (2 points)
 \hline
 Jurisdiction & Diabetes definition & Gestational diabetes excluded \\
 \hline
+Alberta, Canada & 
+Algorithm incorporating $>$1 hospitalisations or $>$2 physician claims with evidence of diabetes within 2 years & 
+Yes \\
 Australia &
 Clinical diagnosis certified by a doctor, nurse or credentialed diabetes educator. &
-Yes \\
-Canada (Alberta) & 
-Algorithm incorporating $>$1 hospitalisations or $>$2 physician claims with evidence of diabetes within 2 years & 
-Yes \\
-Canada (Ontario) & 
-Algorithm incorporating $>$1 hospitalisations or $>$2 physician claims with evidence of diabetes within 2 years & 
 Yes \\
 Denmark & 
 Algorithm incorporating clinical diagnosis (ICD codes) from the hospitalisations, prescription of anti-diabetic medications, clinical and billing records. & 
@@ -5710,6 +5708,9 @@ People who have been reimbursed for at least 3 antidiabetic medications in the y
 No \\
 Lithuania & 
 Clinical diagnosis (ICD-10 codes) and anti-diabetes medications & 
+Yes \\
+Ontario, Canada & 
+Algorithm incorporating $>$1 hospitalisations or $>$2 physician claims with evidence of diabetes within 2 years & 
 Yes \\
 Netherlands & 
 Anti-diabetes medications & 
@@ -5806,6 +5807,15 @@ Range & of allocated points &
 0-2 & 
 9 \\
 \hline
+Alberta, Canada & 
+Population-level healthcare administrative database in Alberta & 
+0 & 
+2 & 
+1 & 
+1 & 
+1 & 
+2 & 
+7 \\
 Australia & 
 National Diabetes Services Scheme & 
 2 & 
@@ -5815,24 +5825,6 @@ National Diabetes Services Scheme &
 1 & 
 2 & 
 8 \\
-Canada (Alberta) & 
-Population-level healthcare administrative database in Alberta & 
-0 & 
-2 & 
-1 & 
-1 & 
-1 & 
-2 & 
-7 \\
-Canada (Ontario) & 
-Population-level healthcare administrative database in Alberta & 
-0 & 
-2 & 
-1 & 
-1 & 
-1 & 
-1 & 
-6 \\
 Denmark & 
 National administrative databases & 
 2 & 
@@ -5878,6 +5870,15 @@ Statistics Netherlands, based on several linked national registries &
 1 & 
 2 & 
 4 \\
+Ontario, Canada & 
+Population-level healthcare administrative database in Alberta & 
+0 & 
+2 & 
+1 & 
+1 & 
+1 & 
+1 & 
+6 \\
 Scotland & 
 Scottish Diabetes Research Network (SDRN) – National Diabetes Dataset 2021 & 
 2 & 
@@ -6227,7 +6228,7 @@ Respiratory -- chronic lower respiratory disease.
     \caption{An illustration of changes in rates that have been labelled as uncertain, meaningful or stable, 
 using a null interval (NI) of $-$5 to 5. Estimate refers to the trend in a rate or rate ratio over time, 
 together with its confidence interval (spokes originating from the effect estimate dots).}
-    \includegraphics[width=\textwidth]{ciex_v3.pdf}
+    \includegraphics[width=\textwidth]{ciex_v11.jpeg}
 \end{figure}
 
 
@@ -6285,6 +6286,43 @@ texdoc graph, label(STDMRF_`ii') figure(h!) cabove ///
 caption(Age-standardised mortality rate by cause of death, people aged 40-89. `oo'.)
 }
 }
+
+foreach ii in can cvd res azd inf flu ckd liv {
+if "`ii'" == "cvd" {
+local oo = "Cardiovascular disease"
+}
+if "`ii'" == "can" {
+local oo = "Cancer"
+}
+if "`ii'" == "res" {
+local oo = "Chronic lower respiratory disease"
+}
+if "`ii'" == "azd" {
+local oo = "Dementia"
+}
+if "`ii'" == "dmd" {
+local oo = "Diabetes"
+}
+if "`ii'" == "inf" {
+local oo = "Infectious diseases"
+}
+if "`ii'" == "flu" {
+local oo = "Influenza and pneumonia"
+}
+if "`ii'" == "liv" {
+local oo = "Liver disease"
+}
+if "`ii'" == "ckd" {
+local oo = "Kidney disease"
+}
+graph combine ///
+GPH/SMR_`ii'.gph ///
+GPH/SMR_`ii'_0.gph ///
+GPH/SMR_`ii'_1.gph ///
+, graphregion(color(white)) cols(1) altshrink xsize(2.5)
+texdoc graph, label(STDMRF_`ii') figure(h!) cabove ///
+caption(Mortality rate ratio by cause of death and sex. `oo'.)
+}
 foreach ii in can cvd res azd dmd inf flu ckd liv {
 if "`ii'" == "can" {
 local oo = "Cancer"
@@ -6334,47 +6372,80 @@ caption(Average 5-year percent change in mortality rate and mortality rate ratio
 Overall (top) and by sex (bottom). `oo'.)
 }
 }
-
-foreach ii in can cvd res azd inf flu ckd liv {
-if "`ii'" == "cvd" {
-local oo = "Cardiovascular disease"
-}
-if "`ii'" == "can" {
-local oo = "Cancer"
-}
-if "`ii'" == "res" {
-local oo = "Chronic lower respiratory disease"
-}
-if "`ii'" == "azd" {
-local oo = "Dementia"
-}
-if "`ii'" == "dmd" {
-local oo = "Diabetes"
-}
-if "`ii'" == "inf" {
-local oo = "Infectious diseases"
-}
-if "`ii'" == "flu" {
-local oo = "Influenza and pneumonia"
-}
-if "`ii'" == "liv" {
-local oo = "Liver disease"
-}
-if "`ii'" == "ckd" {
-local oo = "Kidney disease"
-}
 graph combine ///
-GPH/SMR_`ii'.gph ///
-GPH/SMR_`ii'_0.gph ///
-GPH/SMR_`ii'_1.gph ///
-, graphregion(color(white)) cols(1) altshrink xsize(2.5)
-texdoc graph, label(STDMRF_`ii') figure(h!) cabove ///
-caption(Mortality rate ratio by cause of death and sex. `oo'.)
-}
+GPH/APCo_can_F2_3.gph ///
+GPH/APCo_cvd_F2_3.gph ///
+GPH/APCo_dmd_F2_3.gph ///
+GPH/APCo_res_F2_3.gph ///
+GPH/APCo_azd_F2_3.gph ///
+GPH/APCo_inf_F2_3.gph ///
+GPH/APCo_flu_F2_3.gph ///
+GPH/APCo_ckd_F2_3.gph ///
+GPH/APCo_liv_F2_3.gph ///
+, graphregion(color(white)) cols(3) altshrink xsize(7)
+texdoc graph, label(APC_sum) figure(h!) cabove ///
+caption(Average 5-year percent change in mortality rate by country. ///
+Shaded areas show plus and minus 3\%.)
+graph combine ///
+GPH/SAPCo_can_F3_3.gph ///
+GPH/SAPCo_cvd_F3_3.gph ///
+GPH/SAPCo_res_F3_3.gph ///
+GPH/SAPCo_azd_F3_3.gph ///
+GPH/SAPCo_inf_F3_3.gph ///
+GPH/SAPCo_flu_F3_3.gph ///
+GPH/SAPCo_ckd_F3_3.gph ///
+GPH/SAPCo_liv_F3_3.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(3)
+texdoc graph, label(APC_sum) figure(h!) cabove ///
+caption(Average 5-year percent change in mortality rate ratio (MRR) by country. ///
+Shaded areas show plus and minus 3\%.)
+graph combine ///
+GPH/APCo_can_F2_7.gph ///
+GPH/APCo_cvd_F2_7.gph ///
+GPH/APCo_dmd_F2_7.gph ///
+GPH/APCo_res_F2_7.gph ///
+GPH/APCo_azd_F2_7.gph ///
+GPH/APCo_inf_F2_7.gph ///
+GPH/APCo_flu_F2_7.gph ///
+GPH/APCo_ckd_F2_7.gph ///
+GPH/APCo_liv_F2_7.gph ///
+, graphregion(color(white)) cols(3) altshrink xsize(7)
+texdoc graph, label(APC_sum) figure(h!) cabove ///
+caption(Average 5-year percent change in mortality rate by country. ///
+Shaded areas show plus and minus 7\%.)
+graph combine ///
+GPH/SAPCo_can_F3_7.gph ///
+GPH/SAPCo_cvd_F3_7.gph ///
+GPH/SAPCo_res_F3_7.gph ///
+GPH/SAPCo_azd_F3_7.gph ///
+GPH/SAPCo_inf_F3_7.gph ///
+GPH/SAPCo_flu_F3_7.gph ///
+GPH/SAPCo_ckd_F3_7.gph ///
+GPH/SAPCo_liv_F3_7.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(3)
+texdoc graph, label(APC_sum) figure(h!) cabove ///
+caption(Average 5-year percent change in mortality rate ratio (MRR) by country. ///
+Shaded areas show plus and minus 7\%.)
+graph combine ///
+GPH/propdeath_80_0.gph ///
+GPH/propdeath_80_1.gph ///
+GPH/propdeath_90_0.gph ///
+GPH/propdeath_90_1.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(7)
+texdoc graph, label(propdeathfig1312) figure(h!) cabove ///
+caption(Proportion of deaths among people with diabetes in people ///
+aged 80 and above or 90 and above (as a proportion of all deaths among people with diabetes), by sex)
 texdoc stlog close
 
 
 /***
+
+
+\begin{figure}[h!]
+    \centering
+    \caption{Proportion of dementia deaths over time, by age and jurisdiction.}
+    \includegraphics[width=\textwidth]{A29.pdf}
+\end{figure}
 
 \end{document}
 ***/
@@ -6394,8 +6465,9 @@ gen `i' = `i'1+" ("+`i'2+", "+`i'3+")"
 }
 drop a1-j3
 replace country = "South Korea" if country == "SouthKorea"
-replace country = "Canada (Alberta)" if country == "Canada1"
-replace country = "Canada (Ontario)" if country == "Canada2"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
+sort country
 export delimited using CSV/propcitab.csv, delimiter(":") novarnames replace
 */
 
