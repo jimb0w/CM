@@ -6221,6 +6221,271 @@ Respiratory -- chronic lower respiratory disease.
 \end{table}
 \end{landscape}
 
+
+\clearpage
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
+by country and sex. Cancer. Excluding 2020 onwards.}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/APCt_can.csv}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
+by country and sex. Cardiovascular disease. Excluding 2020 onwards.}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/APCt_cvd.csv}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
+by country and sex. Chronic lower respiratory disease. Excluding 2020 onwards.}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/APCt_res.csv}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
+by country and sex. Dementia. Excluding 2020 onwards.}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/APCt_azd.csv}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in mortality rates, 
+by country and sex. Diabetes. Excluding 2020 onwards.}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/APCt_dmd.csv}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
+by country and sex. Infectious diseases. Excluding 2020 onwards.}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/APCt_inf.csv}
+  \end{center}
+\end{table}
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
+by country and sex. Influenza and pneumonia. Excluding 2020 onwards.}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/APCt_flu.csv}
+  \end{center}
+\end{table}
+
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
+by country and sex. Kidney disease. Excluding 2020 onwards.}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/APCt_ckd.csv}
+  \end{center}
+\end{table}
+
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Average 5-year percent change in mortality rates and mortality rate ratios, 
+by country and sex. Liver disease. Excluding 2020 onwards.}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{3}{*}{##1}}}},
+      display columns/1/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/2/.style={column name=\specialcell{Mortality rate \\ in people with diabetes}, column type={r}},
+      display columns/3/.style={column name=\specialcell{Mortality rate \\ in people without diabetes}, column type={r}},
+      display columns/4/.style={column name=\specialcell{Mortality rate ratio \\ for people with vs. without diabetes}, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					},
+        after row={\midrule}
+            },
+        every nth row={3}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/APCt_liv.csv}
+  \end{center}
+\end{table}
+
+
 \clearpage
 \section{Supplementary Figures}
 
