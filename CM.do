@@ -6332,7 +6332,7 @@ title("`oo'", placement(west) color(black) size(medium))
 graph save GPH/SMR_`ii'_f1_rev, replace
 }
 texdoc stlog close
-texdoc stlog, cmdlog nodo
+texdoc stlog, cmdlog
 graph combine ///
 GPH/STD_GPH_can_dm_F1_rev.gph ///
 GPH/STD_GPH_cvd_dm_F1_rev.gph ///
