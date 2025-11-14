@@ -8,13 +8,13 @@ set linesize 100
 *net install sjlatex
 *copy "http://www.stata-journal.com/production/sjlatex/stata.sty" stata.sty
 
-! rm -r "/home/jimb0w/Documents/CM/Library"
-cd /home/jimb0w/Documents/CM
-! git clone https://github.com/jimb0w/Library.git
 
 texdoc stlog, nolog nodo
 cd /home/jimb0w/Documents/CM
+! rm -r "/home/jimb0w/Documents/CM/Library"
+! git clone https://github.com/jimb0w/Library.git
 texdoc do CM.do
+exit
 texdoc stlog close
 
 /***
@@ -2603,7 +2603,6 @@ ytitle("Mortality rate (per 1,000 person-years)", margin(a+2)) ///
 xtitle("Calendar year") ///
 title("`oo'", placement(west) color(black) size(medium))
 }
-stop
 graph save GPH/STD_GPH_`ii'_`iii'_F1, replace
 }
 }
@@ -5329,6 +5328,103 @@ caption(Proportion of deaths among people with diabetes in people ///
 aged 80 and above or 90 and above (as a proportion of all deaths among people with diabetes), by sex)
 texdoc stlog close
 
+
+/***
+\color{black}
+
+Additionally, the proportion of deaths among people
+in a specific age group among all people with diabetes
+across all age groups will be plotted for completeness.
+
+\color{Blue4}
+***/
+
+
+texdoc stlog, cmdlog nodo
+clear
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
+append using `i'
+}
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
+replace country = "South Korea" if country == "SKorea"
+keep country cal sex age_dm alldeath_d_dm
+bysort country cal sex (age_dm) : egen total = sum(alldeath_d_dm)
+gen death = alldeath_d_dm/total
+save propdeath_rev, replace
+foreach i in 35 45 55 65 75 85 95 {
+if `i' == 35 {
+local iii = "<39"
+}
+else if `i' == 95 {
+local iii = "90+"
+}
+else {
+local ii = `i'+9
+local iii = "`i'-`ii'"
+}
+foreach s in 0 1 {
+if `s' == 0 {
+local s1 = "Females"
+}
+else {
+local s1 = "Males"
+}
+use propdeath_rev, clear
+colorpalette hue, n(9) luminance(50) nograph
+twoway ///
+(line death cal if country == "Alberta, Canada" & sex == `s' & age_dm == `i', color("`r(p1)'")) ///
+(line death cal if country == "Australia" & sex == `s' & age_dm == `i', color("`r(p2)'")) ///
+(line death cal if country == "Denmark" & sex == `s' & age_dm == `i', color("`r(p3)'")) ///
+(line death cal if country == "Finland" & sex == `s' & age_dm == `i', color("`r(p4)'")) ///
+(line death cal if country == "France" & sex == `s' & age_dm == `i', color("`r(p5)'")) ///
+(line death cal if country == "Lithuania" & sex == `s' & age_dm == `i', color("`r(p6)'")) ///
+(line death cal if country == "Ontario, Canada" & sex == `s' & age_dm == `i', color("`r(p7)'")) ///
+(line death cal if country == "Scotland" & sex == `s' & age_dm == `i', color("`r(p8)'")) ///
+(line death cal if country == "South Korea" & sex == `s' & age_dm == `i', color("`r(p9)'")) ///
+, legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
+order( ///
+1 "Alberta, Canada" ///
+2 "Australia" ///
+3 "Denmark" ///
+4 "Finland" ///
+5 "France" ///
+6 "Lithuania" ///
+7 "Ontario, Canada" ///
+8 "Scotland" ///
+9 "South Korea") cols(1)) ///
+graphregion(color(white)) ///
+ylabel(0(0.1)0.7, format(%9.1f) grid glpattern(solid) glcolor(gs10%20) angle(0)) ///
+xlabel(2000(5)2020, nogrid) ///
+ytitle("Proportion of deaths", margin(a+2)) ///
+xtitle("Calendar year") ///
+title("`s1' with diabetes, `iii' years", placement(west) color(black) size(medium))
+graph save GPH/propdeath_rev_`i'_`s', replace
+}
+}
+texdoc stlog close
+texdoc stlog, cmdlog
+foreach i in 35 45 55 65 75 85 95 {
+if `i' == 35 {
+local iii = "<39"
+}
+else if `i' == 95 {
+local iii = "90+"
+}
+else {
+local ii = `i'+9
+local iii = "`i'-`ii'"
+}
+graph combine ///
+GPH/propdeath_rev_`i'_0.gph ///
+GPH/propdeath_rev_`i'_1.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(10)
+texdoc graph, label(propdeathfig131212) figure(h!) cabove ///
+caption(Proportion of deaths among people with diabetes in people ///
+aged `iii' years (as a proportion of all deaths among people with diabetes), by sex.)
+}
+texdoc stlog close
+
 /***
 
 \clearpage
@@ -5510,6 +5606,786 @@ GPH/SAPCo_liv_F3_7.gph ///
 texdoc graph, label(APC_sum) figure(h!) cabove ///
 caption(Average 5-year percent change in mortality rate ratio (MRR) by country. ///
 Shaded areas show plus and minus 7\%.)
+texdoc stlog close
+
+/***
+
+\clearpage
+\section{Other causes of death}
+
+During review, a reviewer inquired about trends in causes of death in the ``other'' category.
+Here are the results, using methods as above, for trends in other causes of death.
+
+***/
+
+texdoc stlog, cmdlog nodo
+quietly {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
+foreach iii in dm nondm {
+foreach iiii in 0 1 {
+use `i', clear
+gen other_d_dm = alldeath_d_dm - ///
+(cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm)
+gen other_d_nondm = alldeath_d_nondm - ///
+(cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv_d_nondm + ckd_d_nondm + azd_d_nondm)
+keep if sex == `iiii'
+replace calendar = calendar-2009.5
+gen coh = calendar-age_`iii'
+centile(age_`iii'), centile(5 35 65 95)
+local A1 = r(c_1)
+local A2 = r(c_2)
+local A3 = r(c_3)
+local A4 = r(c_4)
+mkspline agesp = age_`iii', cubic knots(`A1' `A2' `A3' `A4')
+su(calendar), detail
+local rang = r(max)-r(min)
+if `rang' < 10 {
+centile calendar, centile(25 75)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2')
+}
+else if inrange(`rang',10,14.9) {
+centile calendar, centile(10 50 90)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3')
+}
+else {
+centile calendar, centile(5 35 65 95)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+local CK4 = r(c_4)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4')
+}
+centile(coh), centile(5 35 65 95)
+local CO1 = r(c_1)
+local CO2 = r(c_2)
+local CO3 = r(c_3)
+local CO4 = r(c_4)
+mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
+poisson other_d_`iii' agesp* timesp* cohsp*, exposure(pys_`iii')
+keep sex calendar pys_`iii' age_`iii'
+if "`i'" == "Scotland" & "`iii'" == "nondm" {
+keep if inrange(age_`iii',40,89)
+expand 10 if age_`iii'!=87.5
+expand 20 if age_`iii'==87.5
+replace pys = pys/10 if age_`iii'!=87.5
+replace pys = pys/20 if age_`iii'==87.5
+bysort cal age : replace age = age+_n-6 if age_`iii'!=87.5
+bysort cal age : replace age = age+_n-8.5 if age_`iii'==87.5
+drop if age_`iii' >= 90
+}
+else {
+keep if inrange(age_`iii',40,89)
+expand 10
+replace pys = pys/10
+bysort cal age : replace age = age+_n-6
+}
+gen coh = calendar-age
+mkspline agesp = age, cubic knots(`A1' `A2' `A3' `A4')
+if `rang' < 9.99 {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2')
+}
+else if inrange(`rang',10,14.99) {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3')
+}
+else {
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4')
+}
+mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
+predict _Rate, ir
+save MD/STDi_`i'_other_`iii'_`iiii', replace
+rename age_`iii' age
+merge m:1 age using refpop
+drop _merge
+gen double expdeath = _Rate*B
+bysort cal : egen double expdeath1 = sum(expdeath)
+gen stdrate = 1000*expdeath1
+gen SEC1 = ((B^2)*(_Rate*(1-_Rate)))/pys_`iii'
+bysort cal : egen double SEC2 = sum(SEC1)
+gen double SE = sqrt(SEC2)
+gen lb = 1000*(expdeath1-1.96*SE)
+gen ub = 1000*(expdeath1+1.96*SE)
+bysort cal (age) : keep if _n == 1
+count if lb < 0
+if r(N) != 0 {
+noisily di "`i'" " " "other" " " "`iii'" " " "`iiii'"
+}
+keep cal stdrate lb ub sex
+gen country = "`i'"
+gen OC = "other"
+gen DM = "`iii'"
+replace cal = cal+2009.5
+save MD/STD_`i'_other_`iii'_`iiii', replace
+}
+clear
+append using MD/STDi_`i'_other_`iii'_0 MD/STDi_`i'_other_`iii'_1
+rename age_`iii' age
+merge m:1 sex age using refpops
+drop _merge
+gen double expdeath = _Rate*B
+bysort cal : egen double expdeath1 = sum(expdeath)
+gen stdrate = 1000*expdeath1
+gen SEC1 = ((B^2)*(_Rate*(1-_Rate)))/pys_`iii'
+bysort cal : egen double SEC2 = sum(SEC1)
+gen double SE = sqrt(SEC2)
+gen lb = 1000*(expdeath1-1.96*SE)
+gen ub = 1000*(expdeath1+1.96*SE)
+bysort cal (age) : keep if _n == 1
+count if lb < 0
+if r(N) != 0 {
+noisily di "`i'" " " "other" " " "`iii'"
+replace lb = 0.001 if lb < 0
+}
+keep cal stdrate lb ub
+gen country = "`i'"
+gen OC = "other"
+gen DM = "`iii'"
+replace cal = cal+2009.5
+save MD/STD_`i'_other_`iii', replace
+}
+}
+}
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
+use `i', clear
+expand 2
+bysort cal age_dm sex : gen dm = _n-1
+foreach ii in alldeath_d cvd_d can_d dmd_d inf_d flu_d res_d liv_d ckd_d azd_d pys age {
+gen `ii' = `ii'_dm if dm == 1
+replace `ii' = `ii'_nondm if dm == 0
+drop `ii'_dm `ii'_nondm
+}
+drop if age==.
+save `i'_long_rev, replace
+}
+quietly {
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
+use `i'_long_rev, clear
+gen other_d = alldeath_d - ///
+(cvd_d + can_d + dmd_d + inf_d + flu_d + res_d + liv_d + ckd_d + azd_d)
+replace calendar = calendar-2009.5
+gen coh = calendar-age
+centile(age), centile(5 35 65 95)
+local A1 = r(c_1)
+local A2 = r(c_2)
+local A3 = r(c_3)
+local A4 = r(c_4)
+mkspline agesp = age, cubic knots(`A1' `A2' `A3' `A4')
+su(calendar), detail
+local rang = r(max)-r(min)
+local minn = r(min)
+if `rang' < 10 {
+centile calendar, centile(25 75)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2')
+preserve
+clear
+local rang1 = `rang'+1
+set obs `rang1'
+gen calendar = _n-1+`minn'
+mkspline timesp = calendar, cubic knots(`CK1' `CK2')
+forval a = 1/`rang1' {
+local A1`a' = timesp1[`a']
+}
+restore
+}
+else if inrange(`rang',10,14.9) {
+centile calendar, centile(10 50 90)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3')
+preserve
+clear
+local rang1 = `rang'+1
+set obs `rang1'
+gen calendar = _n-1+`minn'
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3')
+forval a = 1/`rang1' {
+local A1`a' = timesp1[`a']
+local A2`a' = timesp2[`a']
+}
+restore
+}
+else {
+centile calendar, centile(5 35 65 95)
+local CK1 = r(c_1)
+local CK2 = r(c_2)
+local CK3 = r(c_3)
+local CK4 = r(c_4)
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4')
+preserve
+clear
+local rang1 = `rang'+1
+set obs `rang1'
+gen calendar = _n-1+`minn'
+mkspline timesp = calendar, cubic knots(`CK1' `CK2' `CK3' `CK4')
+forval a = 1/`rang1' {
+local A1`a' = timesp1[`a']
+local A2`a' = timesp2[`a']
+local A3`a' = timesp3[`a']
+}
+restore
+}
+centile(coh), centile(5 35 65 95)
+local CO1 = r(c_1)
+local CO2 = r(c_2)
+local CO3 = r(c_3)
+local CO4 = r(c_4)
+mkspline cohsp = coh, cubic knots(`CO1' `CO2' `CO3' `CO4')
+preserve
+poisson other_d agesp* sex c.timesp*##i.dm, exposure(pys)
+matrix A = (.,.,.)
+if `rang' < 10 {
+forval a = 1/`rang1' {
+margins, dydx(dm) at(timesp1==`A1`a'') predict(xb) atmeans
+matrix A = (A\r(table)[1,2],r(table)[5,2],r(table)[6,2])
+}
+}
+else if inrange(`rang',10,14.9) {
+forval a = 1/`rang1' {
+margins, dydx(dm) at(timesp1==`A1`a'' timesp2==`A2`a'') predict(xb) atmeans
+matrix A = (A\r(table)[1,2],r(table)[5,2],r(table)[6,2])
+}
+}
+else {
+forval a = 1/`rang1' {
+margins, dydx(dm) at(timesp1==`A1`a'' timesp2==`A2`a'' timesp3==`A3`a'') predict(xb) atmeans
+matrix A = (A\r(table)[1,2],r(table)[5,2],r(table)[6,2])
+}
+}
+local rang2 = `rang1'+1
+mat A = A[2..`rang2',1..3]
+keep country cal
+bysort cal : keep if _n == 1
+svmat A
+replace A1 = exp(A1)
+replace A2 = exp(A2)
+replace A3 = exp(A3)
+gen OC = "other"
+replace cal = cal+2009.5
+save MD/SMR_`i'_other, replace
+restore
+forval iii = 0/1 {
+preserve
+su agesp1
+local B1 = r(mean)
+su agesp2
+local B2 = r(mean)
+su agesp3
+local B3 = r(mean)
+keep if sex == `iii'
+poisson other_d agesp* c.timesp*##i.dm, exposure(pys)
+matrix A = (.,.,.)
+if `rang' < 10 {
+forval a = 1/`rang1' {
+margins, dydx(dm) at(timesp1==`A1`a'' agesp1==`B1' agesp2==`B2' agesp3==`B3') predict(xb) atmeans
+matrix A = (A\r(table)[1,2],r(table)[5,2],r(table)[6,2])
+}
+}
+else if inrange(`rang',10,14.9) {
+forval a = 1/`rang1' {
+margins, dydx(dm) at(timesp1==`A1`a'' timesp2==`A2`a'' agesp1==`B1' agesp2==`B2' agesp3==`B3') predict(xb) atmeans
+matrix A = (A\r(table)[1,2],r(table)[5,2],r(table)[6,2])
+}
+}
+else {
+forval a = 1/`rang1' {
+margins, dydx(dm) at(timesp1==`A1`a'' timesp2==`A2`a'' timesp3==`A3`a'' agesp1==`B1' agesp2==`B2' agesp3==`B3') predict(xb) atmeans
+matrix A = (A\r(table)[1,2],r(table)[5,2],r(table)[6,2])
+}
+}
+local rang2 = `rang1'+1
+mat A = A[2..`rang2',1..3]
+keep country cal
+bysort cal : keep if _n == 1
+svmat A
+replace A1 = exp(A1)
+replace A2 = exp(A2)
+replace A3 = exp(A3)
+gen OC = "other"
+replace cal = cal+2009.5
+save MD/SMR_`i'_other_`iii', replace
+restore
+}
+}
+}
+foreach iii in dm nondm {
+local oo = "other"
+
+if "`iii'" == "dm" {
+local w = "with"
+}
+if "`iii'" == "nondm" {
+local w = "without"
+}
+clear
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
+append using MD/STD_`i'_other_`iii'
+}
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
+replace country = "South Korea" if country == "SKorea"
+preserve
+bysort country : keep if _n == 1
+forval i = 1/9 {
+local C`i' = country[`i']
+}
+restore
+colorpalette hue, n(9) luminance(50) nograph
+twoway ///
+(rarea ub lb calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C2'", color("`r(p2)'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C4'", color("`r(p4)'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C6'", color("`r(p6)'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C8'", color("`r(p8)'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+, legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
+order(2 "`C1'" ///
+4 "`C2'" ///
+6 "`C3'" ///
+8 "`C4'" ///
+10 "`C5'" ///
+12 "`C6'" ///
+14 "`C7'" ///
+16 "`C8'" ///
+18 "`C9'") ///
+cols(1)) ///
+graphregion(color(white)) ///
+ylabel(1 2 5 10 20 50, format(%9.0f) grid glpattern(solid) glcolor(gs10%20) angle(0)) ///
+yscale(log range(1 50)) ///
+xscale(range(2000 2020)) ///
+xlabel(2000(5)2020, nogrid) ///
+ytitle("Mortality rate (per 1,000 person-years)", margin(a+2)) ///
+xtitle("Calendar year") ///
+title("Mortality rate, `oo', people `w' diabetes", placement(west) color(black) size(medium))
+graph save GPH/STD_GPH_other_`iii'_F1_rev, replace
+}
+local oo = "other"
+local ylab = "1 1.5 2"
+local yform = "%9.1f"
+local yrange = "1 2"
+clear
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
+append using MD/SMR_`i'_other
+}
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
+replace country = "South Korea" if country == "SKorea"
+preserve
+bysort country : keep if _n == 1
+forval i = 1/9 {
+local C`i' = country[`i']
+}
+restore
+colorpalette hue, n(9) luminance(50) nograph
+twoway ///
+(rarea A3 A2 calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C2'", color("`r(p2)'") lpattern(shortdash)) ///
+(rarea A3 A2 calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C4'", color("`r(p4)'") lpattern(shortdash)) ///
+(rarea A3 A2 calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C6'", color("`r(p6)'") lpattern(shortdash)) ///
+(rarea A3 A2 calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C8'", color("`r(p8)'") lpattern(shortdash)) ///
+(rarea A3 A2 calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+, legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
+order(2 "`C1'" ///
+4 "`C2'" ///
+6 "`C3'" ///
+8 "`C4'" ///
+10 "`C5'" ///
+12 "`C6'" ///
+14 "`C7'" ///
+16 "`C8'" ///
+18 "`C9'") ///
+cols(1)) ///
+graphregion(color(white)) ///
+ylabel(`ylab', grid format(`yform') angle(0)) ///
+xscale(range(2000 2020)) ///
+xlabel(2000(5)2020, nogrid) ///
+yline(1, lcol(black)) yscale(log range(`yrange')) ///
+ytitle("Mortality rate ratio", margin(a+2)) ///
+xtitle("Calendar year") ///
+title("Mortality rate ratio, `oo'", placement(west) color(black) size(medium))
+graph save GPH/SMR_other_f1_rev, replace
+texdoc stlog close
+texdoc stlog, cmdlog
+graph combine ///
+GPH/STD_GPH_other_dm_F1_rev.gph ///
+GPH/STD_GPH_other_nondm_F1_rev.gph ///
+GPH/SMR_other_f1_rev.gph ///
+, graphregion(color(white)) cols(1) altshrink xsize(3)
+texdoc graph, label(Othercauses) figure(h!) cabove ///
+caption(Age-standardised mortality rate for death from ``other'' causes among people with ///
+and without diabetes, and the mortality rate ratio for people with vs. without diabetes, by calendar time.)
+texdoc stlog close
+
+/***
+\color{black}
+\clearpage
+Obviously, there's something suspect about the trends in Lithuania -- likely due to COVID-19.
+Let's investigate.
+\color{Blue4}
+***/
+
+texdoc stlog, cmdlog
+use Lithuania, clear
+gen other_d_dm = alldeath_d_dm - ///
+(cvd_d_dm + can_d_dm + dmd_d_dm + inf_d_dm + flu_d_dm + res_d_dm + liv_d_dm + ckd_d_dm + azd_d_dm)
+gen other_d_nondm = alldeath_d_nondm - ///
+(cvd_d_nondm + can_d_nondm + dmd_d_nondm + inf_d_nondm + flu_d_nondm + res_d_nondm + liv_d_nondm + ckd_d_nondm + azd_d_nondm)
+collapse (sum) pys_dm pys_nondm other_d_dm other_d_nondm, by(calendar)
+gen otherdm = 1000*other_d_dm/pys_dm
+gen othernondm = 1000*other_d_nondm/pys_nondm
+twoway ///
+(connected otherdm cal, col(magenta)) ///
+(connected othernondm cal, col(dknavy)) ///
+, graphregion(color(white)) ///
+ytitle(Mortality rate (per 1,000 person-years), margin(a+2)) ///
+xtitle(Calendar year) ///
+legend(order( ///
+1 "People with diabetes" ///
+2 "People without diabetes" ///
+) cols(1) position(3) region(lcolor(none) color(none))) ///
+ylabel(,angle(0) format(%9.2f)) 
+texdoc graph, label(Othercauses) figure(h!) cabove ///
+caption(Crude motality rate for death from ``other'' causes among people with ///
+and without diabetes in Lithuania, by calendar time.)
+texdoc stlog close
+
+
+/***
+
+\clearpage
+\section{Alternative versions of the main figure}
+
+During review, a reviewer suggested a much larger version of Figure 1.
+Here are two versions of that suggestion, using results no different to that above.
+(Excuse the display, these are not designed for a single-page document.)
+
+***/
+
+texdoc stlog, cmdlog nodo
+foreach ii in can cvd res azd dmd inf flu ckd liv {
+foreach iii in dm nondm {
+if "`ii'" == "dmd" & "`iii'" == "nondm" {
+}
+else {
+if "`ii'" == "can" {
+local oo = "Cancer"
+}
+if "`ii'" == "cvd" {
+local oo = "Cardiovascular disease"
+}
+if "`ii'" == "res" {
+local oo = "Chronic lower respiratory disease"
+}
+if "`ii'" == "azd" {
+local oo = "Dementia"
+}
+if "`ii'" == "dmd" {
+local oo = "Diabetes"
+}
+if "`ii'" == "inf" {
+local oo = "Infectious diseases"
+}
+if "`ii'" == "flu" {
+local oo = "Influenza and pneumonia"
+}
+if "`ii'" == "ckd" {
+local oo = "Kidney disease"
+}
+if "`ii'" == "liv" {
+local oo = "Liver disease"
+}
+if "`iii'" == "dm" {
+local w = "with"
+}
+if "`iii'" == "nondm" {
+local w = "without"
+}
+clear
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
+append using MD/STD_`i'_`ii'_`iii'
+}
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
+replace country = "South Korea" if country == "SKorea"
+preserve
+bysort country : keep if _n == 1
+forval i = 1/9 {
+local C`i' = country[`i']
+}
+restore
+colorpalette hue, n(9) luminance(50) nograph
+if "`ii'" == "cvd" | "`ii'" == "can" | "`ii'" == "dmd" {
+twoway ///
+(rarea ub lb calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C2'", color("`r(p2)'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C4'", color("`r(p4)'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C6'", color("`r(p6)'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C8'", color("`r(p8)'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+, legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
+order(2 "`C1'" ///
+4 "`C2'" ///
+6 "`C3'" ///
+8 "`C4'" ///
+10 "`C5'" ///
+12 "`C6'" ///
+14 "`C7'" ///
+16 "`C8'" ///
+18 "`C9'") ///
+cols(1)) ///
+graphregion(color(white)) ///
+ylabel(1 2 5 10 20 50, format(%9.0f) grid glpattern(solid) glcolor(gs10%20) angle(0)) ///
+yscale(log range(1 50)) ///
+xscale(range(2000 2020)) ///
+xlabel(2000(5)2020, nogrid) ///
+ytitle("Mortality rate (per 1,000 person-years)", margin(a+2)) ///
+xtitle("Calendar year") ///
+title("`oo', people `w' diabetes", placement(west) color(black) size(medium))
+}
+else {
+twoway ///
+(rarea ub lb calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C2'", color("`r(p2)'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C4'", color("`r(p4)'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C6'", color("`r(p6)'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C8'", color("`r(p8)'") lpattern(shortdash)) ///
+(rarea ub lb calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+, legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
+order(2 "`C1'" ///
+4 "`C2'" ///
+6 "`C3'" ///
+8 "`C4'" ///
+10 "`C5'" ///
+12 "`C6'" ///
+14 "`C7'" ///
+16 "`C8'" ///
+18 "`C9'") ///
+cols(1)) ///
+graphregion(color(white)) ///
+ylabel(0.01 "0.01" 0.02 "0.02" 0.05 "0.05" 0.1 "0.1" 0.2 "0.2" 0.5 "0.5" 1 2 5, grid glpattern(solid) glcolor(gs10%20) angle(0)) ///
+yscale(log range(0.01 5)) ///
+xscale(range(2000 2020)) ///
+xlabel(2000(5)2020, nogrid) ///
+ytitle("Mortality rate (per 1,000 person-years)", margin(a+2)) ///
+xtitle("Calendar year") ///
+title("`oo', people `w' diabetes", placement(west) color(black) size(medium))
+}
+graph save GPH/STD_GPH_`ii'_`iii'_F1_rev, replace
+}
+}
+}
+foreach ii in can cvd res azd inf flu ckd liv {
+if "`ii'" == "can" {
+local oo = "Cancer"
+local ylab = "1 1.5 2"
+local yform = "%9.1f"
+local yrange = "1 2"
+}
+if "`ii'" == "cvd" {
+local oo = "Cardiovascular disease"
+local ylab = "1 1.5 2 2.5 3"
+local yform = "%9.1f"
+local yrange = "1 3"
+}
+if "`ii'" == "res" {
+local oo = "Chronic lower respiratory disease"
+local ylab = "0.5 1 1.5 2 2.5"
+local yform = "%9.1f"
+local yrange = "0.5 2.5"
+}
+if "`ii'" == "azd" {
+local oo = "Dementia"
+local ylab = "0.5 1 1.5"
+local yform = "%9.1f"
+local yrange = "0.3 1.5"
+}
+if "`ii'" == "inf" {
+local oo = "Infectious diseases"
+local ylab = "0.5 1 2 3 4 5"
+local yform = "%9.1f"
+local yrange = "0.5 5.5"
+}
+if "`ii'" == "flu" {
+local oo = "Influenza and pneumonia"
+local ylab = "0.5 1 2 3"
+local yform = "%9.1f"
+local yrange = "0.4 3.1"
+}
+if "`ii'" == "ckd" {
+local oo = "Kidney disease"
+local ylab = "0.5 1 2 5 10"
+local yform = "%9.0f"
+local yrange = "0.5 11"
+}
+if "`ii'" == "liv" {
+local oo = "Liver disease"
+local ylab = "1 2 5 10"
+local yform = "%9.0f"
+local yrange = "1 10"
+}
+clear
+foreach i in Australia Canada1 Canada2 Denmark Finland France Lithuania Scotland SKorea {
+append using MD/SMR_`i'_`ii'
+}
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
+replace country = "South Korea" if country == "SKorea"
+preserve
+bysort country : keep if _n == 1
+forval i = 1/9 {
+local C`i' = country[`i']
+}
+restore
+colorpalette hue, n(9) luminance(50) nograph
+twoway ///
+(rarea A3 A2 calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C2'", color("`r(p2)'") lpattern(shortdash)) ///
+(rarea A3 A2 calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C4'", color("`r(p4)'") lpattern(shortdash)) ///
+(rarea A3 A2 calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C6'", color("`r(p6)'") lpattern(shortdash)) ///
+(rarea A3 A2 calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C8'", color("`r(p8)'") lpattern(shortdash)) ///
+(rarea A3 A2 calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+, legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
+order(2 "`C1'" ///
+4 "`C2'" ///
+6 "`C3'" ///
+8 "`C4'" ///
+10 "`C5'" ///
+12 "`C6'" ///
+14 "`C7'" ///
+16 "`C8'" ///
+18 "`C9'") ///
+cols(1)) ///
+graphregion(color(white)) ///
+ylabel(`ylab', grid format(`yform') angle(0)) ///
+xscale(range(2000 2020)) ///
+xlabel(2000(5)2020, nogrid) ///
+yline(1, lcol(black)) yscale(log range(`yrange')) ///
+ytitle("Mortality rate ratio", margin(a+2)) ///
+xtitle("Calendar year") ///
+title("`oo'", placement(west) color(black) size(medium))
+graph save GPH/SMR_`ii'_f1_rev, replace
+}
+texdoc stlog close
+texdoc stlog, cmdlog nodo
+graph combine ///
+GPH/STD_GPH_can_dm_F1_rev.gph ///
+GPH/STD_GPH_cvd_dm_F1_rev.gph ///
+GPH/STD_GPH_dmd_dm_F1_rev.gph ///
+GPH/STD_GPH_can_nondm_F1_rev.gph ///
+GPH/STD_GPH_cvd_nondm_F1_rev.gph ///
+GPH/STD_GPH_res_dm_F1_rev.gph ///
+GPH/STD_GPH_azd_dm_F1_rev.gph ///
+GPH/STD_GPH_inf_dm_F1_rev.gph ///
+GPH/STD_GPH_res_nondm_F1_rev.gph ///
+GPH/STD_GPH_azd_nondm_F1_rev.gph ///
+GPH/STD_GPH_inf_nondm_F1_rev.gph ///
+GPH/STD_GPH_flu_dm_F1_rev.gph ///
+GPH/STD_GPH_ckd_dm_F1_rev.gph ///
+GPH/STD_GPH_liv_dm_F1_rev.gph ///
+GPH/STD_GPH_flu_nondm_F1_rev.gph ///
+GPH/STD_GPH_ckd_nondm_F1_rev.gph ///
+GPH/STD_GPH_liv_nondm_F1_rev.gph ///
+, graphregion(color(white)) cols(3) altshrink xsize(3.5) holes(6)
+texdoc graph, label(STDMRF_sum) figure(h!) cabove optargs(width=0.2\textwidth) ///
+caption(Age-standardised mortality rate by cause of death for people with and without diabetes, people aged 40-89.)
+graph export "/home/jimb0w/Documents/CM/Figure_1_v1.pdf", as(pdf) name("Graph") replace
+graph combine ///
+GPH/STD_GPH_can_dm_F1_rev.gph ///
+GPH/STD_GPH_can_nondm_F1_rev.gph ///
+GPH/SMR_can_f1_rev.gph ///
+GPH/STD_GPH_cvd_dm_F1_rev.gph ///
+GPH/STD_GPH_cvd_nondm_F1_rev.gph ///
+GPH/SMR_cvd_f1_rev.gph ///
+GPH/STD_GPH_dmd_dm_F1_rev.gph ///
+GPH/STD_GPH_res_dm_F1_rev.gph ///
+GPH/STD_GPH_res_nondm_F1_rev.gph ///
+GPH/SMR_res_f1_rev.gph ///
+GPH/STD_GPH_azd_dm_F1_rev.gph ///
+GPH/STD_GPH_azd_nondm_F1_rev.gph ///
+GPH/SMR_azd_f1_rev.gph ///
+GPH/STD_GPH_inf_dm_F1_rev.gph ///
+GPH/STD_GPH_inf_nondm_F1_rev.gph ///
+GPH/SMR_inf_f1_rev.gph ///
+GPH/STD_GPH_flu_dm_F1_rev.gph ///
+GPH/STD_GPH_flu_nondm_F1_rev.gph ///
+GPH/SMR_flu_f1_rev.gph ///
+GPH/STD_GPH_ckd_dm_F1_rev.gph ///
+GPH/STD_GPH_ckd_nondm_F1_rev.gph ///
+GPH/SMR_ckd_f1_rev.gph ///
+GPH/STD_GPH_liv_dm_F1_rev.gph ///
+GPH/STD_GPH_liv_nondm_F1_rev.gph ///
+GPH/SMR_liv_f1_rev.gph ///
+, graphregion(color(white)) cols(3) altshrink xsize(2.5) holes(8 9)
+texdoc graph, label(STDMRF_sum) figure(h!) cabove optargs(width=0.2\textwidth) ///
+caption(Age-standardised mortality rate by cause of death for people with and without diabetes, people aged 40-89, ///
+and mortality rate ratios for people with vs. without diabetes, by calendar time.)
+graph export "/home/jimb0w/Documents/CM/Figure_1_mega.pdf", as(pdf) name("Graph") replace
 texdoc stlog close
 
 /***
@@ -5733,7 +6609,149 @@ Yes \\
 \end{table}
 
 \clearpage
+\begin{table}[h!]
+\centering
+    \caption{Data sources for cohorts of people with and without diabetes by jurisdiction}
+\begin{tabular}{p{0.2\textwidth}p{0.4\textwidth}p{0.4\textwidth}}
+\hline
+ & People with diabetes & People without diabetes \\
+\hline
+Australia &
+Residents with diabetes in the Australian Capital Territory, New South Wales, Queensland, and Victoria, as registered in the National Diabetes Services Scheme &
+Generated by subtracting prevalent diabetes cases from the total population for the four states, based on the Australian Bureau of Statistics estimated resident population \\
+Alberta, Canada &
+People with diabetes identified from the linked administrative health databases &
+Generated by subtracting prevalent diabetes cases from the total residential population of Alberta, based on data from the linked administrative health databases \\
+Ontario, Canada &
+People with diabetes in the Ontario Diabetes Database, from the Institute for Clinical Evaluative Sciences (ICES) Data Repository &
+Generated by subtracting prevalent diabetes cases identified from the Ontario Diabetes Database from the total residential population of Ontario \\
+Denmark &
+People with diabetes identified from the Danish National Patient Register, National Prescription Registry, and National Health Service Register &
+Generated by subtracting people with diabetes, identified from the Danish National Patient Register, National Prescription Registry, and National Health Service Register, from the national Danish population \\
+Finland &
+People with diabetes, from the FinDM (Diabetes in Finland) research database &
+Generated by subtracting people with diabetes from the National Finnish population \\
+France &
+People with diabetes from the Système National de Données de Santé (SNDS): French national health data system &
+People without diabetes from the SNDS \\
+Lithuania &
+People with diabetes from the National Compulsory Health Insurance Fund Information System &
+People without diabetes from the National Compulsory Health Insurance Fund Information System \\
+Netherlands &
+People with diabetes, based on several linked national registries from Statistics Netherlands &
+People without diabetes, based on several linked national registries from Statistics Netherlands \\
+Scotland &
+People with diabetes from the Scottish Diabetes Research Network – diabetes research platform  &
+Generated by subtracting people with diabetes from the national Scottish population, using data from National Records of Scotland \\
+South Korea &
+People with diabetes from the National Health Insurance Service–National Sample Cohort &
+People without diabetes from the National Health Insurance Service–National Sample Cohort \\
+Sweden &
+People with diabetes in the Swedish National Diabetes Register &
+Generated by subtracting people with diabetes from the national Swedish population, using data from the Statistics Sweden \\
+\hline
+\end{tabular}
+\end{table}
 
+
+\clearpage
+\begin{landscape}
+\begin{table}[h!]
+\centering
+    \caption{Data sources for cohorts of people with and without diabetes by jurisdiction}
+\begin{tabular}{p{0.2\textwidth}p{0.3\textwidth}p{0.3\textwidth}p{0.3\textwidth}p{0.15\textwidth}p{0.15\textwidth}p{0.15\textwidth}}
+\hline
+ & Death in people with diabetes &
+Death in people without diabetes &
+Death in the general population &
+Original mortality data provided for people with diabetes &
+Original mortality data provided for people without diabetes &
+Original mortality data provided for general population \\
+\hline &
+Australia & &
+National Diabetes Services Scheme linked to the National Death Index &
+Calculated as the total number of deaths minus deaths in people with diabetes, based on data for the four states from the Australian Institute of Health and Welfare &
+Data for the four states from the Australian Institute of Health and Welfare &
+Yes &
+No &
+Yes \\
+Alberta, Canada &
+Determined by linking administrative health databases to the Vital Statistics &
+Calculated as the total number of deaths minus deaths in people with diabetes, based on data from the Vital Statistics &
+Data from the Vital Statistics &
+Yes &
+No &
+Yes \\
+Ontario, Canada &
+Determined by linking the Ontario Diabetes Database to the Ontario Registrar General's Death (ORGD) database &
+Calculated as the total number of deaths minus deaths in people with diabetes, based on data from the Ontario Registrar General's Death (ORGD) database &
+Data from the Ontario Registrar General's Death (ORGD) database &
+Yes &
+No &
+Yes \\
+Denmark &
+Determined by linking the nationwide Danish registries to the Danish Civil Registration System and the Danish Cause of Death Register &
+Determined by linking the nationwide Danish registries to the Danish Civil Registration System and the Danish Cause of Death Register &
+NA &
+Yes &
+Yes &
+No \\
+Finland &
+Determined through linkage with the Cause of Death statistics &
+Determined through linkage with the Cause of Death statistics &
+Data from the Cause of Death statistics &
+Yes &
+Yes &
+Yes \\
+France &
+Determined by linking the SNDS to the Center for Epidemiology of Medical Causes of Death &
+Determined by linking the SNDS to the Center for Epidemiology of Medical Causes of Death &
+Data from the Center for Epidemiology of Medical Causes of Death &
+Yes &
+Yes &
+Yes \\
+Lithuania &
+Determined by linking the National Compulsory Health Insurance Fund Information System to the Causes of Death Register &
+Determined by linking the National Compulsory Health Insurance Fund Information System to the Causes of Death Register &
+Data from Causes of Death Register &
+Yes &
+Yes &
+Yes \\
+Netherlands &
+Determined through linkage with the Personal Records Database &
+Determined through linkage with the Personal Records Database &
+NA &
+Yes &
+Yes &
+No \\
+Scotland &
+Determined by linking the Scottish Diabetes Research Network – diabetes research platform to National Records of Scotland &
+Calculated as the total number of deaths minus deaths in people with diabetes, based on data from National Records of Scotland &
+Data from National Records of Scotland &
+Yes &
+No &
+Yes \\
+South Korea &
+Determined by linking the National Health Insurance Service–National Sample Cohort to Statistics Korea &
+Determined by linking the National Health Insurance Service–National Sample Cohort to the Statistics Korea &
+Data from the Statistics Korea &
+Yes &
+Yes &
+Yes \\
+Sweden &
+Determined by linking the Swedish National Diabetes Register to the Swedish National Board of Health and Welfare &
+Calculated as the total number of deaths minus deaths in people with diabetes, based on data from the Swedish National Board of Health and Welfare &
+Data from the Swedish National Board of Health and Welfare &
+Yes &
+No &
+Yes \\
+\hline
+\end{tabular}
+\end{table}
+\end{landscape}
+
+
+\clearpage
 \begin{table}[]
 \centering
     \caption{ICD codes for specific underlying causes of death}
@@ -5768,7 +6786,7 @@ K70–K76 &
 Renal diseases & 
 N00–N08, N17–N19, N25–N27 & 
 580–589 \\
-All other diseases & 
+All other diseases\textsuperscript{d} & 
 All other ICD-10 codes & 
 All other ICD-9 codes \\
 \hline
@@ -5777,6 +6795,7 @@ All other ICD-9 codes \\
 \textsuperscript{a}We only consider underlying cause of death. \\
 \textsuperscript{b}Alzheimer's disease, vascular dementia and unspecified dementia are included. \\
 \textsuperscript{c}Infectious diseases do not include influenza or pneumonia. \\
+\textsuperscript{d}COVID-related deaths -- U071 and U072 -- are included in the other category. \\
 ICD, International Classification of Diseases. \\
 \end{flushleft}
 \end{table}
@@ -6701,6 +7720,25 @@ GPH/propdeath_90_1.gph ///
 texdoc graph, label(propdeathfig1312) figure(h!) cabove ///
 caption(Proportion of deaths among people with diabetes in people ///
 aged 80 and above or 90 and above (as a proportion of all deaths among people with diabetes), by sex)
+foreach i in 35 45 55 65 75 85 95 {
+if `i' == 35 {
+local iii = "<39"
+}
+else if `i' == 95 {
+local iii = "90+"
+}
+else {
+local ii = `i'+9
+local iii = "`i'-`ii'"
+}
+graph combine ///
+GPH/propdeath_rev_`i'_0.gph ///
+GPH/propdeath_rev_`i'_1.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(10)
+texdoc graph, label(propdeathfig131212) figure(h!) cabove ///
+caption(Proportion of deaths among people with diabetes in people ///
+aged `iii' years (as a proportion of all deaths among people with diabetes), by sex.)
+}
 texdoc stlog close
 
 
@@ -6735,6 +7773,22 @@ replace country = "Alberta, Canada" if country == "Canada1"
 replace country = "Ontario, Canada" if country == "Canada2"
 sort country
 export delimited using CSV/propcitab.csv, delimiter(":") novarnames replace
+
+
+**Other table
+
+use CMdata_prop, clear
+bysort country (cal) : egen lb = min(cal)
+bysort country (cal) : egen ub = max(cal)
+tostring lb ub, replace
+gen rang = lb+ "-" + ub
+recode dmd_d_nondm .=0
+collapse (sum) pys_dm pys_nondm alldeath_d_dm alldeath_d_nondm, by(country rang)
+
+format pys* %15.1fc
+format all* %15.1fc
+
+
 */
 
 
