@@ -1197,6 +1197,16 @@ replace sex = "Male" if sex == "1"
 drop njm
 export delimited using CSV/T1.csv, delimiter(":") novarnames replace
 texdoc stlog close
+texdoc stlog, cmdlog
+use CMdata_prop, clear
+collapse (sum) pys_dm pys_nondm, by(country sex)
+bysort country (sex) : gen percf_dm = 100*pys_dm/(pys_dm+pys_dm[_n+1])
+bysort country (sex) : gen percf_nondm = 100*pys_nondm/(pys_nondm+pys_nondm[_n+1])
+keep if sex == 0
+texdoc stlog close
+texdoc stlog
+list country percf_dm percf_nondm, separator(0)
+texdoc stlog close
 
 /***
 \color{black}
@@ -5335,6 +5345,8 @@ texdoc stlog close
 Additionally, the proportion of deaths among people
 in a specific age group among all people with diabetes
 across all age groups will be plotted for completeness.
+The log scales aren't ideal as log scales don't make much sense for 
+proportions, but it's a useful way to ensure all proportions are comparable across age groups.
 
 \color{Blue4}
 ***/
@@ -5394,7 +5406,8 @@ order( ///
 8 "Scotland" ///
 9 "South Korea") cols(1)) ///
 graphregion(color(white)) ///
-ylabel(0(0.1)0.7, format(%9.1f) grid glpattern(solid) glcolor(gs10%20) angle(0)) ///
+ylabel(0.001 "0.001"  0.002 "0.002" 0.005 "0.005" 0.01 "0.01" 0.02 "0.02" 0.05 "0.05" 0.1 "0.1" 0.2 "0.2" 0.5 "0.5", ///
+grid glpattern(solid) glcolor(gs10%20) angle(0)) yscale(log range(0.001 0.5)) ///
 xlabel(2000(5)2020, nogrid) ///
 ytitle("Proportion of deaths", margin(a+2)) ///
 xtitle("Calendar year") ///
@@ -6093,7 +6106,7 @@ texdoc stlog close
 
 During review, a reviewer suggested a much larger version of Figure 1.
 Here are two versions of that suggestion, using results no different to that above.
-(Excuse the display, these are not designed for a single-page document.)
+(Excuse the size, these are not designed for a single-page document.)
 
 \color{Blue4}
 ***/
@@ -6359,7 +6372,7 @@ GPH/STD_GPH_flu_nondm_F1_rev.gph ///
 GPH/STD_GPH_ckd_nondm_F1_rev.gph ///
 GPH/STD_GPH_liv_nondm_F1_rev.gph ///
 , graphregion(color(white)) cols(3) altshrink xsize(3.5) holes(6)
-texdoc graph, label(STDMRF_sum) figure(h!) cabove optargs(width=0.5\textwidth) ///
+texdoc graph, label(STDMRF_sum) figure(h!) cabove optargs(width=0.7\textwidth) ///
 caption(Age-standardised mortality rate by cause of death for people with and without diabetes, people aged 40-89.)
 graph export "/home/jimb0w/Documents/CM/Figure_1_v1.pdf", as(pdf) name("Graph") replace
 graph combine ///
@@ -6389,7 +6402,7 @@ GPH/STD_GPH_liv_dm_F1_rev.gph ///
 GPH/STD_GPH_liv_nondm_F1_rev.gph ///
 GPH/SMR_liv_f1_rev.gph ///
 , graphregion(color(white)) cols(3) altshrink xsize(2.5) holes(8 9)
-texdoc graph, label(STDMRF_sum) figure(h!) cabove optargs(width=0.4\textwidth) ///
+texdoc graph, label(STDMRF_sum) figure(h!) cabove optargs(width=0.7\textwidth) ///
 caption(Age-standardised mortality rate by cause of death for people with and without diabetes, people aged 40-89, ///
 and mortality rate ratios for people with vs. without diabetes, by calendar time.)
 graph export "/home/jimb0w/Documents/CM/Figure_1_mega.pdf", as(pdf) name("Graph") replace
@@ -6572,47 +6585,66 @@ administrative algorithm where 2 or more criteria are used (2 points)
 \begin{table}[h!]
 \centering
     \caption{Diabetes definitions by data source}
-\begin{tabular}{p{0.2\textwidth}p{0.5\textwidth}p{0.2\textwidth}}
+\begin{tabular}{p{0.2\textwidth}p{0.35\textwidth}p{0.15\textwidth}p{0.15\textwidth}}
 \hline
-Jurisdiction & Diabetes definition & Gestational diabetes excluded \\
+\textbf{Jurisdiction} & \textbf{Diabetes definition} & \textbf{Validation of diabetes definition} & \textbf{Gestational diabetes excluded} \\
 \hline
 Alberta, Canada & 
 Algorithm incorporating $>$1 hospitalisations or $>$2 physician claims with evidence of diabetes within 2 years & 
+Yes\textsupercript{1} &
 Yes \\
 Australia &
 Clinical diagnosis certified by a doctor, nurse or credentialed diabetes educator. &
+Yes\textsupercript{2} &
 Yes \\
 Denmark & 
 Algorithm incorporating clinical diagnosis (ICD codes) from the hospitalisations, prescription of anti-diabetic medications, clinical and billing records. & 
+Yes\textsupercript{3} &
 Yes \\
 Finland & 
 Algorithm incorporating clinical diagnosis (ICD codes) from the Care Register for Health Care, Register of Primary Health Care Visits, Medical Birth Register and Causes of Death Statistics and prescription of anti-diabetic medications. & 
+No, the coverage of diabetes cases was estimated to be 98\%. &
 Yes \\
 France & 
 People who have been reimbursed for at least 3 antidiabetic medications in the year, or 2 in cases of large packaging & 
+Yes\textsupercript{4} &
 No \\
 Lithuania & 
 Clinical diagnosis (ICD-10 codes) and anti-diabetes medications & 
+No. ICD-10 coding and reimbursement data are strictly regulated and monitored by the National Health Insurance Fund in Lithuania. &
 Yes \\
 Ontario, Canada & 
 Algorithm incorporating $>$1 hospitalisations or $>$2 physician claims with evidence of diabetes within 2 years & 
+Yes\textsupercript{1} &
 Yes \\
 Netherlands & 
 Anti-diabetes medications & 
+No &
 No \\
 Scotland & 
 Clinical diagnosis using the Read coding system. & 
+Yes\textsupercript{5} &
 Yes \\
 South Korea & 
 Anti-diabetes medications and clinical diagnosis (ICD-10 codes). & 
+No &
 Yes \\
 Sweden & 
 Clinical diagnosis by healthcare professionals & 
+Yes\textsupercript{6} &
 Yes \\
 \hline
 \end{tabular}
 \begin{flushleft}
 \noindent ICD=International Classification of Diseases; ICD-10=International Classification of Diseases, 10th edition. 
+\begin{enumerate}
+\item Lipscombe LL, Hwee J, Webster L, Shah BR, Booth GL, Tu K. Identifying diabetes cases from administrative data: a population-based validation study. BMC Health Serv Res 2018; 18: 316.
+\item Davis WA, Peters KE, Makepeace A, et al. Prevalence of diabetes in Australia: insights from the Fremantle Diabetes Study Phase II. Intern Med J 2018; 48: 803-9.
+\item Isaksen AA, Sandbaek A, Bjerg L. Validation of Register-Based Diabetes Classifiers in Danish Data. Clin Epidemiol 2023; 15: 569-81.
+\item Fuentes S, Cosson E, Mandereau-Bruno L, et al. Identifying diabetes cases in health administrative databases: a validation study based on a large French cohort. Int J Public Health 2019; 64: 441-50.
+\item McGurnaghan SJ, Blackbourn LAK, Caparrotta TM, et al. Cohort profile: the Scottish Diabetes Research Network national diabetes cohort - a population-based cohort of people with diabetes in Scotland. BMJ Open 2022; 12: e063046.
+\item Everhov AH, Frisell T, Osooli M, et al. Diagnostic accuracy in the Swedish national patient register: a review including diagnoses in the outpatient register. Eur J Epidemiol 2025; 40: 359-69.
+\end{enumerate}
 \end{flushleft}
 \end{table}
 
@@ -6710,8 +6742,8 @@ Yes &
 Yes &
 Yes \\
 France &
-Determined by linking the SNDS to the Center for Epidemiology of Medical Causes of Death &
-Determined by linking the SNDS to the Center for Epidemiology of Medical Causes of Death &
+Determined through linkage with the Center for Epidemiology of Medical Causes of Death in the SNDS &
+Determined through linkage with the Center for Epidemiology of Medical Causes of Death in the SNDS &
 Data from the Center for Epidemiology of Medical Causes of Death &
 Yes &
 Yes &
