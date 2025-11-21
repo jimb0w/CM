@@ -6998,7 +6998,7 @@ Swedish National Diabetes Register &
 \begin{table}[h!]
   \begin{center}
     \vspace*{-2cm}
-    \caption{Summary of data received for the analysis.}
+    \caption{Summary of data included in the analysis.}
 	\hspace*{-1.5cm}
     \label{cleansumtab}
      \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
