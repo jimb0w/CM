@@ -5394,14 +5394,15 @@ gen death = alldeath_d_dm/total
 save propdeath_rev, replace
 foreach i in 35 45 55 65 75 85 95 {
 if `i' == 35 {
-local iii = "<39"
+local iii = "<40"
 }
 else if `i' == 95 {
 local iii = "90+"
 }
 else {
-local ii = `i'+9
-local iii = "`i'-`ii'"
+local ii = `i'-5
+local iiii = `ii'+9
+local iii = "`ii'-`iiii'"
 }
 foreach s in 0 1 {
 if `s' == 0 {
@@ -6947,6 +6948,8 @@ Swedish National Diabetes Register &
 \end{landscape}
 
 \clearpage
+\begin{landscape}
+\thispagestyle{empty}
 \begin{table}[h!]
   \begin{center}
     \vspace*{-2cm}
@@ -7833,6 +7836,14 @@ texdoc graph, label(propdeathfig131212) figure(h!) cabove ///
 caption(Proportion of deaths among people with diabetes in people ///
 aged `iii' years (as a proportion of all deaths among people with diabetes), by sex.)
 }
+graph combine ///
+GPH/STD_GPH_other_dm_F1_rev.gph ///
+GPH/STD_GPH_other_nondm_F1_rev.gph ///
+GPH/SMR_other_f1_rev.gph ///
+, graphregion(color(white)) cols(1) altshrink xsize(3)
+texdoc graph, label(Othercauses) figure(h!) cabove ///
+caption(Age-standardised mortality rate for death from other causes among people with ///
+and without diabetes, and the mortality rate ratio for people with vs. without diabetes, by calendar time.)
 texdoc stlog close
 
 
