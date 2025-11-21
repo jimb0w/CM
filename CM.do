@@ -50,7 +50,7 @@ texdoc stlog close
 \begin{titlepage}
     \begin{flushright}
         \Huge
-        \textbf{International trends in cause-specific mortality among people with and without diabetes}
+        \textbf{International trends in cause-specific mortality among people with and without diabetes: a multi-national population-based study in high-income settings}
 \color{black}
 \rule{16cm}{2mm} \\
 \Large
@@ -1196,16 +1196,22 @@ replace sex = "Female" if sex == "0"
 replace sex = "Male" if sex == "1"
 drop njm
 export delimited using CSV/T1.csv, delimiter(":") novarnames replace
-texdoc stlog close
-texdoc stlog, cmdlog
 use CMdata_prop, clear
 collapse (sum) pys_dm pys_nondm, by(country sex)
 bysort country (sex) : gen percf_dm = 100*pys_dm/(pys_dm+pys_dm[_n+1])
 bysort country (sex) : gen percf_nondm = 100*pys_nondm/(pys_nondm+pys_nondm[_n+1])
 keep if sex == 0
-texdoc stlog close
-texdoc stlog
-list country percf_dm percf_nondm, separator(0)
+tostring perc*, replace force format(%9.1f)
+replace percf_dm=percf_dm+"\%"
+replace percf_nondm=percf_nondm+"\%"
+replace country = "South Korea" if country == "SKorea"
+replace country = "Alberta, Canada" if country == "Canada1"
+replace country = "Ontario, Canada" if country == "Canada2"
+replace country = "Netherlands\textsuperscript{1}" if country == "Netherlands"
+replace country = "Sweden\textsuperscript{1}" if country == "Sweden"
+sort country
+keep country perc*
+export delimited using CSV/T2.csv, delimiter(":") novarnames replace
 texdoc stlog close
 
 /***
@@ -1266,6 +1272,28 @@ FLU -- Influenza and pneumonia; CKD -- Kidney disease; LIV -- Liver disease;
 OTH -- All other causes.
 \end{table}
 \end{landscape}
+
+\begin{table}[h!]
+  \begin{center}
+    \caption{Percentage of person-years among females by country and diabetes status.}
+    \label{fsumtab}
+     \pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country, column type={l}},
+      display columns/1/.style={column name=Diabetes, column type={r}},
+      display columns/2/.style={column name=Non-diabetes, column type={r}},
+      every head row/.style={
+        before row={\toprule},
+        after row={\midrule}
+            },
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/T2.csv}
+  \end{center}
+\textsuperscript{1}Only included in the proportional mortality analysis. \\
+\end{table}
 
 
 \clearpage
@@ -5419,7 +5447,7 @@ texdoc stlog close
 texdoc stlog, cmdlog
 foreach i in 35 45 55 65 75 85 95 {
 if `i' == 35 {
-local iii = "$<$39"
+local iii = "$<$40"
 }
 else if `i' == 95 {
 local iii = "90+"
@@ -6060,7 +6088,7 @@ GPH/STD_GPH_other_nondm_F1_rev.gph ///
 GPH/SMR_other_f1_rev.gph ///
 , graphregion(color(white)) cols(1) altshrink xsize(3)
 texdoc graph, label(Othercauses) figure(h!) cabove ///
-caption(Age-standardised mortality rate for death from ``other'' causes among people with ///
+caption(Age-standardised mortality rate for death from other causes among people with ///
 and without diabetes, and the mortality rate ratio for people with vs. without diabetes, by calendar time.)
 texdoc stlog close
 
@@ -6093,7 +6121,7 @@ legend(order( ///
 ) cols(1) position(3) region(lcolor(none) color(none))) ///
 ylabel(,angle(0) format(%9.2f)) 
 texdoc graph, label(Othercauses) figure(h!) cabove ///
-caption(Crude motality rate for death from ``other'' causes among people with ///
+caption(Crude motality rate for death from other causes among people with ///
 and without diabetes in Lithuania, by calendar time.)
 texdoc stlog close
 
@@ -6470,9 +6498,7 @@ set linesize 100
 \begin{titlepage}
     \begin{flushright}
         \Huge
-        \textbf{
-Trends in cause-specific mortality among people with and without diabetes: a multi-national population-based study
-}
+        \textbf{International trends in cause-specific mortality among people with and without diabetes: a multi-national population-based study in high-income settings}
 \rule{16cm}{2mm} \\
 \Large
 Appendix \\
@@ -6582,24 +6608,22 @@ administrative algorithm where 2 or more criteria are used (2 points)
 
 \clearpage
 \section{Supplementary Tables}
-\begin{table}[h!]
-\centering
-    \caption{Diabetes definitions by data source}
-\begin{tabular}{p{0.2\textwidth}p{0.35\textwidth}p{0.15\textwidth}p{0.15\textwidth}}
+\begin{longtable}[h!]{p{0.2\textwidth}p{0.35\textwidth}p{0.2\textwidth}p{0.1\textwidth}}
+    \caption{Diabetes definitions by data source} \\
 \hline
 \textbf{Jurisdiction} & \textbf{Diabetes definition} & \textbf{Validation of diabetes definition} & \textbf{Gestational diabetes excluded} \\
 \hline
 Alberta, Canada & 
 Algorithm incorporating $>$1 hospitalisations or $>$2 physician claims with evidence of diabetes within 2 years & 
-Yes\textsupercript{1} &
+Yes\textsuperscript{1} &
 Yes \\
 Australia &
 Clinical diagnosis certified by a doctor, nurse or credentialed diabetes educator. &
-Yes\textsupercript{2} &
+Yes\textsuperscript{2} &
 Yes \\
 Denmark & 
 Algorithm incorporating clinical diagnosis (ICD codes) from the hospitalisations, prescription of anti-diabetic medications, clinical and billing records. & 
-Yes\textsupercript{3} &
+Yes\textsuperscript{3} &
 Yes \\
 Finland & 
 Algorithm incorporating clinical diagnosis (ICD codes) from the Care Register for Health Care, Register of Primary Health Care Visits, Medical Birth Register and Causes of Death Statistics and prescription of anti-diabetic medications. & 
@@ -6607,7 +6631,7 @@ No, the coverage of diabetes cases was estimated to be 98\%. &
 Yes \\
 France & 
 People who have been reimbursed for at least 3 antidiabetic medications in the year, or 2 in cases of large packaging & 
-Yes\textsupercript{4} &
+Yes\textsuperscript{4} &
 No \\
 Lithuania & 
 Clinical diagnosis (ICD-10 codes) and anti-diabetes medications & 
@@ -6615,15 +6639,15 @@ No. ICD-10 coding and reimbursement data are strictly regulated and monitored by
 Yes \\
 Ontario, Canada & 
 Algorithm incorporating $>$1 hospitalisations or $>$2 physician claims with evidence of diabetes within 2 years & 
-Yes\textsupercript{1} &
+Yes\textsuperscript{1} &
 Yes \\
 Netherlands & 
 Anti-diabetes medications & 
-No &
+No, more than 80\% of people with type 2 diabetes in the Netherlands were reported to use anti-diabetes medications, though this proportion may vary by year.\textsuperscript{5} &
 No \\
 Scotland & 
 Clinical diagnosis using the Read coding system. & 
-Yes\textsupercript{5} &
+Yes\textsuperscript{6} &
 Yes \\
 South Korea & 
 Anti-diabetes medications and clinical diagnosis (ICD-10 codes). & 
@@ -6631,73 +6655,27 @@ No &
 Yes \\
 Sweden & 
 Clinical diagnosis by healthcare professionals & 
-Yes\textsupercript{6} &
+Yes\textsuperscript{7} &
 Yes \\
 \hline
-\end{tabular}
-\begin{flushleft}
+\end{longtable}
+
 \noindent ICD=International Classification of Diseases; ICD-10=International Classification of Diseases, 10th edition. 
 \begin{enumerate}
 \item Lipscombe LL, Hwee J, Webster L, Shah BR, Booth GL, Tu K. Identifying diabetes cases from administrative data: a population-based validation study. BMC Health Serv Res 2018; 18: 316.
 \item Davis WA, Peters KE, Makepeace A, et al. Prevalence of diabetes in Australia: insights from the Fremantle Diabetes Study Phase II. Intern Med J 2018; 48: 803-9.
 \item Isaksen AA, Sandbaek A, Bjerg L. Validation of Register-Based Diabetes Classifiers in Danish Data. Clin Epidemiol 2023; 15: 569-81.
 \item Fuentes S, Cosson E, Mandereau-Bruno L, et al. Identifying diabetes cases in health administrative databases: a validation study based on a large French cohort. Int J Public Health 2019; 64: 441-50.
+\item Geurten RJ, Struijs JN, Elissen AMJ, Bilo HJG, van Tilburg C, Ruwaard D. Delineating the Type 2 Diabetes Population in the Netherlands Using an All-Payer Claims Database: Specialist Care, Medication Utilization and Expenditures 2016-2018. Pharmacoecon Open 2022; 6: 219-29.
 \item McGurnaghan SJ, Blackbourn LAK, Caparrotta TM, et al. Cohort profile: the Scottish Diabetes Research Network national diabetes cohort - a population-based cohort of people with diabetes in Scotland. BMJ Open 2022; 12: e063046.
 \item Everhov AH, Frisell T, Osooli M, et al. Diagnostic accuracy in the Swedish national patient register: a review including diagnoses in the outpatient register. Eur J Epidemiol 2025; 40: 359-69.
 \end{enumerate}
-\end{flushleft}
-\end{table}
-
-\clearpage
-\begin{table}[h!]
-\centering
-    \caption{Data sources for cohorts of people with and without diabetes by jurisdiction}
-\begin{tabular}{p{0.2\textwidth}p{0.4\textwidth}p{0.4\textwidth}}
-\hline
- & People with diabetes & People without diabetes \\
-\hline
-Australia &
-Residents with diabetes in the Australian Capital Territory, New South Wales, Queensland, and Victoria, as registered in the National Diabetes Services Scheme &
-Generated by subtracting prevalent diabetes cases from the total population for the four states, based on the Australian Bureau of Statistics estimated resident population \\
-Alberta, Canada &
-People with diabetes identified from the linked administrative health databases &
-Generated by subtracting prevalent diabetes cases from the total residential population of Alberta, based on data from the linked administrative health databases \\
-Ontario, Canada &
-People with diabetes in the Ontario Diabetes Database, from the Institute for Clinical Evaluative Sciences (ICES) Data Repository &
-Generated by subtracting prevalent diabetes cases identified from the Ontario Diabetes Database from the total residential population of Ontario \\
-Denmark &
-People with diabetes identified from the Danish National Patient Register, National Prescription Registry, and National Health Service Register &
-Generated by subtracting people with diabetes, identified from the Danish National Patient Register, National Prescription Registry, and National Health Service Register, from the national Danish population \\
-Finland &
-People with diabetes, from the FinDM (Diabetes in Finland) research database &
-Generated by subtracting people with diabetes from the National Finnish population \\
-France &
-People with diabetes from the Système National de Données de Santé (SNDS): French national health data system &
-People without diabetes from the SNDS \\
-Lithuania &
-People with diabetes from the National Compulsory Health Insurance Fund Information System &
-People without diabetes from the National Compulsory Health Insurance Fund Information System \\
-Netherlands &
-People with diabetes, based on several linked national registries from Statistics Netherlands &
-People without diabetes, based on several linked national registries from Statistics Netherlands \\
-Scotland &
-People with diabetes from the Scottish Diabetes Research Network – diabetes research platform  &
-Generated by subtracting people with diabetes from the national Scottish population, using data from National Records of Scotland \\
-South Korea &
-People with diabetes from the National Health Insurance Service–National Sample Cohort &
-People without diabetes from the National Health Insurance Service–National Sample Cohort \\
-Sweden &
-People with diabetes in the Swedish National Diabetes Register &
-Generated by subtracting people with diabetes from the national Swedish population, using data from the Statistics Sweden \\
-\hline
-\end{tabular}
-\end{table}
 
 
 \clearpage
 \begin{landscape}
 \begin{longtable}[h!]{p{0.2\textwidth}p{0.25\textwidth}p{0.25\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.1\textwidth}p{0.1\textwidth}}
-    \caption{Data sources for cohorts of people with and without diabetes by jurisdiction} \\
+    \caption{Data sources for deaths among people with and without diabetes by jurisdiction} \\
 \hline
  & Death in people with diabetes &
 Death in people without diabetes &
@@ -6967,6 +6945,84 @@ Swedish National Diabetes Register &
 \end{tabular}
 \end{table}
 \end{landscape}
+
+\clearpage
+\begin{table}[h!]
+  \begin{center}
+    \vspace*{-2cm}
+    \caption{Summary of data received for the analysis.}
+	\hspace*{-1.5cm}
+    \label{cleansumtab}
+     \fontsize{7pt}{9pt}\selectfont\pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{4}{*}{##1}}}},
+	  display columns/1/.style={column name=Period,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{4}{*}{##1}}}},
+	  display columns/2/.style={column name=Diabetes status,
+		assign cell content/.code={
+\pgfkeyssetvalue{/pgfplots/table/@cell content}
+{\multirow{2}{*}{##1}}}},
+      display columns/3/.style={column name=Sex, column type={l}, text indicator="},
+      display columns/4/.style={column name=Person-years of follow-up, column type={r}},
+      display columns/5/.style={column name=CAN, column type={r}},
+      display columns/6/.style={column name=CVD, column type={r}},
+      display columns/7/.style={column name=RES, column type={r}},
+      display columns/8/.style={column name=DEM, column type={r}},
+      display columns/9/.style={column name=DMD, column type={r}},
+      display columns/10/.style={column name=INF, column type={r}},
+      display columns/11/.style={column name=FLU, column type={r}},
+      display columns/12/.style={column name=CKD, column type={r}},
+      display columns/13/.style={column name=LIV, column type={r}},
+      display columns/14/.style={column name=OTH, column type={r}},
+      every head row/.style={
+        before row={\toprule
+					& & & & & \multicolumn{10}{c}{Death counts by cause of death} \\
+					},
+        after row={\midrule}
+            },
+        every nth row={4}{before row=\midrule},
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/T1.csv}
+  \end{center}
+\textsuperscript{1}Only included in the proportional mortality analysis. \\
+Abbreviations: DEM -- Dementia; CAN -- Cancer; CVD -- Cardiovascular disease; 
+RES -- Chronic lower respiratory disease; DMD -- Diabetes; INF -- Infectious diseases; 
+FLU -- Influenza and pneumonia; CKD -- Kidney disease; LIV -- Liver disease;
+OTH -- All other causes.
+\end{table}
+\end{landscape}
+
+\clearpage
+\begin{table}[h!]
+  \begin{center}
+    \caption{Percentage of person-years among females by country and diabetes status.}
+    \label{fsumtab}
+     \pgfplotstabletypeset[
+      multicolumn names,
+      col sep=colon,
+      header=false,
+      string type,
+	  display columns/0/.style={column name=Country, column type={l}},
+      display columns/1/.style={column name=Diabetes, column type={r}},
+      display columns/2/.style={column name=Non-diabetes, column type={r}},
+      every head row/.style={
+        before row={\toprule},
+        after row={\midrule}
+            },
+        every last row/.style={after row=\bottomrule},
+    ]{CSV/T2.csv}
+  \end{center}
+\textsuperscript{1}Only included in the proportional mortality analysis. \\
+\end{table}
+
 
 \clearpage
 
@@ -7759,7 +7815,7 @@ caption(Proportion of deaths among people with diabetes in people ///
 aged 80 and above or 90 and above (as a proportion of all deaths among people with diabetes), by sex)
 foreach i in 35 45 55 65 75 85 95 {
 if `i' == 35 {
-local iii = "$<$39"
+local iii = "$<$40"
 }
 else if `i' == 95 {
 local iii = "90+"
@@ -7787,6 +7843,68 @@ texdoc stlog close
     \centering
     \caption{Proportion of dementia deaths over time, by age and jurisdiction.}
     \includegraphics[width=\textwidth]{A29.pdf}
+\end{figure}
+
+
+\begin{figure}[h!]
+    \centering
+    \caption{Proportion of deaths due to specific causes by calendar year -- Australia.}
+    \includegraphics[width=\textwidth]{Propfigs/Australia.pdf}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \caption{Proportion of deaths due to specific causes by calendar year -- Alberta, Canada.}
+    \includegraphics[width=\textwidth]{Propfigs/Alberta.pdf}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \caption{Proportion of deaths due to specific causes by calendar year -- Ontario, Canada.}
+    \includegraphics[width=\textwidth]{Propfigs/Ontario.pdf}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \caption{Proportion of deaths due to specific causes by calendar year -- Denmark}
+    \includegraphics[width=\textwidth]{Propfigs/Denmark.pdf}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \caption{Proportion of deaths due to specific causes by calendar year -- Finland.}
+    \includegraphics[width=\textwidth]{Propfigs/Finland.pdf}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \caption{Proportion of deaths due to specific causes by calendar year -- France.}
+    \includegraphics[width=\textwidth]{Propfigs/France.pdf}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \caption{Proportion of deaths due to specific causes by calendar year -- Lithuania.}
+    \includegraphics[width=\textwidth]{Propfigs/Lithuania.pdf}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \caption{Proportion of deaths due to specific causes by calendar year -- Netherlands.}
+    \includegraphics[width=\textwidth]{Propfigs/Netherlands.pdf}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \caption{Proportion of deaths due to specific causes by calendar year -- Scotland.}
+    \includegraphics[width=\textwidth]{Propfigs/Scotland.pdf}
+\end{figure}
+\pagebreak
+\begin{figure}[h!]
+    \centering
+    \caption{Proportion of deaths due to specific causes by calendar year -- South Korea.}
+    \includegraphics[width=\textwidth]{Propfigs/SouthKorea.pdf}
+\end{figure}
+\begin{figure}[h!]
+    \centering
+    \caption{Proportion of deaths due to specific causes by calendar year -- Sweden.}
+    \includegraphics[width=\textwidth]{Propfigs/Sweden.pdf}
 \end{figure}
 
 \end{document}
