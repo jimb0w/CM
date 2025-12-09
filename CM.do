@@ -7964,6 +7964,29 @@ texdoc stlog close
     \includegraphics[width=\textwidth]{Propfigs/Sweden.pdf}
 \end{figure}
 
+\clearpage
+\begin{figure}[h!]
+    \centering
+    \caption{Age-standardised mortality rate for death from specific causes among people with
+and without diabetes, and the mortality rate ratio for people with vs. without diabetes, by calendar time.}
+    \includegraphics[width=\textwidth]{Propfigs/Figure_1_mega_1.pdf}
+\end{figure}
+\clearpage
+\begin{figure}[h!]
+    \centering
+    \caption{Age-standardised mortality rate for death from specific causes among people with
+and without diabetes, and the mortality rate ratio for people with vs. without diabetes, by calendar time.}
+    \includegraphics[width=\textwidth]{Propfigs/Figure_1_mega_2.pdf}
+\end{figure}
+\clearpage
+\begin{figure}[h!]
+    \centering
+    \caption{Age-standardised mortality rate for death from specific causes among people with
+and without diabetes, and the mortality rate ratio for people with vs. without diabetes, by calendar time.}
+    \includegraphics[width=\textwidth]{Propfigs/Figure_1_mega_3.pdf}
+\end{figure}
+
+
 \end{document}
 ***/
 
