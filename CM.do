@@ -36,6 +36,7 @@ texdoc stlog close
 
 \usepackage{multirow}
 \usepackage{booktabs}
+\hypersetup{pdfborder = {0 0 0}}
 
 \newcommand{\specialcell}[2][c]{%
   \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
@@ -50,7 +51,7 @@ texdoc stlog close
 \begin{titlepage}
     \begin{flushright}
         \Huge
-        \textbf{International trends in cause-specific mortality among people with and without diabetes: a multi-national population-based study in high-income settings}
+        \textbf{Trends in cause-specific mortality among people with and without diabetes: a multi-national population-based study in high-income settings}
 \color{black}
 \rule{16cm}{2mm} \\
 \Large
@@ -6480,6 +6481,7 @@ set linesize 100
 
 \newcommand{\specialcelr}[2][c]{%
   \begin{tabular}[#1]{@{}r@{}}#2\end{tabular}}
+\hypersetup{pdfborder = {0 0 0}}
 
 \usepackage[superscript,biblabel]{cite}
 
@@ -6499,7 +6501,7 @@ set linesize 100
 \begin{titlepage}
     \begin{flushright}
         \Huge
-        \textbf{International trends in cause-specific mortality among people with and without diabetes: a multi-national population-based study in high-income settings}
+        \textbf{Trends in cause-specific mortality among people with and without diabetes: a multi-national population-based study in high-income settings}
 \rule{16cm}{2mm} \\
 \Large
 Appendix \\
@@ -7969,23 +7971,55 @@ texdoc stlog close
     \centering
     \caption{Age-standardised mortality rate for death from specific causes among people with
 and without diabetes, and the mortality rate ratio for people with vs. without diabetes, by calendar time.}
-    \includegraphics[width=\textwidth]{Propfigs/Figure_1_mega_1.pdf}
+    \includegraphics[width=\textwidth]{Figure_1_mega_1.pdf}
 \end{figure}
 \clearpage
 \begin{figure}[h!]
     \centering
     \caption{Age-standardised mortality rate for death from specific causes among people with
 and without diabetes, and the mortality rate ratio for people with vs. without diabetes, by calendar time.}
-    \includegraphics[width=\textwidth]{Propfigs/Figure_1_mega_2.pdf}
+    \includegraphics[width=\textwidth]{Figure_1_mega_2.pdf}
 \end{figure}
 \clearpage
 \begin{figure}[h!]
     \centering
     \caption{Age-standardised mortality rate for death from specific causes among people with
 and without diabetes, and the mortality rate ratio for people with vs. without diabetes, by calendar time.}
-    \includegraphics[width=\textwidth]{Propfigs/Figure_1_mega_3.pdf}
+    \includegraphics[width=\textwidth]{Figure_1_mega_3.pdf}
 \end{figure}
 
+
+***/
+
+texdoc stlog, nolog
+graph combine ///
+GPH/APCo_can_F2.gph ///
+GPH/APCo_cvd_F2.gph ///
+GPH/APCo_dmd_F2.gph ///
+GPH/APCo_res_F2.gph ///
+GPH/APCo_azd_F2.gph ///
+GPH/APCo_inf_F2.gph ///
+GPH/APCo_flu_F2.gph ///
+GPH/APCo_ckd_F2.gph ///
+GPH/APCo_liv_F2.gph ///
+, graphregion(color(white)) cols(3) altshrink xsize(7)
+texdoc graph, label(APC_sum) figure(h!) cabove ///
+caption(Average 5-year percent change in mortality rate by country.)
+graph combine ///
+GPH/SAPCo_can_F3.gph ///
+GPH/SAPCo_cvd_F3.gph ///
+GPH/SAPCo_res_F3.gph ///
+GPH/SAPCo_azd_F3.gph ///
+GPH/SAPCo_inf_F3.gph ///
+GPH/SAPCo_flu_F3.gph ///
+GPH/SAPCo_ckd_F3.gph ///
+GPH/SAPCo_liv_F3.gph ///
+, graphregion(color(white)) cols(2) altshrink xsize(3)
+texdoc graph, label(APC_sum) figure(h!) cabove ///
+caption(Average 5-year percent change in mortality rate ratio (MRR) by country.)
+texdoc stlog close
+
+/***
 
 \end{document}
 ***/
