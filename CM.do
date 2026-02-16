@@ -51,7 +51,7 @@ texdoc stlog close
 \begin{titlepage}
     \begin{flushright}
         \Huge
-        \textbf{Trends in cause-specific mortality among people with and without diabetes: a multi-national population-based study in high-income settings}
+        \textbf{Trends in cause-specific mortality among people with and without diabetes in high-income settings: a multi-national, population-based study}
 \color{black}
 \rule{16cm}{2mm} \\
 \Large
@@ -6501,7 +6501,7 @@ set linesize 100
 \begin{titlepage}
     \begin{flushright}
         \Huge
-        \textbf{Trends in cause-specific mortality among people with and without diabetes: a multi-national population-based study in high-income settings}
+        \textbf{Trends in cause-specific mortality among people with and without diabetes in high-income settings: a multi-national, population-based study}
 \rule{16cm}{2mm} \\
 \Large
 Appendix \\
