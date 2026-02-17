@@ -56,6 +56,7 @@ texdoc stlog close
 \rule{16cm}{2mm} \\
 \Large
 \color{black}
+Appendix 2 \\
 \thedate \\
 \color{blue}
 https://github.com/jimb0w/CM \\
@@ -6295,24 +6296,24 @@ title("`oo', people `w' diabetes", placement(west) color(black) size(medium))
 }
 else {
 twoway ///
-(rarea ub lb calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C2'", color("`r(p2)'") lpattern(shortdash)) ///
-(rarea ub lb calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C4'", color("`r(p4)'") lpattern(shortdash)) ///
-(rarea ub lb calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C6'", color("`r(p6)'") lpattern(shortdash)) ///
-(rarea ub lb calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C8'", color("`r(p8)'") lpattern(shortdash)) ///
-(rarea ub lb calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -6600,7 +6601,7 @@ set linesize 100
         \textbf{Trends in cause-specific mortality among people with and without diabetes in high-income settings: a multi-national, population-based study}
 \rule{16cm}{2mm} \\
 \Large
-Appendix \\
+Appendix 1 \\
        \vfill
     \end{flushright}
         \Large
