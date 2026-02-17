@@ -6498,6 +6498,40 @@ texdoc graph, label(STDMRF_sum) figure(h!) cabove optargs(width=0.7\textwidth) /
 caption(Age-standardised mortality rate by cause of death for people with and without diabetes, people aged 40-89, ///
 and mortality rate ratios for people with vs. without diabetes, by calendar time.)
 graph export "/home/jimb0w/Documents/CM/Figure_1_mega.pdf", as(pdf) name("Graph") replace
+graph combine ///
+GPH/STD_GPH_can_dm_F1_rev.gph ///
+GPH/STD_GPH_can_nondm_F1_rev.gph ///
+GPH/SMR_can_f1_rev.gph ///
+GPH/STD_GPH_cvd_dm_F1_rev.gph ///
+GPH/STD_GPH_cvd_nondm_F1_rev.gph ///
+GPH/SMR_cvd_f1_rev.gph ///
+GPH/STD_GPH_dmd_dm_F1_rev.gph ///
+, graphregion(color(white)) cols(3) altshrink xsize(7) holes(8 9)
+graph export "/home/jimb0w/Documents/CM/Figure_1_mega_1.pdf", as(pdf) name("Graph") replace
+graph combine ///
+GPH/STD_GPH_res_dm_F1_rev.gph ///
+GPH/STD_GPH_res_nondm_F1_rev.gph ///
+GPH/SMR_res_f1_rev.gph ///
+GPH/STD_GPH_azd_dm_F1_rev.gph ///
+GPH/STD_GPH_azd_nondm_F1_rev.gph ///
+GPH/SMR_azd_f1_rev.gph ///
+GPH/STD_GPH_inf_dm_F1_rev.gph ///
+GPH/STD_GPH_inf_nondm_F1_rev.gph ///
+GPH/SMR_inf_f1_rev.gph ///
+, graphregion(color(white)) cols(3) altshrink xsize(7)
+graph export "/home/jimb0w/Documents/CM/Figure_1_mega_2.pdf", as(pdf) name("Graph") replace
+graph combine ///
+GPH/STD_GPH_flu_dm_F1_rev.gph ///
+GPH/STD_GPH_flu_nondm_F1_rev.gph ///
+GPH/SMR_flu_f1_rev.gph ///
+GPH/STD_GPH_ckd_dm_F1_rev.gph ///
+GPH/STD_GPH_ckd_nondm_F1_rev.gph ///
+GPH/SMR_ckd_f1_rev.gph ///
+GPH/STD_GPH_liv_dm_F1_rev.gph ///
+GPH/STD_GPH_liv_nondm_F1_rev.gph ///
+GPH/SMR_liv_f1_rev.gph ///
+, graphregion(color(white)) cols(3) altshrink xsize(7)
+graph export "/home/jimb0w/Documents/CM/Figure_1_mega_3.pdf", as(pdf) name("Graph") replace
 texdoc stlog close
 
 /***
