@@ -5367,8 +5367,8 @@ else {
 local s1 = "Males"
 }
 use cols, clear
-forval i = 1/9 {
-local col`i' = col[`i']
+forval ii = 1/9 {
+local col`ii' = col[`ii']
 }
 use propdeath`i', clear
 twoway ///
@@ -5460,8 +5460,8 @@ else {
 local s1 = "Males"
 }
 use cols, clear
-forval i = 1/9 {
-local col`i' = col[`i']
+forval ii = 1/9 {
+local col`ii' = col[`ii']
 }
 use propdeath_rev, clear
 twoway ///
