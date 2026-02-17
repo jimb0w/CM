@@ -2328,6 +2328,19 @@ texdoc stlog close
 texdoc stlog, cmdlog nodo
 *ssc install palettes
 *ssc install colrspace
+clear
+set obs 9
+gen col = ""
+replace col = "230 25 75" if _n == 1
+replace col = "60 180 75" if _n == 2
+replace col = "255 225 25" if _n == 3
+replace col = "67 99 216" if _n == 4
+replace col = "245 130 49" if _n == 5
+replace col = "145 30 180" if _n == 6
+replace col = "66 212 244" if _n == 7
+replace col = "240 50 230" if _n == 8
+replace col = "120 120 120" if _n == 9
+save cols, replace
 foreach ii in can cvd res azd dmd inf flu ckd liv {
 foreach iii in dm nondm {
 if "`ii'" == "dmd" & "`iii'" == "nondm" {
@@ -2405,27 +2418,30 @@ bysort country : keep if _n == 1
 forval i = 1/9 {
 local C`i' = country[`i']
 }
+use cols, clear
+forval i = 1/9 {
+local col`i' = col[`i']
+}
 restore
-colorpalette hue, n(9) luminance(50) nograph
 twoway ///
-(rarea ub lb calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C2'", color("`r(p2)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C4'", color("`r(p4)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C6'", color("`r(p6)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C8'", color("`r(p8)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -2465,27 +2481,30 @@ bysort country : keep if _n == 1
 forval i = 1/9 {
 local C`i' = country[`i']
 }
+use cols, clear
+forval i = 1/9 {
+local col`i' = col[`i']
+}
 restore
-colorpalette hue, n(9) luminance(50) nograph
 twoway ///
-(rarea ub lb calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C2'", color("`r(p2)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C4'", color("`r(p4)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C6'", color("`r(p6)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C8'", color("`r(p8)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -2560,28 +2579,31 @@ bysort country : keep if _n == 1
 forval i = 1/9 {
 local C`i' = country[`i']
 }
+use cols, clear
+forval i = 1/9 {
+local col`i' = col[`i']
+}
 restore
-colorpalette hue, n(9) luminance(50) nograph
 if "`ii'" == "cvd" | "`ii'" == "can" | "`ii'" == "dmd" {
 twoway ///
-(rarea ub lb calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C2'", color("`r(p2)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C4'", color("`r(p4)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C6'", color("`r(p6)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C8'", color("`r(p8)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -2604,24 +2626,24 @@ title("`oo'", placement(west) color(black) size(medium))
 }
 else {
 twoway ///
-(rarea ub lb calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C2'", color("`r(p2)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C4'", color("`r(p4)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C6'", color("`r(p6)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C8'", color("`r(p8)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -2985,27 +3007,30 @@ bysort country : keep if _n == 1
 forval i = 1/9 {
 local C`i' = country[`i']
 }
+use cols, clear
+forval i = 1/9 {
+local col`i' = col[`i']
+}
 restore
-colorpalette hue, n(9) luminance(50) nograph
 twoway ///
-(rarea A3 A2 calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C2'", color("`r(p2)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C4'", color("`r(p4)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C6'", color("`r(p6)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C8'", color("`r(p8)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -3045,27 +3070,30 @@ bysort country : keep if _n == 1
 forval i = 1/9 {
 local C`i' = country[`i']
 }
+use cols, clear
+forval i = 1/9 {
+local col`i' = col[`i']
+}
 restore
-colorpalette hue, n(9) luminance(50) nograph
 twoway ///
-(rarea A3 A2 calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C2'", color("`r(p2)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C4'", color("`r(p4)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C6'", color("`r(p6)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C8'", color("`r(p8)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -4245,27 +4273,30 @@ bysort country : keep if _n == 1
 forval i = 1/9 {
 local C`i' = country[`i']
 }
+use cols, clear
+forval i = 1/9 {
+local col`i' = col[`i']
+}
 restore
-colorpalette hue, n(9) luminance(50) nograph
 twoway ///
-(rarea ub lb calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C2'", color("`r(p2)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C4'", color("`r(p4)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C6'", color("`r(p6)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C8'", color("`r(p8)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -4305,27 +4336,34 @@ bysort country : keep if _n == 1
 forval i = 1/9 {
 local C`i' = country[`i']
 }
+use cols, clear
+forval i = 1/9 {
+local col`i' = col[`i']
+}
+use cols, clear
+forval i = 1/9 {
+local col`i' = col[`i']
+}
 restore
-colorpalette hue, n(9) luminance(50) nograph
 twoway ///
-(rarea ub lb calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C2'", color("`r(p2)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C4'", color("`r(p4)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C6'", color("`r(p6)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C8'", color("`r(p8)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -4662,27 +4700,30 @@ bysort country : keep if _n == 1
 forval i = 1/9 {
 local C`i' = country[`i']
 }
+use cols, clear
+forval i = 1/9 {
+local col`i' = col[`i']
+}
 restore
-colorpalette hue, n(9) luminance(50) nograph
 twoway ///
-(rarea A3 A2 calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C2'", color("`r(p2)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C4'", color("`r(p4)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C6'", color("`r(p6)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C8'", color("`r(p8)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -4722,27 +4763,30 @@ bysort country : keep if _n == 1
 forval i = 1/9 {
 local C`i' = country[`i']
 }
+use cols, clear
+forval i = 1/9 {
+local col`i' = col[`i']
+}
 restore
-colorpalette hue, n(9) luminance(50) nograph
 twoway ///
-(rarea A3 A2 calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C2'", color("`r(p2)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C4'", color("`r(p4)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C6'", color("`r(p6)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C8'", color("`r(p8)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -5322,18 +5366,21 @@ local s1 = "Females"
 else {
 local s1 = "Males"
 }
+use cols, clear
+forval i = 1/9 {
+local col`i' = col[`i']
+}
 use propdeath`i', clear
-colorpalette hue, n(9) luminance(50) nograph
 twoway ///
-(line death cal if country == "Alberta, Canada" & sex == `s' & age_dm == 95, color("`r(p1)'")) ///
-(line death cal if country == "Australia" & sex == `s' & age_dm == 95, color("`r(p2)'")) ///
-(line death cal if country == "Denmark" & sex == `s' & age_dm == 95, color("`r(p3)'")) ///
-(line death cal if country == "Finland" & sex == `s' & age_dm == 95, color("`r(p4)'")) ///
-(line death cal if country == "France" & sex == `s' & age_dm == 95, color("`r(p5)'")) ///
-(line death cal if country == "Lithuania" & sex == `s' & age_dm == 95, color("`r(p6)'")) ///
-(line death cal if country == "Ontario, Canada" & sex == `s' & age_dm == 95, color("`r(p7)'")) ///
-(line death cal if country == "Scotland" & sex == `s' & age_dm == 95, color("`r(p8)'")) ///
-(line death cal if country == "South Korea" & sex == `s' & age_dm == 95, color("`r(p9)'")) ///
+(line death cal if country == "Alberta, Canada" & sex == `s' & age_dm == 95, color("`col1'")) ///
+(line death cal if country == "Australia" & sex == `s' & age_dm == 95, color("`col2'")) ///
+(line death cal if country == "Denmark" & sex == `s' & age_dm == 95, color("`col3'")) ///
+(line death cal if country == "Finland" & sex == `s' & age_dm == 95, color("`col4'")) ///
+(line death cal if country == "France" & sex == `s' & age_dm == 95, color("`col5'")) ///
+(line death cal if country == "Lithuania" & sex == `s' & age_dm == 95, color("`col6'")) ///
+(line death cal if country == "Ontario, Canada" & sex == `s' & age_dm == 95, color("`col7'")) ///
+(line death cal if country == "Scotland" & sex == `s' & age_dm == 95, color("`col8'")) ///
+(line death cal if country == "South Korea" & sex == `s' & age_dm == 95, color("`col9'")) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order( ///
 1 "Alberta, Canada" ///
@@ -5412,18 +5459,21 @@ local s1 = "Females"
 else {
 local s1 = "Males"
 }
+use cols, clear
+forval i = 1/9 {
+local col`i' = col[`i']
+}
 use propdeath_rev, clear
-colorpalette hue, n(9) luminance(50) nograph
 twoway ///
-(line death cal if country == "Alberta, Canada" & sex == `s' & age_dm == `i', color("`r(p1)'")) ///
-(line death cal if country == "Australia" & sex == `s' & age_dm == `i', color("`r(p2)'")) ///
-(line death cal if country == "Denmark" & sex == `s' & age_dm == `i', color("`r(p3)'")) ///
-(line death cal if country == "Finland" & sex == `s' & age_dm == `i', color("`r(p4)'")) ///
-(line death cal if country == "France" & sex == `s' & age_dm == `i', color("`r(p5)'")) ///
-(line death cal if country == "Lithuania" & sex == `s' & age_dm == `i', color("`r(p6)'")) ///
-(line death cal if country == "Ontario, Canada" & sex == `s' & age_dm == `i', color("`r(p7)'")) ///
-(line death cal if country == "Scotland" & sex == `s' & age_dm == `i', color("`r(p8)'")) ///
-(line death cal if country == "South Korea" & sex == `s' & age_dm == `i', color("`r(p9)'")) ///
+(line death cal if country == "Alberta, Canada" & sex == `s' & age_dm == `i', color("`col1'")) ///
+(line death cal if country == "Australia" & sex == `s' & age_dm == `i', color("`col2'")) ///
+(line death cal if country == "Denmark" & sex == `s' & age_dm == `i', color("`col3'")) ///
+(line death cal if country == "Finland" & sex == `s' & age_dm == `i', color("`col4'")) ///
+(line death cal if country == "France" & sex == `s' & age_dm == `i', color("`col5'")) ///
+(line death cal if country == "Lithuania" & sex == `s' & age_dm == `i', color("`col6'")) ///
+(line death cal if country == "Ontario, Canada" & sex == `s' & age_dm == `i', color("`col7'")) ///
+(line death cal if country == "Scotland" & sex == `s' & age_dm == `i', color("`col8'")) ///
+(line death cal if country == "South Korea" & sex == `s' & age_dm == `i', color("`col9'")) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order( ///
 1 "Alberta, Canada" ///
@@ -5983,27 +6033,30 @@ bysort country : keep if _n == 1
 forval i = 1/9 {
 local C`i' = country[`i']
 }
+use cols, clear
+forval i = 1/9 {
+local col`i' = col[`i']
+}
 restore
-colorpalette hue, n(9) luminance(50) nograph
 twoway ///
-(rarea ub lb calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C2'", color("`r(p2)'") lpattern(shortdash)) ///
-(rarea ub lb calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C4'", color("`r(p4)'") lpattern(shortdash)) ///
-(rarea ub lb calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C6'", color("`r(p6)'") lpattern(shortdash)) ///
-(rarea ub lb calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C8'", color("`r(p8)'") lpattern(shortdash)) ///
-(rarea ub lb calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -6041,27 +6094,30 @@ bysort country : keep if _n == 1
 forval i = 1/9 {
 local C`i' = country[`i']
 }
+use cols, clear
+forval i = 1/9 {
+local col`i' = col[`i']
+}
 restore
-colorpalette hue, n(9) luminance(50) nograph
 twoway ///
-(rarea A3 A2 calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C2'", color("`r(p2)'") lpattern(shortdash)) ///
-(rarea A3 A2 calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C4'", color("`r(p4)'") lpattern(shortdash)) ///
-(rarea A3 A2 calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C6'", color("`r(p6)'") lpattern(shortdash)) ///
-(rarea A3 A2 calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C8'", color("`r(p8)'") lpattern(shortdash)) ///
-(rarea A3 A2 calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -6192,28 +6248,31 @@ bysort country : keep if _n == 1
 forval i = 1/9 {
 local C`i' = country[`i']
 }
+use cols, clear
+forval i = 1/9 {
+local col`i' = col[`i']
+}
 restore
-colorpalette hue, n(9) luminance(50) nograph
 if "`ii'" == "cvd" | "`ii'" == "can" | "`ii'" == "dmd" {
 twoway ///
-(rarea ub lb calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C2'", color("`r(p2)'") lpattern(shortdash)) ///
-(rarea ub lb calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C4'", color("`r(p4)'") lpattern(shortdash)) ///
-(rarea ub lb calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C6'", color("`r(p6)'") lpattern(shortdash)) ///
-(rarea ub lb calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
-(rarea ub lb calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C8'", color("`r(p8)'") lpattern(shortdash)) ///
-(rarea ub lb calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
-(line stdrate calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
+(rarea ub lb calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
+(line stdrate calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
@@ -6339,27 +6398,30 @@ bysort country : keep if _n == 1
 forval i = 1/9 {
 local C`i' = country[`i']
 }
+use cols, clear
+forval i = 1/9 {
+local col`i' = col[`i']
+}
 restore
-colorpalette hue, n(9) luminance(50) nograph
 twoway ///
-(rarea A3 A2 calendar if country == "`C1'", color("`r(p1)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C1'", color("`r(p1)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C2'", color("`r(p2)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C2'", color("`r(p2)'") lpattern(shortdash)) ///
-(rarea A3 A2 calendar if country == "`C3'", color("`r(p3)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C3'", color("`r(p3)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C4'", color("`r(p4)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C4'", color("`r(p4)'") lpattern(shortdash)) ///
-(rarea A3 A2 calendar if country == "`C5'", color("`r(p5)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C5'", color("`r(p5)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C6'", color("`r(p6)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C6'", color("`r(p6)'") lpattern(shortdash)) ///
-(rarea A3 A2 calendar if country == "`C7'", color("`r(p7)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C7'", color("`r(p7)'") lpattern(solid)) ///
-(rarea A3 A2 calendar if country == "`C8'", color("`r(p8)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C8'", color("`r(p8)'") lpattern(shortdash)) ///
-(rarea A3 A2 calendar if country == "`C9'", color("`r(p9)'%30") fintensity(inten80) lwidth(none)) ///
-(line A1 calendar if country == "`C9'", color("`r(p9)'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C1'", color("`col1'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C1'", color("`col1'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C2'", color("`col2'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C2'", color("`col2'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C3'", color("`col3'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C3'", color("`col3'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C4'", color("`col4'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C4'", color("`col4'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C5'", color("`col5'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C5'", color("`col5'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C6'", color("`col6'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C6'", color("`col6'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C7'", color("`col7'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C7'", color("`col7'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C8'", color("`col8'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C8'", color("`col8'") lpattern(solid)) ///
+(rarea A3 A2 calendar if country == "`C9'", color("`col9'%30") fintensity(inten80) lwidth(none)) ///
+(line A1 calendar if country == "`C9'", color("`col9'") lpattern(solid)) ///
 , legend(symxsize(0.13cm) position(3) region(lcolor(white) color(none)) ///
 order(2 "`C1'" ///
 4 "`C2'" ///
